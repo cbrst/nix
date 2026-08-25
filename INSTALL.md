@@ -166,7 +166,7 @@ boot.loader.limine.secureBoot.enable = false;
 Install the flake:
 
 ```bash
-nixos-install --flake /mnt/etc/nix-config#asgard
+nixos-install --flake /mnt/etc/nix-config#asgard --option experimental-features "ca-derivations"
 ```
 
 The installer prompts for the root password. After it completes, set the
