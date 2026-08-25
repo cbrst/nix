@@ -1,0 +1,9 @@
+// Start Noctalia shell when the Niri session begins.
+spawn-at-startup "noctalia"
+
+// Example keybindings
+binds {
+	Mod+Return { spawn "foot"; }
+	Mod+D { spawn "noctalia" "launcher"; }
+	Mod+Shift+E { quit; }
+}
