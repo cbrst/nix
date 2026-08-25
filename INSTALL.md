@@ -212,10 +212,13 @@ be named "Reset to Setup Mode" or an equivalent option to clear custom Secure
 Boot keys.
 
 For dual boot with Windows, preserve Microsoft and firmware-builtin certificates
-when enrollment is supported:
+when enrollment is supported. To modify the keys, we have to make the key files
+mutable first using chattr. After applying the keys, make them immutable again.
 
 ```bash
+sudo nix-shell -p e2fsprogs --run "sh -c 'chattr -i /sys/firmware/efi/efivars/{KEK-*,db-*}'"
 sudo sbctl enroll-keys --microsoft --firmware-builtin
+sudo nix-shell -p e2fsprogs --run "sh -c 'chattr +i /sys/firmware/efi/efivars/{KEK-*,db-*}'"
 ```
 
 Check enrollment status:
