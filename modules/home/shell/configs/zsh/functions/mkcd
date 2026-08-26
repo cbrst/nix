@@ -1,0 +1,8 @@
+# vim: set ft=zsh:
+
+function main() {
+	mkdir -p "${1}"
+	cd "${1}"
+}
+
+main "$@"

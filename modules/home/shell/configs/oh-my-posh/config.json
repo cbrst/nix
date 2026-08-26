@@ -1,0 +1,76 @@
+{
+	"$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+	"version": 4,
+	"final_space": false,
+	"transient_prompt": {
+		"background": "transparent",
+		"foreground": "yellow",
+		"template": "{{ .Path }}> "
+	},
+	"blocks": [
+		{
+			"type": "prompt",
+			"alignment": "left",
+			"segments": [
+				{
+					"type": "session",
+					"style": "diamond",
+					"background": "green",
+					"foreground": "black",
+					"leading_diamond": "",
+					"trailing_diamond": "",
+					"template": "{{ .UserName }} "
+				},
+				{
+					"type": "path",
+					"style": "powerline",
+					"background": "blue",
+					"foreground": "black",
+					"template": " {{ .Path }} ",
+					"powerline_symbol": "\ue0b0",
+					"options": {
+						"style": "folder"
+					}
+				},
+				{
+					"type": "git",
+					"style": "diamond",
+					"background": "yellow",
+					"foreground": "black",
+					"leading_diamond": "<transparent,background>\ue0b0</>",
+					"trailing_diamond": "",
+					"template": "  {{ .Ref }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }} "
+				}
+			]
+		},
+		{
+			"type": "prompt",
+			"alignment": "left",
+			"segments": [
+				{
+					"type": "text",
+					"style": "plain",
+					"template": "\n 󱞩 "
+				}
+			]
+		},
+		{
+			"type": "rprompt",
+			"alignment": "right",
+			"segments": [
+				{
+					"type": "node",
+					"style": "plain",
+					"foreground": "green",
+					"template": " 󰎙 {{ .Full }} "
+				},
+				{
+					"type": "python",
+					"style": "plain",
+					"foreground": "red",
+					"template": " 󰌠 {{ .Full }} "
+				}
+			]
+		}
+	]
+}

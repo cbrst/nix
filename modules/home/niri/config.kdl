@@ -1,9 +1,179 @@
-// Start Noctalia shell when the Niri session begins.
+// Don't show overlay at startup
+hotkey-overlay {
+	skip-at-startup
+}
+
+// Layout
+layout {
+	always-center-single-column
+	gaps 12
+	center-focused-column "on-overflow"
+	preset-column-widths {
+		proportion 0.33333
+		proportion 0.5
+		proportion 0.66667
+	}
+	default-column-width { proportion 0.5; }
+
+	focus-ring {
+		off
+		width 2
+		active-gradient from="#cba6f7" to="#89b4fa" angle=45
+		inactive-color "#45475a"
+	}
+
+	border {
+		on
+		width 2
+		active-gradient from="#cba6f7" to="#89b4fa" angle=45
+		inactive-color "#45475a"
+	}
+
+	// Niri knows window geometry from the rule below
+	// avoiding CSD shadow artifacts.
+	shadow {
+		on
+		softness 24
+		spread 3
+		offset x=0 y=4
+		color "#00000080"
+	}
+
+	tab-indicator {
+		width 8
+		gap 2
+		corner-radius 4
+		length total-proportion=0.8
+		place-within-column
+		position "left"
+		active-gradient from="#cba6f7" to="#89b4fa" angle=45
+	}
+}
+
+// A modest speed-up preserves feedback without making
+// workspace movement sluggish.
+animations {
+	slowdown 0.8
+}
+
+// Rounded geometry also clips the content and makes
+// the compositor shadow accurate.
+window-rule {
+	geometry-corner-radius 8
+	clip-to-geometry true
+}
+
+// Let applications omit client-side decorations so Niri
+// can render clean rounded geometry.
+prefer-no-csd
+
+// Noctalia integration
 spawn-at-startup "noctalia"
 
-// Example keybindings
+layer-rule {
+	match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
+	background-effect {
+		blur true
+		xray false
+		noise 0.015
+		saturation 1.1
+	}
+	popups {
+		background-effect {
+			blur true
+			xray false
+			noise 0.015
+			saturation 1.1
+		}
+	}
+}
+
+layer-rule {
+	match namespace="^noctalia-backdrop"
+	place-within-backdrop true
+}
+
+// Misc. window rules
+// Keep common utility dialogs out of the scrolling tiled layout.
+window-rule {
+	match app-id=r#"^(pavucontrol|blueman-manager|nm-connection-editor)$"#
+	open-floating true
+}
+
+// Keep Firefox readable by opening its tiled column at four fifths
+window-rule {
+	match app-id="firefox"
+	default-column-width { proportion 0.8; }
+}
+
+// Keybindings
 binds {
-	Mod+Return { spawn "foot"; }
-	Mod+D { spawn "noctalia" "launcher"; }
+
+	// General
 	Mod+Shift+E { quit; }
+	Mod+Q repeat=false { close-window; }
+	Mod+O { toggle-overview; }
+	Mod+T { toggle-column-tabbed-display; }
+	Print { screenshot; }
+	Ctrl+Print { screenshot-screen; }
+	Mod+Print { screenshot-window; }
+
+	// Launchers
+	Mod+Return { spawn "ghostty"; }
+	Mod+B { spawn "firefox"; }
+	Mod+Space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+
+	// Focus / Move
+	Mod+H { focus-column-left; }
+	Mod+J { focus-window-down; }
+	Mod+K { focus-window-up; }
+	Mod+L { focus-column-right; }
+
+	Mod+Alt+H { move-column-left; }
+	Mod+Alt+J { move-window-down; }
+	Mod+Alt+K { move-window-up; }
+	Mod+Alt+L { move-column-right; }
+
+	// Fullscreen / Maximize / Float
+	Mod+Shift+F { fullscreen-window; }
+	Mod+F { maximize-column; }
+	Mod+Shift+Space { toggle-window-floating; }
+
+	// Resize the focused column or window by one tenth of the output.
+	Mod+Comma { set-column-width "-10%"; }
+	Mod+Period { set-column-width "+10%"; }
+	Mod+Alt+Comma { set-window-height "-10%"; }
+	Mod+Alt+Period { set-window-height "+10%"; }
+
+	// Consume / Expel
+	Mod+Minus { consume-or-expel-window-left; }
+	Mod+Equal { consume-or-expel-window-right; }
+
+	// Workspaces
+	Mod+1 { focus-workspace 1; }
+	Mod+2 { focus-workspace 2; }
+	Mod+3 { focus-workspace 3; }
+	Mod+4 { focus-workspace 4; }
+	Mod+5 { focus-workspace 5; }
+	Mod+6 { focus-workspace 6; }
+	Mod+7 { focus-workspace 7; }
+	Mod+8 { focus-workspace 8; }
+	Mod+Alt+1 { move-column-to-workspace 1; }
+	Mod+Alt+2 { move-column-to-workspace 2; }
+	Mod+Alt+3 { move-column-to-workspace 3; }
+	Mod+Alt+4 { move-column-to-workspace 4; }
+	Mod+Alt+5 { move-column-to-workspace 5; }
+	Mod+Alt+6 { move-column-to-workspace 6; }
+	Mod+Alt+7 { move-column-to-workspace 7; }
+	Mod+Alt+8 { move-column-to-workspace 8; }
+
+	Mod+I { focus-workspace-up; }
+	Mod+N { focus-workspace-down; }
+
+	Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+	Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+
+	// Touchpads have "natural" scrolling, so these are reversed
+	Mod+TouchpadScrollDown { focus-workspace-up; }
+	Mod+TouchpadScrollUp { focus-workspace-down; }
 }

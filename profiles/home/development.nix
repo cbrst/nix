@@ -4,5 +4,6 @@
   imports = [
     ./minimal.nix
     ../../modules/home/neovim
+    ../../modules/ai
   ];
 }

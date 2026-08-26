@@ -4,8 +4,14 @@
     enable = true;
     settings = {
       main = {
-        term = "xterm-256color";
+        font = "monospace:size=11";
         shell = "zsh";
+        term = "xterm-256color";
+        resize-by-cells = "no";
+        line-height = "15";
+      };
+      csd = {
+        preferred = "none";
       };
     };
   };
