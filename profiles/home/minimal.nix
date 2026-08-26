@@ -4,5 +4,6 @@
   imports = [
     ../../modules/home/shell
     ../../modules/home/git.nix
+    ../../modules/home/1password.nix
   ];
 }

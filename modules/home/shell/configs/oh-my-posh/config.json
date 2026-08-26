@@ -5,7 +5,7 @@
 	"transient_prompt": {
 		"background": "transparent",
 		"foreground": "yellow",
-		"template": "{{ .Path }}> "
+		"template": "{{ .Root }} | {{ .PWD }} > "
 	},
 	"blocks": [
 		{

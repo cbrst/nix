@@ -13,5 +13,7 @@
     ../../modules/nixos/niri.nix
     ../../modules/nixos/noctalia.nix
     ../../modules/nixos/noctalia-greeter.nix
+    ../../modules/nixos/1password.nix
+    ../../modules/nixos/pipewire.nix
   ];
 }

@@ -4,8 +4,8 @@
   programs.git = {
     enable = true;
     settings.user = {
-      name = "Replace with your name";
-      email = "replace-with-your-email@example.com";
+      name = "Christian Brassat";
+      email = "christian@brassat.eu";
     };
   };
 }
