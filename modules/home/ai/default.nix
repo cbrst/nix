@@ -41,6 +41,8 @@ in
         reserved = 10000;
       };
     };
+
+    skills = ./skills;
   };
 
   programs.mcp = {
