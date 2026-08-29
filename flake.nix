@@ -26,6 +26,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # AI
+    serena = {
+      url = "github:oraios/serena";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     rtk-src = {
       url = "github:rtk-ai/rtk/v0.42.4";
       flake = false;

@@ -5,6 +5,6 @@
     ./minimal.nix
     ../../modules/home/code
     ../../modules/home/neovim
-    # ../../modules/home/ai
+    ../../modules/home/ai
   ];
 }
