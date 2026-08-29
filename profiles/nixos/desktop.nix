@@ -11,6 +11,7 @@
   imports = [
     ../../modules/nixos/base.nix
     ../../modules/nixos/fonts.nix
+    ../../modules/nixos/gtk.nix
     ../../modules/nixos/niri.nix
     ../../modules/nixos/noctalia.nix
     ../../modules/nixos/noctalia-greeter.nix
