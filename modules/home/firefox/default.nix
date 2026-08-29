@@ -1,5 +1,10 @@
 { pkgs, ... }:
 {
+  home.packages = with pkgs; [
+    ffmpeg
+    yt-dlp
+  ];
+
   programs.firefox = {
     enable = true;
 
@@ -13,7 +18,7 @@
       isDefault = true;
 
       settings = {
-        "browser.startup.homepage" = "about:blank";
+        "browser.startup.page" = 3;
         "browser.toolbars.bookmarks.visibility" = "never";
         "privacy.trackingprotection.enabled" = true;
 
@@ -22,7 +27,8 @@
       };
 
       # enable and install userChrome.css
-      userChrome = builtins.readFile ./userChrome.css;
+      userChrome =
+        builtins.readFile ./configs/chrome/theme.css + builtins.readFile ./configs/chrome/userChrome.css;
 
       # install extensions into this profile
       extensions.packages =
@@ -40,4 +46,8 @@
         ];
     };
   };
+
+  # Link tridactyl config
+  xdg.configFile."tridactyl/tridactylrc".source = ./configs/tridactyl/tridactylrc;
+  xdg.configFile."tridactyl/themes/theme.css".source = ./configs/tridactyl/theme.css;
 }

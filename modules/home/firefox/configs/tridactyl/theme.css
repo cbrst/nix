@@ -1,0 +1,90 @@
+/* Meowsoot Night and Dawn palette from marekh19/meowsoot.nvim. */
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--tridactyl-bg: #f9f6f1;
+		--tridactyl-fg: #3c312a;
+		--tridactyl-border-color: #b0998d;
+		--tridactyl-bg-border: 1px solid var(--tridactyl-border-color);
+		--tridactyl-bg-inset: inset 0 0 0 1px #ffffff80;
+		--tridactyl-cmdl-shadow: #3c312a33;
+		--tridactyl-link-fg: #25659d;
+		--tridactyl-selection-bg: #d7cac1;
+		--tridactyl-selection-fg: #3c312a;
+		--tridactyl-hint-fg: #f9f6f1;
+		--tridactyl-hint-bg-solid: #911256;
+		--tridactyl-hint-backdrop: #91125640;
+		--tridactyl-code-bg: #f2eee9;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--tridactyl-bg: #171616;
+		--tridactyl-fg: #e2e0df;
+		--tridactyl-border-color: #454240;
+		--tridactyl-bg-border: 1px solid var(--tridactyl-border-color);
+		--tridactyl-bg-inset: inset 0 0 0 1px #e2e0df80;
+		--tridactyl-cmdl-shadow: #00000066;
+		--tridactyl-link-fg: #96bddf;
+		--tridactyl-selection-bg: #353331;
+		--tridactyl-selection-fg: #e2e0df;
+		--tridactyl-hint-fg: #171616;
+		--tridactyl-hint-bg-solid: #eaa4c9;
+		--tridactyl-hint-backdrop: #eaa4c940;
+		--tridactyl-code-bg: #282625;
+	}
+}
+
+:root {
+	--tridactyl-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	--tridactyl-cmdl-font-family: var(--tridactyl-font-family);
+	--tridactyl-font-size: 12px;
+	--tridactyl-small-font-size: 12px;
+	--tridactyl-cmplt-font-size: var(--tridactyl-font-size);
+
+	--tridactyl-status-font-family: var(--tridactyl-font-family);
+	--tridactyl-status-font-bg: var(--tridactyl-cmdl-bg);
+	--tridactyl-status-border: 2px solid black;
+	--tridactyl-status-border-radius: 4px;
+
+	--tridactyl-of-fg: var(--tridactyl-selection-fg);
+	--tridactyl-of-bg: var(--tridactyl-selection-bg);
+	--tridactyl-url-fg: var(--tridactyl-link-fg);
+
+	--tridactyl-hintspan-font-family: var(--tridactyl-font-family);
+	--tridactyl-hintspan-fg: var(--tridactyl-hint-fg);
+	--tridactyl-hintspan-bg: var(--tridactyl-hint-bg-solid);
+
+	--tridactyl-hint-active-fg: var(--tridactyl-selection-fg);
+	--tridactyl-hint-active-bg: var(--tridactyl-selection-bg);
+	--tridactyl-hint-active-outline: 1px solid var(--tridactyl-border-color);
+
+	--tridactyl-hint-bg: var(--tridactyl-hint-backdrop);
+	--tridactyl-hint-outline: 1px solid var(--tridactyl-hintspan-bg);
+
+	--tridactyl-cmdl-bg: var(--tridactyl-bg);
+	--tridactyl-cmdl-fg: var(--tridactyl-fg);
+	--tridactyl-cmdl-font-size: calc(var(--tridactyl-font-size) * 1.2);
+	--tridactyl-cmplt-option-height: 1.5rem;
+
+	--tridactyl-border-radius: 10px;
+
+	/** Use theme colors */
+	--tridactyl-header-first-bg: var(--tridactyl-code-bg);
+	--tridactyl-header-second-bg: var(--tridactyl-code-bg);
+	--tridactyl-header-third-bg: var(--tridactyl-code-bg);
+}
+
+:root .TridactylStatusIndicator {
+	display: none !important;
+}
+
+/*
+ * Hints
+ */
+
+span.TridactylHint {
+	border-radius: 5px 5px 0 5px !important;
+	transform: translate(-50%, -50%) !important;
+}
