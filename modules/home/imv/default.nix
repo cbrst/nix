@@ -1,10 +1,10 @@
-{ ... }:
+{ settings, ... }:
 {
   programs.imv = {
     enable = true;
     settings = {
       options = {
-        background = "171616";
+        background = builtins.substring 1 6 settings.theme.dark.background;
       };
     };
   };

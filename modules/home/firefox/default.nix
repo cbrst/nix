@@ -1,4 +1,31 @@
-{ pkgs, ... }:
+{
+  configLib,
+  pkgs,
+  settings,
+  ...
+}:
+let
+  paletteReplacements = {
+    "@light-background@" = settings.theme.light.background;
+    "@light-foreground@" = settings.theme.light.foreground;
+    "@light-muted@" = settings.theme.light.muted;
+    "@light-border@" = settings.theme.light.border;
+    "@light-hover@" = settings.theme.light.hover;
+    "@light-selected@" = settings.theme.light.selected;
+    "@light-accent@" = settings.theme.light.accent;
+    "@light-accent-foreground@" = settings.theme.light.accentForeground;
+    "@light-link@" = settings.theme.light.link;
+    "@dark-background@" = settings.theme.dark.background;
+    "@dark-foreground@" = settings.theme.dark.foreground;
+    "@dark-muted@" = settings.theme.dark.muted;
+    "@dark-border@" = settings.theme.dark.border;
+    "@dark-hover@" = settings.theme.dark.hover;
+    "@dark-selected@" = settings.theme.dark.selected;
+    "@dark-accent@" = settings.theme.dark.accent;
+    "@dark-accent-foreground@" = settings.theme.dark.accentForeground;
+    "@dark-link@" = settings.theme.dark.link;
+  };
+in
 {
   home.packages = with pkgs; [
     ffmpeg
@@ -80,7 +107,8 @@
 
       # enable and install userChrome.css
       userChrome =
-        builtins.readFile ./configs/chrome/theme.css + builtins.readFile ./configs/chrome/userChrome.css;
+        configLib.renderTemplate paletteReplacements ./configs/chrome/theme.css
+        + builtins.readFile ./configs/chrome/userChrome.css;
 
       # install extensions into this profile
       extensions.packages =
@@ -101,5 +129,6 @@
 
   # Link tridactyl config
   xdg.configFile."tridactyl/tridactylrc".source = ./configs/tridactyl/tridactylrc;
-  xdg.configFile."tridactyl/themes/theme.css".source = ./configs/tridactyl/theme.css;
+  xdg.configFile."tridactyl/themes/theme.css".text =
+    configLib.renderTemplate paletteReplacements ./configs/tridactyl/theme.css;
 }

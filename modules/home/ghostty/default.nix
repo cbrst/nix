@@ -21,11 +21,15 @@
       window-theme = "ghostty";
       macos-titlebar-style = "tabs";
       gtk-titlebar = false;
-      theme = "light:meowsoot-dawn,dark:meowsoot";
+      theme = "light:${settings.theme.apps.ghostty.light},dark:${settings.theme.apps.ghostty.dark}";
     };
   };
 
   xdg.configFile."ghostty/themes/meowsoot".source = "${inputs.meowsoot}/extras/ghostty/meowsoot";
   xdg.configFile."ghostty/themes/meowsoot-dawn".source =
     "${inputs.meowsoot}/extras/ghostty/meowsoot-dawn";
+  xdg.configFile."ghostty/themes/kanagawa-lotus".source =
+    "${inputs.kanagawa}/extras/ghostty/kanagawa-lotus";
+  xdg.configFile."ghostty/themes/kanagawa-wave".source =
+    "${inputs.kanagawa}/extras/ghostty/kanagawa-wave";
 }

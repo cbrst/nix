@@ -1,14 +1,19 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  settings,
+  ...
+}:
 let
-  # Package meowsoot until it is packaged in the Nixpkgs version used by consumers
   meowsootNvim = pkgs.vimUtils.buildVimPlugin {
     pname = "meowsoot.nvim";
     version = "unstable-2026-07-19";
-    src = pkgs.fetchzip {
-      url = "https://github.com/marekh19/meowsoot.nvim/archive/4b76f83e364d589d901ecaada50ba0b0a81e611e.tar.gz";
-      hash = "sha256-lHdKNSu+BJFaEhOiwfn5Z1j11fhi+bdVLikV70aefOM=";
-      stripRoot = true;
-    };
+    src = inputs.meowsoot;
+  };
+  kanagawaNvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "kanagawa.nvim";
+    version = "unstable-2026-05-10";
+    src = inputs.kanagawa;
   };
   neotree-file-nesting-config = pkgs.vimUtils.buildVimPlugin {
     pname = "neotree-file-nesting-config";
@@ -75,6 +80,7 @@ in
       mini-nvim
       monokai-pro-nvim
       meowsootNvim
+      kanagawaNvim
       neo-tree-nvim
       neotree-file-nesting-config
       nui-nvim
@@ -104,4 +110,6 @@ in
   # configuration directory instead of copying and maintaining it manually.
   xdg.configFile."nvim/init.lua".source = ./configs/init.lua;
   xdg.configFile."nvim/lua".source = ./configs/lua;
+
+  home.sessionVariables.CONFIG_THEME_FAMILY = settings.theme.family;
 }

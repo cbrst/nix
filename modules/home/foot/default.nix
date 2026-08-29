@@ -1,4 +1,9 @@
-{ ... }:
+{
+  inputs,
+  lib,
+  settings,
+  ...
+}:
 {
   programs.foot = {
     enable = true;
@@ -9,6 +14,9 @@
         term = "xterm-256color";
         resize-by-cells = "no";
         line-height = "15";
+      }
+      // lib.optionalAttrs (settings.theme.family == "kanagawa") {
+        include = "${inputs.kanagawa}/extras/foot/kanagawa-wave.ini";
       };
       csd = {
         preferred = "none";

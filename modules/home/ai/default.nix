@@ -20,6 +20,7 @@ in
   programs.opencode = {
     enable = true;
     enableMcpIntegration = true;
+    extraPackages = [ pkgs.lua-language-server ];
 
     settings = {
       model = "openai/gpt-5.6-sol";

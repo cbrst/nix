@@ -18,15 +18,15 @@ layout {
 	focus-ring {
 		off
 		width 2
-		active-gradient from="#cba6f7" to="#89b4fa" angle=45
-		inactive-color "#45475a"
+		active-gradient from="@active-from@" to="@active-to@" angle=45
+		inactive-color "@inactive@"
 	}
 
 	border {
 		on
 		width 2
-		active-gradient from="#cba6f7" to="#89b4fa" angle=45
-		inactive-color "#45475a"
+		active-gradient from="@active-from@" to="@active-to@" angle=45
+		inactive-color "@inactive@"
 	}
 
 	// Niri knows window geometry from the rule below
@@ -46,7 +46,7 @@ layout {
 		length total-proportion=0.8
 		place-within-column
 		position "left"
-		active-gradient from="#cba6f7" to="#89b4fa" angle=45
+		active-gradient from="@active-from@" to="@active-to@" angle=45
 	}
 }
 

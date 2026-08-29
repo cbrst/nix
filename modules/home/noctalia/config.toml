@@ -170,7 +170,7 @@ source = "wallpaper"
 wallpaper_scheme = "m3-monochrome"
 
     [theme.templates]
-    builtin_ids = [ "foot", "gtk3", "gtk4", "ghostty", "niri" ]
+    builtin_ids = []
 
 [wallpaper]
 directory = "~/Pictures/Wallpapers"

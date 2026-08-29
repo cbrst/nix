@@ -1,30 +1,13 @@
-/* Meowsoot Night and Dawn palette from marekh19/meowsoot.nvim. */
-@media (prefers-color-scheme: light) {
-  :root {
-    --browser-bg: #f9f6f1;
-    --browser-fg: #3c312a;
-    --browser-muted: #7e7063;
-    --browser-border: #b0998d;
-    --browser-hover: #f2eee9;
-    --browser-selected: #d7cac1;
-    --browser-accent: #911256;
-    --browser-accent-fg: #f9f6f1;
-  }
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --browser-bg: #171616;
-    --browser-fg: #e2e0df;
-    --browser-muted: #b1ada9;
-    --browser-border: #454240;
-    --browser-hover: #282625;
-    --browser-selected: #353331;
-    --browser-accent: #eaa4c9;
-    --browser-accent-fg: #171616;
-  }
-}
-/* This stylesheet is installed only in Firefox's default profile. */
+/*
+ * Firefox's chrome styles and userChrome.css occupy different cascade origins.
+ * The marked declarations require !important to override Firefox's own rules;
+ * increasing selector specificity alone cannot replace it.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Browser chrome colors                                                      */
+/* -------------------------------------------------------------------------- */
 
 #navigator-toolbox,
 #TabsToolbar,
@@ -39,49 +22,56 @@
   border-bottom: 1px solid var(--browser-border) !important;
 }
 
-.tabbrowser-tab[selected] .tab-background,
-#urlbar[focused] > #urlbar-background {
-  background-color: var(--browser-selected) !important;
-}
+/* -------------------------------------------------------------------------- */
+/* Toolbar controls                                                           */
+/* -------------------------------------------------------------------------- */
 
-.tabbrowser-tab:hover > .tab-stack > .tab-background,
-#urlbar-background {
-  background-color: var(--browser-hover) !important;
-}
-
-.tabbrowser-tab,
-#urlbar-background,
 .toolbarbutton-1 > .toolbarbutton-icon {
   color: var(--browser-fg) !important;
 }
 
-.tab-secondary-label {
-  color: var(--browser-muted) !important;
-}
-
-.tab-close-button:hover,
-.toolbarbutton-1:hover > .toolbarbutton-icon {
+.toolbarbutton-1:hover > .toolbarbutton-icon,
+.tab-close-button:hover {
   background-color: var(--browser-selected) !important;
 }
 
-#urlbar[focused] > #urlbar-background {
-  outline: 1px solid var(--browser-accent) !important;
-}
-
-#urlbar-input,
-.urlbarView-row,
-.urlbarView-title,
-.urlbarView-url {
-  color: var(--browser-fg) !important;
-}
-
+/*
+ * Firefox may place the native window controls in different toolbars depending
+ * on the platform and titlebar configuration.
+ */
 .titlebar-buttonbox-container,
 .titlebar-buttonbox,
 .titlebar-spacer[type="post-tabs"] {
   display: none !important;
 }
 
-/* Shrink tabs */
+/* -------------------------------------------------------------------------- */
+/* Compact toolbar sizing                                                     */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --toolbarbutton-padding-inner: 4px !important;
+}
+
+#urlbar-container {
+  --urlbar-container-height: 34px !important;
+}
+
+.urlbar {
+  --urlbar-height: 28px !important;
+  --urlbar-min-height: var(--urlbar-height) !important;
+  --urlbar-background-background-color: transparent !important;
+  --urlbar-background-outline-focused: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tab strip                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Firefox declares --tab-min-height on :root and changes it for density and UI
+ * modes. This override applies only to the legacy, non-Nova interface.
+ */
 :root {
   @media not -moz-pref("browser.nova.enabled") {
     --tab-min-height: 26px !important;
@@ -93,90 +83,161 @@
 }
 
 #tabbrowser-tabs {
-  padding-left: 2px;
+  padding-inline-start: 2px;
 }
 
+.tabbrowser-tab {
+  color: var(--browser-fg) !important;
+}
+
+/*
+ * Tab state attributes such as [selected] live on .tabbrowser-tab. The visible
+ * tab shape is the descendant .tab-background.
+ */
+.tabbrowser-tab[selected] .tab-background {
+  background-color: var(--browser-selected) !important;
+}
+
+.tabbrowser-tab:hover > .tab-stack > .tab-background {
+  background-color: var(--browser-hover) !important;
+}
+
+.tab-secondary-label {
+  color: var(--browser-muted) !important;
+}
+
+/*
+ * Firefox normally changes close-button visibility according to tab width,
+ * pinning, and the browser.tabs.closeButtons preference.
+ */
 .tab-close-button {
   display: none;
 }
 
-/* Shrink navbar */
-:root {
-  --toolbarbutton-padding-inner: 4px !important;
+/* -------------------------------------------------------------------------- */
+/* Address bar                                                                */
+/* -------------------------------------------------------------------------- */
+
+#urlbar-background {
+  background-color: var(--browser-hover) !important;
 }
 
-#urlbar-container {
-  --urlbar-container-height: 34px !important;
-}
-.urlbar {
-  --urlbar-height: 28px !important;
-  --urlbar-min-height: var(--urlbar-height) !important;
-  --urlbar-background-background-color: transparent !important;
-  --urlbar-background-outline-focused: none !important;
-}
-
-/* Tab groups */
-.tab-group-label {
-  tab-group[collapsed] > .tab-group-label-container & {
-    background-color: rgb(from var(--tab-group-color-invert) r g b / 0.2) !important;
-    color: var(--tab-group-color) !important;
-    outline-color: rgb(from var(--tab-group-color) r g b / 0.2) !important;
-  }
+/*
+ * [focused] belongs to #urlbar, while #urlbar-background is the direct child
+ * that paints the field.
+ */
+#urlbar[focused] > #urlbar-background {
+  background-color: var(--browser-selected) !important;
+  outline: 1px solid var(--browser-accent) !important;
 }
 
-.tab-group-label-container {
-  #tabbrowser-tabs[orient="horizontal"] & {
-    &:after {
-      display: none;
-    }
-  }
+#urlbar-input,
+.urlbarView-row,
+.urlbarView-title,
+.urlbarView-url {
+  color: var(--browser-fg) !important;
 }
 
-.tab-group-overflow-count-container {
-  #tabbrowser-tabs[orient="horizontal"] & {
-    &:after {
-      display: none;
-    }
-  }
+/* -------------------------------------------------------------------------- */
+/* Tab groups                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Firefox's relevant tab-group structure is approximately:
+ *
+ *   tab-group
+ *     .tab-group-label-container
+ *       .tab-group-label
+ *     .tabbrowser-tab
+ *
+ * [collapsed] and [hasactivetab] belong to tab-group. Individual tab state
+ * attributes such as [selected] remain on .tabbrowser-tab.
+ */
+
+/* Restyle the label only while its group is collapsed. */
+tab-group[collapsed]
+  > .tab-group-label-container
+  .tab-group-label {
+  background-color:
+    rgb(from var(--tab-group-color-invert) r g b / 0.2) !important;
+  color: var(--tab-group-color) !important;
+  outline-color:
+    rgb(from var(--tab-group-color) r g b / 0.2) !important;
 }
 
+/* Remove Firefox's extra horizontal decorations around group labels. */
+#tabbrowser-tabs[orient="horizontal"]
+  .tab-group-label-container::after,
+#tabbrowser-tabs[orient="horizontal"]
+  .tab-group-overflow-count-container::after {
+  display: none;
+}
+
+/*
+ * Each grouped tab has a .tab-group-line used for Firefox's standard group
+ * underline. The custom enclosure below replaces that visual treatment.
+ */
 .tab-group-line {
   display: none !important;
 }
 
 tab-group {
+  /*
+   * Use the inverted group color for hover feedback while retaining the normal
+   * group color for selected tabs.
+  */
   --my-tab-group-color: var(--tab-group-color-invert);
-  
+
+  /*
+   * Firefox's own display rule must be overridden. Without flex layout, the
+   * positioned ::before enclosure can escape the group's intended bounds.
+  */
+  display: flex !important;
   position: relative;
   margin-inline-start: 2px;
   padding-inline: 3px;
-  
-  &:is([hasactivetab], :not([collapsed])):before {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 2px;
-    right: 0;
-    bottom: 2px;
-    left: 0;
-    background: rgb(from var(--tab-group-color-invert) r g b / 0.15);
-    border-radius: var(--tab-border-radius);
-    border: 1px solid rgb(from var(--tab-group-color-invert) r g b / 0.3);
+
+  &:not([collapsed]) {
+    margin-inline-end: 4px;
   }
 
+  /*
+   * Draw one enclosure behind expanded groups and collapsed groups containing
+   * the active tab.
+  */
+  &:is([hasactivetab], :not([collapsed]))::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset: 2px 0;
+    background:
+      rgb(from var(--tab-group-color-invert) r g b / 0.15);
+    border:
+      1px solid
+      rgb(from var(--tab-group-color-invert) r g b / 0.3);
+    border-radius: var(--tab-border-radius);
+  }
+
+  /*
+   * Grouped tab backgrounds are shortened by one pixel so they fit cleanly
+   * inside the custom enclosure.
+  */
   .tabbrowser-tab .tab-background {
     min-height: calc(var(--tab-min-height) - 1px) !important;
     height: calc(var(--tab-min-height) - 1px) !important;
   }
 
   .tabbrowser-tab[selected] .tab-background {
-    background-color: rgb(from var(--tab-group-color) r g b / 0.2) !important;
-    outline-color: rgb(from var(--tab-group-color) r g b / 0.1) !important;
+    background-color:
+      rgb(from var(--tab-group-color) r g b / 0.2) !important;
+    outline-color:
+      rgb(from var(--tab-group-color) r g b / 0.1) !important;
   }
 
   .tabbrowser-tab:hover > .tab-stack > .tab-background {
-    background-color: rgb(from var(--my-tab-group-color) r g b / 0.2) !important;
-    outline-color: rgb(from var(--my-tab-group-color) r g b / 0.1) !important;
+    background-color:
+      rgb(from var(--my-tab-group-color) r g b / 0.2) !important;
+    outline-color:
+      rgb(from var(--my-tab-group-color) r g b / 0.1) !important;
   }
 }
-

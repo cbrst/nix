@@ -6,30 +6,19 @@ local M = {}
 function M.get()
 	local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
 	local visual = vim.api.nvim_get_hl(0, { name = "Visual", link = false })
-	if vim.o.background == "light" then
-		return {
-			bar = "#e6e0db",
-			inactive = "#f2eee9",
-			fg = "#3c312a",
-			muted = "#7e7063",
-			tab = normal.bg or "#f9f6f1",
-			label = "#e6e0db",
-			editor = normal.bg or "#f9f6f1",
-			context = visual.fg or "#911256",
-			command = "#e8e3de",
-		}
-	end
-
+	local statusline = vim.api.nvim_get_hl(0, { name = "StatusLine", link = false })
+	local statusline_nc = vim.api.nvim_get_hl(0, { name = "StatusLineNC", link = false })
+	local comment = vim.api.nvim_get_hl(0, { name = "Comment", link = false })
+	local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
 	return {
-		bar = "#201f1d",
-		inactive = "#171616",
-		fg = "#e2e0df",
-		muted = "#b1ada9",
-		tab = normal.bg or "#171616",
-		label = "#171616",
-		editor = normal.bg or "#171616",
-		context = visual.fg or "#eaa4c9",
-		command = "#100f0f",
+		bar = statusline.bg or normal.bg,
+		inactive = statusline_nc.bg or normal_float.bg or normal.bg,
+		fg = statusline.fg or normal.fg,
+		muted = comment.fg or statusline_nc.fg or normal.fg,
+		tab = normal.bg,
+		editor = normal.bg,
+		context = visual.fg or visual.bg or normal.fg,
+		command = normal_float.bg or normal.bg,
 	}
 end
 

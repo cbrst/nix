@@ -1,12 +1,18 @@
-{ pkgs, settings, ... }:
+{
+  lib,
+  pkgs,
+  settings,
+  ...
+}:
 let
-  deepin-icon-theme = pkgs.callPackage ../../packages/deepin-icon-theme { };
+  kanagawaGtkTheme = pkgs.callPackage ../../packages/kanagawa-gtk-theme { };
   font = "${settings.fonts.sans} 11";
+  gtkTheme = settings.theme.apps.gtk.name;
 
   gtkSettings = ''
     [Settings]
-    gtk-theme-name=Adwaita-dark
-    gtk-icon-theme-name=bloom-dark
+    gtk-theme-name=${gtkTheme}
+    gtk-icon-theme-name=Fluent-dark
     gtk-application-prefer-dark-theme=1
     gtk-font-name=${font}
     gtk-xft-antialias=1
@@ -17,9 +23,10 @@ let
 in
 {
   environment.systemPackages = [
-    deepin-icon-theme
+    pkgs.fluent-icon-theme
     pkgs.papirus-icon-theme
-  ];
+  ]
+  ++ lib.optional (settings.theme.family == "kanagawa") kanagawaGtkTheme;
 
   environment.etc = {
     "xdg/gtk-3.0/settings.ini".text = gtkSettings;
@@ -29,7 +36,8 @@ in
   programs.dconf.profiles.user.databases = [
     {
       settings."org/gnome/desktop/interface" = {
-        icon-theme = "bloom-dark";
+        gtk-theme = gtkTheme;
+        icon-theme = "Fluent-dark";
         font-name = "${font}";
       };
     }

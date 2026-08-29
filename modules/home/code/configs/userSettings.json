@@ -108,6 +108,5 @@
 		"*.wat": "$(capture).wasm",
 		"*.xaml": "$(capture).xaml.cs"
 	},
-	"workbench.colorTheme": "Meowsoot Night",
 	"workbench.experimental.modernUI": true
 }

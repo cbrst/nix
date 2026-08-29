@@ -43,6 +43,11 @@
       flake = false;
     };
 
+    kanagawa = {
+      url = "github:rebelot/kanagawa.nvim";
+      flake = false;
+    };
+
     zshcs = {
       url = "github:yuys13/zshcs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -63,6 +68,7 @@
           sans = "0xPropo";
           mono = "0xProto";
         };
+        theme = import ./lib/themes.nix { family = "meowsoot"; };
       };
       # Shared helper for standalone Home Manager configurations.
       configLib = import ./lib { inherit inputs; };
