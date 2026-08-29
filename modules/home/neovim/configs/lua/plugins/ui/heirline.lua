@@ -79,7 +79,7 @@ function M.setup()
 	local divider = {
 		provider = "  ",
 		hl = function()
-			return { bg = colors.get().bar, fg = colors.get().label, bold = true }
+			return { bg = colors.get().bar, fg = colors.get().tab, bold = true }
 		end,
 	}
 
@@ -92,8 +92,7 @@ function M.setup()
 
 	local filetype = {
 		provider = function()
-			local icon = MiniIcons.get("filetype", vim.bo.filetype)
-			return " " .. icon .. " " .. (vim.bo.filetype == "" and "text" or vim.bo.filetype)
+			return " " .. (vim.bo.filetype == "" and "text" or vim.bo.filetype)
 		end,
 		hl = function()
 			return { bg = colors.get().bar, fg = colors.get().muted }
@@ -103,14 +102,14 @@ function M.setup()
 	local label_separator_pre = {
 		provider = "",
 		hl = function()
-			return { fg = colors.get().bar, bg = colors.get().label }
+			return { fg = colors.get().bar, bg = colors.get().tab }
 		end,
 	}
 
 	local label_separator_post = {
 		provider = "",
 		hl = function()
-			return { fg = colors.get().label, bg = colors.get().bar }
+			return { fg = colors.get().tab, bg = colors.get().bar }
 		end,
 	}
 
@@ -148,7 +147,7 @@ function M.setup()
 			return "  " .. status.head .. (#changes > 0 and " " .. table.concat(changes, " ") or "") .. " "
 		end,
 		hl = function()
-			return { bg = colors.get().label, fg = colors.get().fg }
+			return { bg = colors.get().tab, fg = colors.get().fg }
 		end,
 	}
 

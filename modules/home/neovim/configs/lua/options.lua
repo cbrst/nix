@@ -2,6 +2,7 @@ local icons = require("utils.icons")
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
+--  For more options, you can see `:help option-list`
 
 -- Make line numbers default
 vim.opt.number = true
@@ -32,13 +33,14 @@ vim.opt.foldtext = ""
 --  Do not close folds when opening a file
 vim.opt.foldlevel = 99
 --  Limit folding depth
-vim.opt.foldnestmax = 3
+vim.opt.foldnestmax = 4
 --  Keep the fold column empty except for open and closed fold markers
 vim.opt.fillchars = {
 	foldopen = icons.folds.foldopen,
 	foldclose = icons.folds.foldclose,
 	foldsep = "│",
 	foldinner = "│",
+	fold = " ",
 }
 
 -- Sync clipboard between OS and Neovim.
