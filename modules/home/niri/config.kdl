@@ -68,7 +68,7 @@ window-rule {
 prefer-no-csd
 
 // Noctalia integration
-spawn-at-startup "noctalia"
+spawn-at-startup "env" "QT_QPA_PLATFORMTHEME=gtk3" "noctalia"
 
 layer-rule {
 	match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
