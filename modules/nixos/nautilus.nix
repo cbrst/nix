@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  services.gvfs.enable = true;
+
   environment.systemPackages = [
     pkgs.nautilus
     pkgs.nautilus-python
