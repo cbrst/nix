@@ -88,7 +88,7 @@
       "--bind 'ctrl-o:execute($\{EDITOR} {})+abort'"
     ];
     enableZshIntegration = true;
-    fileWidgetOptions = [
+    fileWidget.options = [
       "--preview 'head {}'"
       "--bind 'ctrl-/:toggle-preview'"
     ];
