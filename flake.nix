@@ -36,6 +36,12 @@
       ...
     }:
     let
+      settings = {
+        fonts = {
+          sans = "0xPropo";
+          mono = "0xProto";
+        };
+      };
       # Shared helper for standalone Home Manager configurations.
       configLib = import ./lib { inherit inputs; };
     in
@@ -43,7 +49,7 @@
       # Apply with: sudo nixos-rebuild switch --flake .#example-nixos
       nixosConfigurations.example-nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs settings configLib; };
         modules = [
           ./hosts/nixos/example-nixos
           home-manager.nixosModules.home-manager
@@ -52,7 +58,7 @@
 
       nixosConfigurations.asgard = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs settings configLib; };
         modules = [
           ./hosts/nixos/asgard
           home-manager.nixosModules.home-manager
@@ -66,6 +72,7 @@
         system = "x86_64-linux";
         username = "example-user";
         homeDirectory = "/home/example-user";
+        inherit settings;
         modules = [
           ./users/example-user/home.nix
           ./hosts/home/generic-linux.nix
@@ -79,6 +86,7 @@
         system = "aarch64-darwin";
         username = "example-user";
         homeDirectory = "/Users/example-user";
+        inherit settings;
         modules = [
           ./users/example-user/home.nix
           ./hosts/home/macbook.nix

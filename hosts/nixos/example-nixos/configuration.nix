@@ -1,4 +1,9 @@
-{ inputs, ... }:
+{
+  inputs,
+  settings,
+  configLib,
+  ...
+}:
 {
   # A profile is a named group of reusable NixOS modules.
   imports = [
@@ -26,7 +31,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit inputs settings configLib; };
     users.example-user = {
       imports = [
         ../../../users/example-user/home.nix
