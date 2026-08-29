@@ -31,6 +31,11 @@
       url = "github:marekh19/meowsoot.nvim";
       flake = false;
     };
+
+    zshcs = {
+      url = "github:yuys13/zshcs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Outputs are the named configurations and helpers exported by this flake.

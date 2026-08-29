@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 let
   # Package meowsoot until it is packaged in the Nixpkgs version used by consumers
   meowsootNvim = pkgs.vimUtils.buildVimPlugin {
@@ -28,8 +28,14 @@ in
       ripgrep
 
       #conform
+      black
       prettier
       stylua
+      shellharden
+      shfmt
+
+      # lint
+      markdownlint-cli
 
       # LSP tools
       tree-sitter
@@ -40,6 +46,9 @@ in
       yaml-language-server
       phpactor
       emmet-language-server
+      inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
+      zsh
+      man-db
     ];
 
     plugins = with pkgs.vimPlugins; [

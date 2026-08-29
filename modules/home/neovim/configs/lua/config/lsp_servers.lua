@@ -32,6 +32,19 @@ return {
 		},
 	},
 	bashls = {},
+	zshcs = {
+		cmd = { "zshcs" },
+		filetypes = { "zsh" },
+		root_markers = { ".git" },
+		settings = {
+			zshcs = {
+				experimental = {
+					diagnostics = true,
+					hover = true,
+				},
+			},
+		},
+	},
 	nil_ls = {},
 	jsonls = {
 		cmd = { "vscode-json-language-server", "--stdio" },
