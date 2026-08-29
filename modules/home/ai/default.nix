@@ -22,26 +22,16 @@ in
     enableMcpIntegration = true;
 
     settings = {
-      # Current default. You can change provider/model later without
-      # touching any of the RTK or Serena integration.
       model = "openai/gpt-5.6-sol";
-
-      # OpenCode itself is managed through Nix.
       autoupdate = false;
-
-      # Let OpenCode compact old conversation history itself.
       compaction = {
         auto = true;
-
-        # Explicitly enable old tool-output pruning.
-        # Current OpenCode behavior requires this to be set explicitly.
         prune = true;
-
-        # Leave some breathing room for compaction itself.
         reserved = 10000;
       };
     };
 
+    agents = ./agents;
     skills = ./skills;
   };
 
