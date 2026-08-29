@@ -10,6 +10,15 @@ let
       stripRoot = true;
     };
   };
+  neotree-file-nesting-config = pkgs.vimUtils.buildVimPlugin {
+    pname = "neotree-file-nesting-config";
+    version = "unstable-2025-03-06";
+    src = pkgs.fetchzip {
+      url = "https://github.com/saifulapm/neotree-file-nesting-config/archive/089adb6d3e478771f4485be96128796fb01a20c4.tar.gz";
+      hash = "sha256-VCwujwpiRR8+MLcLgTWsQe+y0+BYL9HRZD+OzafNGGA=";
+      stripRoot = true;
+    };
+  };
 in
 {
   # Install Neovim for the current Home Manager user.
@@ -67,6 +76,7 @@ in
       monokai-pro-nvim
       meowsootNvim
       neo-tree-nvim
+      neotree-file-nesting-config
       nui-nvim
       nvim-highlight-colors
       nvim-lint

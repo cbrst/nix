@@ -27,16 +27,21 @@ vim.opt.exrc = true
 --  Enable folding and use treesitter
 vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
---  Show a maximum of 4 folds in the foldcolumn
-vim.opt.foldcolumn = "auto:4"
+--  Show native fold arrows in a single column
+vim.opt.foldcolumn = "1"
 --  Disable foldtext and show the first line with highlighting
 vim.opt.foldtext = ""
 --  Do not close folds when opening a file
 vim.opt.foldlevel = 99
 --  Limit folding depth
 vim.opt.foldnestmax = 3
---  Set characters for folcolumn
-vim.opt.fillchars = "foldopen:" .. icons.folds.foldopen .. ",foldclose:" .. icons.folds.foldclose
+--  Keep the fold column empty except for open and closed fold markers
+vim.opt.fillchars = {
+	foldopen = icons.folds.foldopen,
+	foldclose = icons.folds.foldclose,
+	foldsep = "│",
+	foldinner = "│",
+}
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -64,6 +69,7 @@ vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
 vim.opt.signcolumn = "yes"
+vim.opt.statuscolumn = ""
 
 -- Decrease update time
 vim.opt.updatetime = 250

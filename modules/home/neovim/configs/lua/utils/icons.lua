@@ -15,8 +15,9 @@ M.diagnostics = {
 }
 
 M.folds = {
-	foldclose = "",
-	foldopen = "",
+	foldclose = "⏵",
+	foldopen = "⏷",
+	foldinner = "⏶",
 }
 
 M.vimode = {
