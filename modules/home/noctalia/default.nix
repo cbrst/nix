@@ -1,13 +1,9 @@
-{ ... }:
+{ settings, configLib, ... }:
 {
   programs.noctalia = {
     enable = true;
-    settings = {
-      theme = {
-        mode = "dark";
-        source = "builtin";
-        builtin = "Catppuccin";
-      };
-    };
+    settings = configLib.renderTemplate {
+      "@font@" = settings.fonts.mono;
+    } ./config.toml;
   };
 }
