@@ -26,10 +26,20 @@
     fastSyntaxHighlighting = {
       enable = true;
     };
-    initContent = lib.mkBefore ''
-      fpath+=($ZDOTDIR/functions)
-      autoload -Uz $ZDOTDIR/functions/*(.:t)
-    '';
+    initContent =
+      let
+        zshBefore = lib.mkBefore ''
+          fpath+=($ZDOTDIR/functions)
+          autoload -Uz $ZDOTDIR/functions/*(.:t)
+        '';
+        zshAfter = lib.mkAfter ''
+          source $ZDOTDIR/aliases.zsh
+        '';
+      in
+      lib.mkMerge [
+        zshBefore
+        zshAfter
+      ];
     history = {
       append = true;
       expireDuplicatesFirst = true;
