@@ -1,3 +1,29 @@
+/* Meowsoot Night and Dawn palette from marekh19/meowsoot.nvim. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --browser-bg: #f9f6f1;
+    --browser-fg: #3c312a;
+    --browser-muted: #7e7063;
+    --browser-border: #b0998d;
+    --browser-hover: #f2eee9;
+    --browser-selected: #d7cac1;
+    --browser-accent: #911256;
+    --browser-accent-fg: #f9f6f1;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --browser-bg: #171616;
+    --browser-fg: #e2e0df;
+    --browser-muted: #b1ada9;
+    --browser-border: #454240;
+    --browser-hover: #282625;
+    --browser-selected: #353331;
+    --browser-accent: #eaa4c9;
+    --browser-accent-fg: #171616;
+  }
+}
 /* This stylesheet is installed only in Firefox's default profile. */
 
 #navigator-toolbox,
@@ -62,8 +88,16 @@
   }
 }
 
+#TabsToolbar {
+  margin-block-start: 2px;
+}
+
 #tabbrowser-tabs {
   padding-left: 2px;
+}
+
+.tab-close-button {
+  display: none;
 }
 
 /* Shrink navbar */
@@ -72,7 +106,7 @@
 }
 
 #urlbar-container {
-  --urlbar-container-height: 30px !important;
+  --urlbar-container-height: 34px !important;
 }
 .urlbar {
   --urlbar-height: 28px !important;
@@ -80,3 +114,69 @@
   --urlbar-background-background-color: transparent !important;
   --urlbar-background-outline-focused: none !important;
 }
+
+/* Tab groups */
+.tab-group-label {
+  tab-group[collapsed] > .tab-group-label-container & {
+    background-color: rgb(from var(--tab-group-color-invert) r g b / 0.2) !important;
+    color: var(--tab-group-color) !important;
+    outline-color: rgb(from var(--tab-group-color) r g b / 0.2) !important;
+  }
+}
+
+.tab-group-label-container {
+  #tabbrowser-tabs[orient="horizontal"] & {
+    &:after {
+      display: none;
+    }
+  }
+}
+
+.tab-group-overflow-count-container {
+  #tabbrowser-tabs[orient="horizontal"] & {
+    &:after {
+      display: none;
+    }
+  }
+}
+
+.tab-group-line {
+  display: none !important;
+}
+
+tab-group {
+  --my-tab-group-color: var(--tab-group-color-invert);
+  
+  position: relative;
+  margin-inline-start: 2px;
+  padding-inline: 3px;
+  
+  &:is([hasactivetab], :not([collapsed])):before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 2px;
+    right: 0;
+    bottom: 2px;
+    left: 0;
+    background: rgb(from var(--tab-group-color-invert) r g b / 0.15);
+    border-radius: var(--tab-border-radius);
+    border: 1px solid rgb(from var(--tab-group-color-invert) r g b / 0.3);
+  }
+
+  .tabbrowser-tab .tab-background {
+    min-height: calc(var(--tab-min-height) - 1px) !important;
+    height: calc(var(--tab-min-height) - 1px) !important;
+  }
+
+  .tabbrowser-tab[selected] .tab-background {
+    background-color: rgb(from var(--tab-group-color) r g b / 0.2) !important;
+    outline-color: rgb(from var(--tab-group-color) r g b / 0.1) !important;
+  }
+
+  .tabbrowser-tab:hover > .tab-stack > .tab-background {
+    background-color: rgb(from var(--my-tab-group-color) r g b / 0.2) !important;
+    outline-color: rgb(from var(--my-tab-group-color) r g b / 0.1) !important;
+  }
+}
+
