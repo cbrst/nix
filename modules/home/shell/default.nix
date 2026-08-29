@@ -53,7 +53,6 @@
   xdg.configFile."zsh/functions".source = ./configs/zsh/functions;
   xdg.configFile."zsh/aliases.zsh".source = ./configs/zsh/aliases.zsh;
 
-  # TODO: Needs aliases
   programs.bat = {
     enable = true;
     extraPackages = with pkgs.bat-extras; [
