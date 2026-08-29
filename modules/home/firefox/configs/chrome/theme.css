@@ -9,6 +9,34 @@
     --browser-selected: @light-selected@;
     --browser-accent: @light-accent@;
     --browser-accent-fg: @light-accent-foreground@;
+
+    --tab-group-blue: @light-link@ !important;
+    --tab-group-blue-invert: @dark-link@ !important;
+    --tab-group-blue-pale: @dark-link@ !important;
+    --tab-group-purple: @light-accent-2@ !important;
+    --tab-group-purple-invert: @dark-accent-2@ !important;
+    --tab-group-purple-pale: @dark-accent-2@ !important;
+    --tab-group-cyan: @light-accent-3@ !important;
+    --tab-group-cyan-invert: @dark-accent-3@ !important;
+    --tab-group-cyan-pale: @dark-accent-3@ !important;
+    --tab-group-orange: @light-accent-4@ !important;
+    --tab-group-orange-invert: @dark-accent-4@ !important;
+    --tab-group-orange-pale: @dark-accent-4@ !important;
+    --tab-group-yellow: @light-accent-5@ !important;
+    --tab-group-yellow-invert: @dark-accent-5@ !important;
+    --tab-group-yellow-pale: @dark-accent-5@ !important;
+    --tab-group-pink: @light-accent@ !important;
+    --tab-group-pink-invert: @dark-accent@ !important;
+    --tab-group-pink-pale: @dark-accent@ !important;
+    --tab-group-green: @light-success@ !important;
+    --tab-group-green-invert: @dark-success@ !important;
+    --tab-group-green-pale: @dark-success@ !important;
+    --tab-group-red: @light-error@ !important;
+    --tab-group-red-invert: @dark-error@ !important;
+    --tab-group-red-pale: @dark-error@ !important;
+    --tab-group-gray: @light-muted@ !important;
+    --tab-group-gray-invert: @dark-muted@ !important;
+    --tab-group-gray-pale: @dark-muted@ !important;
   }
 }
 
@@ -22,5 +50,33 @@
     --browser-selected: @dark-selected@;
     --browser-accent: @dark-accent@;
     --browser-accent-fg: @dark-accent-foreground@;
+
+    --tab-group-blue: @dark-link@ !important;
+    --tab-group-blue-invert: @light-link@ !important;
+    --tab-group-blue-pale: @dark-link@ !important;
+    --tab-group-purple: @dark-accent-2@ !important;
+    --tab-group-purple-invert: @light-accent-2@ !important;
+    --tab-group-purple-pale: @dark-accent-2@ !important;
+    --tab-group-cyan: @dark-accent-3@ !important;
+    --tab-group-cyan-invert: @light-accent-3@ !important;
+    --tab-group-cyan-pale: @dark-accent-3@ !important;
+    --tab-group-orange: @dark-accent-4@ !important;
+    --tab-group-orange-invert: @light-accent-4@ !important;
+    --tab-group-orange-pale: @dark-accent-4@ !important;
+    --tab-group-yellow: @dark-accent-5@ !important;
+    --tab-group-yellow-invert: @light-accent-5@ !important;
+    --tab-group-yellow-pale: @dark-accent-5@ !important;
+    --tab-group-pink: @dark-accent@ !important;
+    --tab-group-pink-invert: @light-accent@ !important;
+    --tab-group-pink-pale: @dark-accent@ !important;
+    --tab-group-green: @dark-success@ !important;
+    --tab-group-green-invert: @light-success@ !important;
+    --tab-group-green-pale: @dark-success@ !important;
+    --tab-group-red: @dark-error@ !important;
+    --tab-group-red-invert: @light-error@ !important;
+    --tab-group-red-pale: @dark-error@ !important;
+    --tab-group-gray: @dark-muted@ !important;
+    --tab-group-gray-invert: @light-muted@ !important;
+    --tab-group-gray-pale: @dark-muted@ !important;
   }
 }

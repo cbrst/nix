@@ -14,6 +14,12 @@ let
     "@light-selected@" = settings.theme.light.selected;
     "@light-accent@" = settings.theme.light.accent;
     "@light-accent-foreground@" = settings.theme.light.accentForeground;
+    "@light-accent-2@" = settings.theme.light.accent2;
+    "@light-accent-3@" = settings.theme.light.accent3;
+    "@light-accent-4@" = settings.theme.light.accent4;
+    "@light-accent-5@" = settings.theme.light.accent5;
+    "@light-error@" = settings.theme.light.error;
+    "@light-success@" = settings.theme.light.success;
     "@light-link@" = settings.theme.light.link;
     "@dark-background@" = settings.theme.dark.background;
     "@dark-foreground@" = settings.theme.dark.foreground;
@@ -23,6 +29,12 @@ let
     "@dark-selected@" = settings.theme.dark.selected;
     "@dark-accent@" = settings.theme.dark.accent;
     "@dark-accent-foreground@" = settings.theme.dark.accentForeground;
+    "@dark-accent-2@" = settings.theme.dark.accent2;
+    "@dark-accent-3@" = settings.theme.dark.accent3;
+    "@dark-accent-4@" = settings.theme.dark.accent4;
+    "@dark-accent-5@" = settings.theme.dark.accent5;
+    "@dark-error@" = settings.theme.dark.error;
+    "@dark-success@" = settings.theme.dark.success;
     "@dark-link@" = settings.theme.dark.link;
   };
 in
