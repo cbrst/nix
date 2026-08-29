@@ -2,10 +2,12 @@
 	"$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
 	"version": 4,
 	"final_space": false,
+	"shell_integration": true,
 	"transient_prompt": {
-		"background": "transparent",
 		"foreground": "yellow",
-		"template": "{{ .Root }} | {{ .PWD }} > "
+		"template": "{{ .PWD }} ",
+		"filler": "─",
+		"newline": true
 	},
 	"blocks": [
 		{
@@ -26,7 +28,7 @@
 					"style": "powerline",
 					"background": "blue",
 					"foreground": "black",
-					"template": " {{ .Path }} ",
+					"template": " <b>{{ .Path }}</b> ",
 					"powerline_symbol": "\ue0b0",
 					"options": {
 						"style": "folder"
