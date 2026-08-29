@@ -25,6 +25,12 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Add meowsoot as input to get the ghostty theme
+    meowsoot = {
+      url = "github:marekh19/meowsoot.nvim";
+      flake = false;
+    };
   };
 
   # Outputs are the named configurations and helpers exported by this flake.

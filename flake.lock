@@ -41,6 +41,22 @@
         "type": "github"
       }
     },
+    "meowsoot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784495861,
+        "narHash": "sha256-lHdKNSu+BJFaEhOiwfn5Z1j11fhi+bdVLikV70aefOM=",
+        "owner": "marekh19",
+        "repo": "meowsoot.nvim",
+        "rev": "4b76f83e364d589d901ecaada50ba0b0a81e611e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "marekh19",
+        "repo": "meowsoot.nvim",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787498568,
@@ -121,6 +137,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "meowsoot": "meowsoot",
         "nixpkgs": "nixpkgs",
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",
