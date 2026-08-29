@@ -10,8 +10,8 @@
       font-size = 11;
       env = "CONFIG_POWERLINE_GLYPHS=1";
       adjust-cursor-thickness = 2;
-      adjust-cell-height = "10%";
-      adjust-font-baseline = "10%";
+      # adjust-cell-height = "10%";
+      # adjust-font-baseline = "10%";
       unfocused-split-opacity = 0.5;
       mouse-hide-while-typing = true;
       window-padding-x = 2;
