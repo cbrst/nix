@@ -26,6 +26,11 @@
     enable = true;
     maxGenerations = 10;
     resolution = "2560x1440x32";
+    extraEntries = ''
+      /Windows
+        protocol: efi_boot_entry
+        entry: Windows Boot Manager
+    '';
     # Change this to true after enrolling the keys from Secure Boot Setup mode
     secureBoot.enable = true;
     style.interface.resolution = "2560x1440";
