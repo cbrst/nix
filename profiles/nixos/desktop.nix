@@ -13,6 +13,7 @@
     ../../modules/nixos/archives.nix
     ../../modules/nixos/fonts.nix
     ../../modules/nixos/gtk.nix
+    ../../modules/nixos/multimedia.nix
     ../../modules/nixos/niri.nix
     ../../modules/nixos/noctalia.nix
     ../../modules/nixos/noctalia-greeter.nix
