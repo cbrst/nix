@@ -1,0 +1,376 @@
+# vim: set ft=zsh
+#
+# opencode-fzf — select & preview opencode sessions with fzf
+#
+# Based on the original gist by @PEMessage:
+#     https://gist.github.com/PEMessage/a0f7f299291a6fda9955adf3b1ea54be
+#
+# Changes vs. upstream:
+#   - Fixed `\x1b` ANSI escapes (BSD awk on macOS only honours octal `\033`).
+#   - Rewrote `session-print` preview: structured session-header block,
+#     per-message header with role/timestamp, basic markdown rendering
+#     (code fences, inline `code`, headers, lists, blockquotes).
+#   - Tolerate truncated JSON dumps from `opencode db` (happens while a
+#     session is actively streaming) via `repair_json_array`.
+#   - Detect currently-running sessions from `ps` (looking for
+#     `opencode -s <id>`) and mark them with a red ● in the list and a
+#     "Status: ● ACTIVE" row in the preview header.
+#   - Collapse consecutive same-role messages into a single block.
+#
+
+emulate -L zsh
+setopt pipefail
+
+local -x LC_ALL=C
+local self_path="${functions_source[opencode-fzf]:-$0}"
+local -x FFOP_COLORS="${FFOP_COLORS:-auto}"
+local FMT_ID FMT_TITLE FMT_TIME FMT_RESET FMT_NONE
+local AGENT_COLOR USER_COLOR META_COLOR ACTIVE_COLOR
+local result
+
+# Color support
+if [ "$FFOP_COLORS" = "auto" ]; then
+  if [ -t 1 ]; then
+    export FFOP_COLORS="always"
+  else
+    export FFOP_COLORS="never"
+  fi
+fi
+
+# ANSI color codes
+if [ "$FFOP_COLORS" = "always" ]; then
+  FMT_ID='\033[1;36m'
+  FMT_TITLE='\033[0m'
+  FMT_TIME='\033[1;32m'
+  FMT_RESET='\033[0m'
+  FMT_NONE=''
+
+  AGENT_COLOR='\033[32m'
+  USER_COLOR='\033[36m'
+  META_COLOR='\033[33m'
+else
+  FMT_ID=''
+  FMT_TITLE=''
+  FMT_TIME=''
+  FMT_RESET=''
+  FMT_NONE=''
+
+  AGENT_COLOR=''
+  USER_COLOR=''
+  META_COLOR=''
+fi
+
+# Add ANSI styling for "active" (currently running) sessions
+if [ "$FFOP_COLORS" = "always" ]; then
+  ACTIVE_COLOR='\033[1;31m' # bold red bullet
+else
+  ACTIVE_COLOR=''
+fi
+
+# Print one session id per line for currently-running `opencode -s <id>` processes
+_opencode_fzf_list_active_session_ids() {
+  ps -eo command 2>/dev/null | awk '
+  /(^| )opencode( |$)/ {
+    for (i = 1; i <= NF; i++) {
+      if ($i == "-s" && (i+1) <= NF) {
+        print $(i+1)
+        next
+      }
+    }
+  }
+' | sort -u
+}
+
+_opencode_fzf_format_sessions() {
+  local active_ids
+  active_ids="$(_opencode_fzf_list_active_session_ids | tr '\n' ' ')"
+  awk -F'\t' \
+    -v fmt_id="$FMT_NONE" \
+    -v fmt_path="$FMT_NONE" \
+    -v fmt_title="$FMT_TITLE" \
+    -v fmt_time="$FMT_TIME" \
+    -v fmt_reset="$FMT_RESET" \
+    -v fmt_none="$FMT_NONE" \
+    -v fmt_active="$ACTIVE_COLOR" \
+    -v home="$HOME" \
+    -v active_list="$active_ids" \
+    'BEGIN {
+      n = split(active_list, a, " ")
+      for (i = 1; i <= n; i++) if (a[i] != "") active[a[i]] = 1
+    }
+  {
+    path = $2
+    gsub(home, "~", path)
+    marker = (($1 in active) ? fmt_active "●" fmt_reset " " : "  ")
+    print fmt_id $1 fmt_none "\t" fmt_path path fmt_none "\t" marker fmt_title $3 fmt_reset "\t" fmt_time $4 fmt_reset
+  }'
+}
+
+# Get sessions from database
+_opencode_fzf_list_sessions() {
+  opencode db "SELECT id, directory, title, datetime(time_updated / 1000, 'unixepoch') FROM session WHERE title NOT LIKE '%subagent)' ORDER BY time_updated DESC" | tail -n +2 | _opencode_fzf_format_sessions
+}
+
+# Interactive selection with fzf
+_opencode_fzf_interactive_select() {
+  local preview_window
+  if [ "${COLUMNS:-80}" -lt 80 ]; then
+    preview_window="wrap:down:50%"
+  else
+    preview_window="wrap:right:50%"
+  fi
+
+  # --preview="opencode db \"SELECT * FROM session WHERE id={1}\" --format=json"
+
+  fzf --ansi \
+    --delimiter='\t' \
+    --with-nth="{3} {4} @{2}" \
+    --preview-window="$preview_window" \
+    --preview="zsh ${(q)self_path} session-print {1}" \
+    --wrap=word \
+    --exit-0 \
+    --scheme history \
+    --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up,ctrl-g:preview-bottom,ctrl-t:preview-top' \
+    --expect=alt-n \
+    --header-first \
+    --header="[New: Alt-n]  [Preview Scroll: Ctrl-d/u]  [Jump: Ctrl-g/t]"
+}
+
+_opencode_fzf_trim() {
+  awk 'NF {
+    gsub(/^[[:space:]]+|[[:space:]]+$/, ""); # trim
+    print;
+  }'
+}
+
+_opencode_fzf_expand_path() {
+  local path="$1"
+  path="$(echo "$path" | _opencode_fzf_trim)"
+  if [[ "$path" == "~"* ]]; then
+    path="${HOME}${path:1}"
+  fi
+  echo "$path"
+}
+
+_opencode_fzf_cmd_session() {
+  local selected session_id directory
+  selected="$(_opencode_fzf_list_sessions | _opencode_fzf_interactive_select)"
+  if [ "$(echo "$selected" | head -n1)" = "alt-n" ]; then
+    echo "New opencode session"
+    opencode
+    return 0
+  fi
+
+  session_id="$(echo "$selected" | cut -f 1 -d $'\t' | _opencode_fzf_trim)"
+  directory="$(echo "$selected" | cut -f 2 -d $'\t' | _opencode_fzf_trim)"
+
+  if [ "$session_id" != "" ]; then
+    echo "Select session: $session_id"
+    echo "Change dir to: $directory"
+    cd "$(_opencode_fzf_expand_path "$directory")"
+    opencode -s "$session_id"
+  else
+    echo "No session selected" >&2
+    return 1
+  fi
+}
+
+# Repair a possibly-truncated pretty-printed JSON array from `opencode db`.
+# When a session is still streaming, the dump may end mid-string. We keep all
+# complete records (closing brace lines), strip the trailing comma if any, and
+# re-close the array.
+_opencode_fzf_repair_json_array() {
+  awk '
+  { lines[NR] = $0 }
+  /^[[:space:]]*\},?[[:space:]]*$/ { last = NR }
+END {
+  if (last == 0) { print "[]"; exit }
+    for (i = 1; i < last; i++) print lines[i]
+      line = lines[last]
+      sub(/,[[:space:]]*$/, "", line)
+      print line
+      print "]"
+}
+'
+}
+
+_opencode_fzf_print_session() {
+  local sid="$1"
+  local active=0
+  if _opencode_fzf_list_active_session_ids | grep -qx "$sid"; then
+    active=1
+  fi
+
+  # ── Session header ──────────────────────────────────────────────────────
+  opencode db "
+  SELECT
+    COALESCE(title,'(no title)')                                AS title,
+    COALESCE(agent,'?')                                         AS agent,
+    COALESCE(model,'?')                                         AS model,
+    COALESCE(directory,'')                                      AS directory,
+    datetime(time_created/1000,'unixepoch','localtime')         AS created,
+    datetime(time_updated/1000,'unixepoch','localtime')         AS updated,
+    COALESCE(tokens_input,0)                                    AS t_in,
+    COALESCE(tokens_output,0)                                   AS t_out,
+    COALESCE(tokens_cache_read,0)+COALESCE(tokens_cache_write,0) AS t_cache,
+    COALESCE(cost,0)                                            AS cost,
+    id                                                          AS sid
+    FROM session WHERE id='$sid'
+    " --format=json |
+    jq -r '.[0] |
+      ( .model
+    | if type=="string" then (. as $s | try (fromjson) catch null | if . != null and .id then .id else $s end)
+  elif type=="object" then (.id // (tostring))
+  else "?" end ) as $model |
+    "Title\t"     + .title,
+  "Session\t"   + .sid,
+  "Agent\t"     + .agent + "  ·  " + $model,
+  "Directory\t" + (.directory | sub(env.HOME; "~")),
+  "Created\t"   + .created,
+  "Updated\t"   + .updated,
+  "Tokens\t"    + "in " + (.t_in|tostring) + "  ·  out " + (.t_out|tostring) + "  ·  cache " + (.t_cache|tostring),
+  "Cost\t$"     + ((.cost*10000|round)/10000|tostring)
+  ' |
+    awk -F'\t' \
+      -v meta="$META_COLOR" \
+      -v title="$FMT_TITLE" \
+      -v reset="$FMT_RESET" \
+      -v bold="\033[1m" \
+      -v active_c="$ACTIVE_COLOR" \
+      -v active="$active" '
+  BEGIN {
+    if (active == "1") {
+      printf "%s%-10s%s %s%s● ACTIVE%s\n", meta, "Status", reset, bold, active_c, reset
+    }
+  }
+{
+  printf "%s%-10s%s %s%s%s%s\n", meta, $1, reset, bold, title, $2, reset
+}
+'
+  printf '\n'
+
+  # ── Conversation ────────────────────────────────────────────────────────
+  opencode db "
+SELECT data FROM part
+  WHERE session_id='$sid'
+  AND json_extract(data, '\$.type') = 'text'
+  AND (json_extract(data, '\$.synthetic') IS NULL
+  OR json_extract(data, '\$.synthetic') = 0)
+  ORDER BY time_updated
+  " --format=json | _opencode_fzf_repair_json_array |
+    jq -r '.[] | .data | fromjson |
+    ( if .time != null then "ASSISTANT" else "USER" end ) as $role |
+    ( if .time.start != null
+then (.time.start/1000)|strftime("%H:%M:%S")
+else "" end ) as $ts |
+  "__OCFZF_ROLE__\t" + $role + "\t" + $ts + "\n" + (.text // "")
+' |
+    awk \
+      -v agent_c="$AGENT_COLOR" \
+      -v user_c="$USER_COLOR" \
+      -v meta_c="$META_COLOR" \
+      -v reset="$FMT_RESET" \
+      -v bold="\033[1m" \
+      -v dim="\033[2m" \
+      -v code="\033[38;5;208m" '
+function style_inline(s,    out, m, before) {
+  # `code` → highlighted span
+  out = ""
+  while (match(s, /`[^`]+`/) > 0) {
+    before = substr(s, 1, RSTART - 1)
+    m      = substr(s, RSTART + 1, RLENGTH - 2)
+    s      = substr(s, RSTART + RLENGTH)
+    out = out before code m reset
+  }
+return out s
+}
+BEGIN { in_code = 0; first = 1; cur = ""; last_role = "" }
+/^__OCFZF_ROLE__\t/ {
+  n = split($0, a, "\t")
+  role = a[2]; ts = a[3]
+  if (in_code) in_code = 0
+    cur = (role == "USER") ? user_c : agent_c
+    label = (role == "USER") ? "USER" : "ASSISTANT"
+    if (role == last_role) {
+      # Same speaker – just add a blank line between parts.
+      printf "\n"
+    } else {
+      if (!first) printf "\n"
+        first = 0
+        if (ts != "") {
+          printf "%s▌%s %s%s%s%s  %s%s%s\n", cur, reset, bold, cur, label, reset, meta_c, ts, reset
+        } else {
+          printf "%s▌%s %s%s%s%s\n", cur, reset, bold, cur, label, reset
+        }
+    }
+  last_role = role
+  next
+}
+{
+  line = $0
+  # Fenced code block toggle
+  if (line ~ /^[[:space:]]*```/) {
+    in_code = !in_code
+    printf "%s%s%s\n", dim, line, reset
+    next
+  }
+if (in_code) {
+  printf "%s%s%s\n", dim, line, reset
+  next
+}
+# Headers
+if (line ~ /^#{1,6} /) {
+  printf "%s%s%s\n", bold cur, line, reset
+  next
+}
+# Bullets / numbered lists – keep marker colored
+if (match(line, /^[[:space:]]*([-*+]|[0-9]+\.) /)) {
+  marker = substr(line, RSTART, RLENGTH)
+  rest   = substr(line, RSTART + RLENGTH)
+  printf "%s%s%s%s\n", cur, marker, reset, style_inline(rest)
+  next
+}
+# Blockquote
+if (line ~ /^[[:space:]]*> /) {
+  printf "%s%s%s\n", dim, line, reset
+  next
+}
+print style_inline(line)
+}
+'
+}
+
+_opencode_fzf_cmd_session_print() {
+  local session_id="$1"
+
+  if [ "$session_id" = "" ]; then
+    echo "Usage: opencode-fzf session-print <session-id>" >&2
+    echo "Get session info from fzf: opencode-fzf session-print \$(opencode session | cut -f1)" >&2
+    return 1
+  fi
+
+  _opencode_fzf_print_session "$session_id"
+}
+
+_opencode_fzf_main() {
+  local cmd="${1:-session}"
+
+  case "$cmd" in
+  session)
+    _opencode_fzf_cmd_session
+    ;;
+  session-print)
+    _opencode_fzf_cmd_session_print "${2:-}"
+    ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    echo "Run 'opencode-fzf help' for usage information" >&2
+    return 1
+    ;;
+  esac
+}
+
+_opencode_fzf_main "$@"
+result=$?
+unfunction -m '_opencode_fzf_*'
+return "$result"

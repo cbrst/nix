@@ -5,6 +5,8 @@
   ...
 }:
 {
+  home.packages = [ pkgs.jq ];
+
   # Home Manager installs and configures Zsh for this user.
   programs.zsh = {
     enable = true;
