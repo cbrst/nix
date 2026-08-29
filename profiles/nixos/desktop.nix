@@ -10,6 +10,7 @@
   # Import NixOS modules required by machines with this role.
   imports = [
     ../../modules/nixos/base.nix
+    ../../modules/nixos/archives.nix
     ../../modules/nixos/fonts.nix
     ../../modules/nixos/gtk.nix
     ../../modules/nixos/niri.nix
