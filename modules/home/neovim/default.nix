@@ -42,7 +42,6 @@ in
       ripgrep
 
       #conform
-      isort
       prettier
       ruff
       stylua
