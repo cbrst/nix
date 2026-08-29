@@ -22,7 +22,7 @@ function M.setup()
 		formatters_by_ft = {
 			html = { "prettierd", "prettier", stop_after_first = true },
 			lua = { "stylua" },
-			python = { "black" },
+			python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
 			zsh = { "shellharden", "shfmt" },
 			-- Conform can also run multiple formatters sequentially
 			-- python = { "isort", "black" },

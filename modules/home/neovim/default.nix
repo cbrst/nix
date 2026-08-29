@@ -42,8 +42,9 @@ in
       ripgrep
 
       #conform
-      black
+      isort
       prettier
+      ruff
       stylua
       shellharden
       shfmt
@@ -62,6 +63,7 @@ in
       emmet-language-server
       inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
       zsh
+      zuban
       man-db
     ];
 

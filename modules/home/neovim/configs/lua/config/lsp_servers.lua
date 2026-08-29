@@ -2,7 +2,7 @@
 -- │ Server-specific settings │
 -- └──────────────────────────┘
 return {
-	phpactor = {},
+	bashls = {},
 	emmet_language_server = {
 		cmd = { "emmet-language-server", "--stdio" },
 		filetypes = {
@@ -23,6 +23,9 @@ return {
 			showExpandedAbbreviation = "always",
 		},
 	},
+	jsonls = {
+		cmd = { "vscode-json-language-server", "--stdio" },
+	},
 	lua_ls = {
 		settings = {
 			Lua = {
@@ -31,7 +34,11 @@ return {
 			},
 		},
 	},
-	bashls = {},
+	nil_ls = {},
+	phpactor = {},
+	yamlls = {
+		cmd = { "yaml-language-server", "--stdio" },
+	},
 	zshcs = {
 		cmd = { "zshcs" },
 		filetypes = { "zsh" },
@@ -45,11 +52,5 @@ return {
 			},
 		},
 	},
-	nil_ls = {},
-	jsonls = {
-		cmd = { "vscode-json-language-server", "--stdio" },
-	},
-	yamlls = {
-		cmd = { "yaml-language-server", "--stdio" },
-	},
+	zuban = {},
 }

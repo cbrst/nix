@@ -13,24 +13,34 @@ function M.setup()
 			nerd_font_variant = "normal",
 		},
 		completion = {
-			menu = {
-				border = "rounded",
-			},
+			menu = { border = "rounded" },
 			documentation = {
 				auto_show = true,
 				border = "rounded",
 			},
 			-- Replace the former nvim-cmp/autopairs function-call integration.
-			accept = { auto_brackets = { enabled = true } },
+			accept = {
+				auto_brackets = { enabled = true },
+			},
+		},
+		cmdline = {
+			keymap = { preset = "inherit" },
+			completion = {
+				menu = { auto_show = true },
+			},
 		},
 		signature = {
-			window = {
-				border = "rounded",
-			},
+			window = { border = "rounded" },
 		},
 		snippets = { preset = "luasnip" },
 		sources = {
-			default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+			default = {
+				"lazydev",
+				"lsp",
+				"path",
+				"snippets",
+				"buffer",
+			},
 			providers = {
 				lazydev = {
 					name = "LazyDev",
