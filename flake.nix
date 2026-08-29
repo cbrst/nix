@@ -26,6 +26,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    rtk-src = {
+      url = "github:rtk-ai/rtk/v0.42.4";
+      flake = false;
+    };
+
     # Add meowsoot as input to get the ghostty theme
     meowsoot = {
       url = "github:marekh19/meowsoot.nvim";
