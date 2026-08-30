@@ -41,29 +41,26 @@ in
       file
       ripgrep
 
-      #conform
+      # Language tools (conform & LSP)
+      bash-language-server
+      emmet-language-server
+      lua-language-server
+      man-db
+      mdsf
+      nil
+      phpactor
       prettier
       ruff
+      rumdl
       stylua
       shellharden
       shfmt
-
-      # lint
-      markdownlint-cli
-
-      # LSP tools
       tree-sitter
-      bash-language-server
-      nil
       vscode-langservers-extracted
-      lua-language-server
       yaml-language-server
-      phpactor
-      emmet-language-server
-      inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
       zsh
+      inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
       zuban
-      man-db
     ];
 
     plugins = with pkgs.vimPlugins; [
@@ -86,7 +83,6 @@ in
       neotree-file-nesting-config
       nui-nvim
       nvim-highlight-colors
-      nvim-lint
       nvim-lspconfig
       # TODO: I probably don't need ALL grammars
       nvim-treesitter.withAllGrammars
@@ -111,6 +107,19 @@ in
   # configuration directory instead of copying and maintaining it manually.
   xdg.configFile."nvim/init.lua".source = ./configs/init.lua;
   xdg.configFile."nvim/lua".source = ./configs/lua;
+
+  # Project-local rumdl and markdownlint configuration takes precedence over
+  # this user-level fallback.
+  xdg.configFile."rumdl/rumdl.toml".text = ''
+    [MD013]
+    line-length = 80
+    reflow = true
+    reflow-mode = "normalize"
+    code-blocks = false
+    tables = false
+    headings = false
+    math-blocks = false
+  '';
 
   home.sessionVariables.CONFIG_THEME_FAMILY = settings.theme.family;
 }

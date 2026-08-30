@@ -36,6 +36,7 @@ return {
 	},
 	nil_ls = {},
 	phpactor = {},
+	rumdl = {},
 	yamlls = {
 		cmd = { "yaml-language-server", "--stdio" },
 	},
