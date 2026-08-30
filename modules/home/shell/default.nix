@@ -228,10 +228,17 @@ in
     "@dark-muted@" = settings.theme.dark.muted;
   } ./configs/oh-my-posh/config.json;
 
+  programs.pay-respects = {
+    enable = true;
+    enableZshIntegration = true;
+    options = [
+      "--alias"
+      "fuck"
+    ];
+  };
+
   programs.zoxide = {
     enable = true;
-    enableBashIntegration = false;
-    enableFishIntegration = false;
     enableZshIntegration = true;
   };
 
