@@ -34,7 +34,7 @@ function M.setup()
 		},
 	})
 	require("trouble").setup({})
-	vim.keymap.set("n", "<leader>vd", "<cmd>Trouble diagnostics toggle<cr>", { desc = "[V]iew [D]iagnostics" })
+	vim.keymap.set("n", "<leader>cx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "List diagnostics" })
 
 	require("config.lsp_keymaps").setup()
 

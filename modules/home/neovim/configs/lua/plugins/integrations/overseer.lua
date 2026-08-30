@@ -2,8 +2,8 @@ local M = {}
 
 function M.setup()
 	require("overseer").setup({})
-	vim.keymap.set("n", "<leader>or", "<cmd>OverseerRun<cr>", { desc = "Overseer: [R]un" })
-	vim.keymap.set("n", "<leader>ot", "<cmd>OverseerToggle<cr>", { desc = "Overseer: [T]oggle" })
+	vim.keymap.set("n", "<leader>cc", "<cmd>OverseerRun<cr>", { desc = "Compile/run task" })
+	vim.keymap.set("n", "<leader>cC", "<cmd>OverseerToggle<cr>", { desc = "Toggle task list" })
 end
 
 return M

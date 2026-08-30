@@ -32,9 +32,9 @@ function M.setup()
 			-- javascript = { "prettierd", "prettier", stop_after_first = true },
 		},
 	})
-	vim.keymap.set({ "n", "v" }, "<leader>f", function()
+	vim.keymap.set({ "n", "v" }, "<leader>cf", function()
 		require("conform").format({ async = true, lsp_format = "fallback" })
-	end, { desc = "[F]ormat buffer" })
+	end, { desc = "Format buffer/selection" })
 end
 
 return M

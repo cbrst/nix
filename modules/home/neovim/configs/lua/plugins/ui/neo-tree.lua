@@ -35,7 +35,7 @@ function M.setup()
 
 	-- Always reveal the current buffer so the tree opens in the relevant directory.
 	vim.keymap.set("n", "\\", "<cmd>Neotree toggle reveal_force_cwd<cr>", { desc = "Browse files near current buffer" })
-	vim.keymap.set("n", "<leader>vt", "<cmd>Neotree toggle reveal_force_cwd<cr>", { desc = "[V]iew [T]ree files" })
+	vim.keymap.set("n", "<leader>op", "<cmd>Neotree toggle reveal_force_cwd<cr>", { desc = "Project sidebar" })
 end
 
 return M

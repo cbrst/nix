@@ -7,16 +7,16 @@ function M.setup()
 		picker = { enabled = true },
 		terminal = { enabled = true },
 	})
-	vim.keymap.set({ "n", "t" }, "<leader>tt", function()
+	vim.keymap.set({ "n", "t" }, "<leader>ot", function()
 		require("snacks").terminal.toggle()
-	end, { desc = "[T]oggle shell terminal" })
-	vim.keymap.set("n", "<leader>tn", function()
+	end, { desc = "Toggle terminal popup" })
+	vim.keymap.set("n", "<leader>oT", function()
 		require("snacks").terminal.open()
-	end, { desc = "[N]ew shell terminal" })
-	vim.keymap.set({ "n", "t" }, "<leader>tf", function()
+	end, { desc = "Open terminal here" })
+	vim.keymap.set({ "n", "t" }, "<leader>of", function()
 		require("snacks").terminal.focus()
-	end, { desc = "[F]ocus shell terminal" })
-	vim.keymap.set("n", "<leader>tg", function()
+	end, { desc = "Focus terminal" })
+	vim.keymap.set("n", "<leader>gg", function()
 		-- TODO: make this a custom command or global function.
 		-- the same thing is used in heirline as a click action
 		local cwd = vim.fs.root(0, { ".git" }) or vim.fn.getcwd()
@@ -28,7 +28,7 @@ function M.setup()
 				height = 0.4,
 			},
 		})
-	end, { desc = "Open Lazy[G]it" })
+	end, { desc = "LazyGit status" })
 end
 
 return M

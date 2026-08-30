@@ -21,10 +21,10 @@ function M.setup()
 			map("gr", telescope.lsp_references, "[G]oto [R]eferences")
 			map("gI", telescope.lsp_implementations, "[G]oto [I]mplementation")
 			map("<leader>ca", vim.lsp.buf.code_action, "Code [A]ction", { "n", "x" })
-			map("<leader>cd", telescope.lsp_type_definitions, "Type [D]efinition")
+			map("<leader>ct", telescope.lsp_type_definitions, "Type definition")
 			map("<leader>cr", vim.lsp.buf.rename, "[R]ename")
-			map("<leader>cs", telescope.lsp_document_symbols, "Document [S]ymbols")
-			map("<leader>cS", telescope.lsp_dynamic_workspace_symbols, "Workspace [S]ymbols")
+			map("<leader>cS", telescope.lsp_document_symbols, "Document symbols")
+			map("<leader>cj", telescope.lsp_dynamic_workspace_symbols, "Workspace symbols")
 
 			local client = vim.lsp.get_client_by_id(event.data.client_id)
 			if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then

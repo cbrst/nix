@@ -5,7 +5,7 @@
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Diagnostic keymaps
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>cq", vim.diagnostic.setloclist, { desc = "Open diagnostic quickfix list" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -32,9 +32,10 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper win
 
 vim.keymap.set("i", "<C-CR>", "<Esc>$a<CR>", { desc = "Insert on new line" })
 
-vim.keymap.set("n", "<leader>vw", "<cmd>set list!<CR>", { desc = "Toggle [w]hitespace" })
-vim.keymap.set("n", "<leader>vn", function()
+vim.keymap.set("n", "<leader>tv", "<cmd>set list!<CR>", { desc = "Toggle visible whitespace" })
+vim.keymap.set("n", "<leader>tl", function()
 	vim.wo.relativenumber = not vim.wo.relativenumber
-end, { desc = "Toggle relative [n]umbers" })
+end, { desc = "Toggle relative line numbers" })
 
-vim.keymap.set("n", "<leader>QQ", "<cmd>:qa<CR>", { desc = "[Q]uit" })
+vim.keymap.set("n", "<leader>w", "<C-w>", { desc = "Window" })
+vim.keymap.set("n", "<leader>qq", "<cmd>qa<CR>", { desc = "Quit Neovim" })

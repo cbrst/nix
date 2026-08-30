@@ -15,11 +15,11 @@ function M.setup()
 		},
 	})
 
-	vim.keymap.set("n", "<leader>aa", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Toggle [A]I chat" })
-	vim.keymap.set("x", "<leader>aa", "<cmd>CodeCompanionChat Add<cr>", { desc = "Add selection to [A]I chat" })
-	vim.keymap.set({ "n", "x" }, "<leader>as", "<cmd>CodeCompanionActions<cr>", { desc = "[S]elect AI action" })
-	vim.keymap.set({ "n", "x" }, "<leader>ac", "<cmd>CodeCompanion<cr>", { desc = "[C]odeCompanion inline action" })
-	vim.keymap.set("n", "<leader>ar", "<cmd>CodeCompanionCodeReview<cr>", { desc = "AI code [R]eview" })
+	vim.keymap.set("n", "<leader>oll", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Open AI chat" })
+	vim.keymap.set("x", "<leader>ola", "<cmd>CodeCompanionChat Add<cr>", { desc = "Add selection to AI context" })
+	vim.keymap.set({ "n", "x" }, "<leader>olm", "<cmd>CodeCompanionActions<cr>", { desc = "Open AI action menu" })
+	vim.keymap.set({ "n", "x" }, "<leader>olr", "<cmd>CodeCompanion<cr>", { desc = "Rewrite with AI" })
+	vim.keymap.set("n", "<leader>olR", "<cmd>CodeCompanionCodeReview<cr>", { desc = "Review code with AI" })
 end
 
 return M
