@@ -24,11 +24,25 @@ let
       fi
     '';
   };
+
+  zshAutocomplete = pkgs.zsh-autocomplete.overrideAttrs (old: {
+    installPhase = old.installPhase + ''
+      install -D ${
+        pkgs.fetchFromGitHub {
+          owner = "marlonrichert";
+          repo = "zasync";
+          rev = "5370537de80670b4a97e49cd253d15067709c0a6";
+          hash = "sha256-tPosFoZSaUShaRpv7ca9BdOMREfmhnzjd/VKHSshhXo=";
+        }
+      }/z-async $out/share/zsh-autocomplete/z-async/z-async
+    '';
+  });
 in
 {
   home.packages = [
     pkgs.jq
     pkgs.doggo
+    zshAutocomplete
     fzfPreview
   ];
 
@@ -49,24 +63,22 @@ in
       p = "${config.home.homeDirectory}/Projects";
     };
     dotDir = "${config.xdg.configHome}/zsh";
-    enableCompletion = true;
-    fastSyntaxHighlighting = {
+    # zsh-autocomplete initializes the completion system itself.
+    enableCompletion = false;
+    syntaxHighlighting = {
       enable = true;
     };
-    initContent =
-      let
-        zshBefore = lib.mkBefore ''
-          fpath+=($ZDOTDIR/functions)
-          autoload -Uz $ZDOTDIR/functions/*(.:t)
-        '';
-        zshAfter = lib.mkAfter ''
-          source $ZDOTDIR/aliases.zsh
-        '';
-      in
-      lib.mkMerge [
-        zshBefore
-        zshAfter
-      ];
+    initContent = lib.mkMerge [
+      (lib.mkOrder 500 ''
+        fpath+=($ZDOTDIR/functions)
+        autoload -Uz $ZDOTDIR/functions/*(.:t)
+      '')
+      (lib.mkOrder 600 ''
+        source ${zshAutocomplete}/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+      '')
+      (lib.mkOrder 1001 (builtins.readFile ./configs/zsh/zstyle.zsh))
+      (lib.mkOrder 1002 (builtins.readFile ./configs/zsh/aliases.zsh))
+    ];
     history = {
       append = true;
       expireDuplicatesFirst = true;
@@ -76,7 +88,6 @@ in
     };
   };
   xdg.configFile."zsh/functions".source = ./configs/zsh/functions;
-  xdg.configFile."zsh/aliases.zsh".source = ./configs/zsh/aliases.zsh;
 
   programs.bat = {
     enable = true;
