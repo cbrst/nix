@@ -77,6 +77,89 @@
     ];
   };
 
+  programs.fastfetch = {
+    enable = true;
+    settings = {
+      display = {
+        separator = "  ";
+      };
+      logo = {
+        type = "auto";
+        source = "${./configs/logo.png}";
+        width = 25;
+        padding = {
+          top = 1;
+          left = 1;
+        };
+      };
+      modules = [
+        "break"
+        {
+          type = "title";
+          format = "{#1}@{host-name}";
+        }
+        {
+          type = "host";
+          key = "{#}├┬ {#32}{icon}";
+        }
+        {
+          type = "cpu";
+          key = "{#}│├┬ {#32}{icon}";
+        }
+        {
+          type = "memory";
+          key = "{#}││╰─ {#32}{icon}";
+        }
+        {
+          type = "gpu";
+          key = "{#}│╰┬ {#32}{icon}";
+        }
+        {
+          type = "display";
+          key = "{#}│ ╰─ {#32}{icon}";
+          format = "{}×{}px {}hz";
+        }
+        {
+          type = "os";
+          key = "{#}╰┬┬ {#33}{icon}";
+        }
+        {
+          type = "kernel";
+          key = "{#} │╰─ {#33}{icon}";
+        }
+        {
+          type = "wm";
+          key = "{#} ├─ {#34}{icon}";
+        }
+        {
+          type = "terminal";
+          key = "{#} ╰┬ {#35}{icon}";
+        }
+        {
+          type = "shell";
+          key = "{#}  ├─ {#35}{icon}";
+        }
+        {
+          type = "terminalfont";
+          key = "{#}  ╰─ {#35}{icon}";
+        }
+        {
+          type = "colors";
+          paddingLeft = 2;
+          symbol = "circle";
+          block = {
+            range = [
+              2
+              4
+            ];
+          };
+        }
+        "break"
+      ];
+    };
+
+  };
+
   # TODO: Needs preview
   programs.fzf = {
     enable = true;
