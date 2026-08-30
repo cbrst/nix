@@ -1,7 +1,9 @@
 {
   config,
+  configLib,
   lib,
   pkgs,
+  settings,
   ...
 }:
 {
@@ -100,7 +102,12 @@
     enableZshIntegration = true;
     configFile = "${config.xdg.configHome}/oh-my-posh/config.json";
   };
-  xdg.configFile."oh-my-posh/config.json".source = ./configs/oh-my-posh/config.json;
+  xdg.configFile."oh-my-posh/config.json".text = configLib.renderTemplate {
+    "@light-path@" = settings.theme.light.shade4;
+    "@light-vcs@" = settings.theme.light.shade3;
+    "@dark-path@" = settings.theme.dark.shade4;
+    "@dark-vcs@" = settings.theme.dark.shade3;
+  } ./configs/oh-my-posh/config.json;
 
   programs.zoxide = {
     enable = true;

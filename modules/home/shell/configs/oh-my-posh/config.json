@@ -9,6 +9,19 @@
 		"filler": "─",
 		"newline": true
 	},
+	"palettes": {
+		"template": "{{ if eq .Env.POSH_COLOR_MODE \"light\" }}light{{ else }}dark{{ end }}",
+		"list": {
+			"light": {
+				"path": "@light-path@",
+				"vcs": "@light-vcs@"
+			},
+			"dark": {
+				"path": "@dark-path@",
+				"vcs": "@dark-vcs@"
+			}
+		}
+	},
 	"blocks": [
 		{
 			"type": "prompt",
@@ -16,32 +29,49 @@
 			"segments": [
 				{
 					"type": "session",
-					"style": "diamond",
+					"style": "powerline",
+					"leading_powerline_symbol": "",
+					"powerline_symbol": "",
 					"background": "green",
 					"foreground": "black",
-					"leading_diamond": "",
-					"trailing_diamond": "",
-					"template": "{{ .UserName }} "
+					"template": "{{ .UserName }}"
 				},
 				{
 					"type": "path",
 					"style": "powerline",
-					"background": "blue",
-					"foreground": "black",
-					"template": " <b>{{ .Path }}</b> ",
-					"powerline_symbol": "\ue0b0",
+					"powerline_symbol": "",
+					"background": "p:path",
+					"foreground": "default",
+					"template": " {{ .Path }}",
 					"options": {
-						"style": "folder"
+						"style": "powerlevel",
+						"right_format": "<b>%s</b>",
+						"home_icon": " ",
+						"display_root": true
 					}
 				},
 				{
 					"type": "git",
-					"style": "diamond",
-					"background": "yellow",
-					"foreground": "black",
-					"leading_diamond": "<transparent,background>\ue0b0</>",
-					"trailing_diamond": "",
-					"template": "  {{ .Ref }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }} "
+					"style": "powerline",
+					"powerline_symbol": "",
+					"background": "p:vcs",
+					"foreground": "default",
+					"template": "  {{ .Ref }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}",
+					"options": {
+						"disable_with_jj": true
+					}
+				},
+				{
+					"type": "jujutsu",
+					"style": "powerline",
+					"powerline_symbol": "",
+					"background": "p:vcs",
+					"foreground": "default",
+					"template": "  {{ .ClosestBookmarks }}@<b>{{ .ChangeIDPrefix }}</b>{{ .ChangeIDRest }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}",
+					"options": {
+						"change_id_min_len": 6,
+						"fetch_status": true
+					}
 				}
 			]
 		},
