@@ -5,6 +5,6 @@
     ../../modules/home/shell
     ../../modules/home/ssh.nix
     ../../modules/home/git
-    ../../modules/home/1password.nix
+    ../../modules/home/bitwarden.nix
   ];
 }

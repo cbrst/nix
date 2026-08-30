@@ -127,7 +127,7 @@ in
         with pkgs.nur.repos.rycee.firefox-addons;
         [
           tridactyl
-          onepassword-password-manager
+          bitwarden
           export-cookies-txt
           ublock-origin
           stylus
