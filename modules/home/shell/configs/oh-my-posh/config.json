@@ -14,11 +14,13 @@
 		"list": {
 			"light": {
 				"path": "@light-path@",
-				"vcs": "@light-vcs@"
+				"vcs": "@light-vcs@",
+				"muted": "@light-muted@"
 			},
 			"dark": {
 				"path": "@dark-path@",
-				"vcs": "@dark-vcs@"
+				"vcs": "@dark-vcs@",
+				"muted": "@dark-muted@"
 			}
 		}
 	},
@@ -34,7 +36,7 @@
 					"powerline_symbol": "",
 					"background": "green",
 					"foreground": "black",
-					"template": "{{ .UserName }}"
+					"template": "<b>{{ .UserName }}</b>"
 				},
 				{
 					"type": "path",
@@ -67,7 +69,7 @@
 					"powerline_symbol": "",
 					"background": "p:vcs",
 					"foreground": "default",
-					"template": "  {{ .ClosestBookmarks }}@<b>{{ .ChangeIDPrefix }}</b>{{ .ChangeIDRest }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}",
+					"template": "  <b>{{ .ClosestBookmarks }}</b>@<b>{{ .ChangeIDPrefix }}</b><p:muted>{{ .ChangeIDRest }}</>{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}",
 					"options": {
 						"change_id_min_len": 6,
 						"fetch_status": true
@@ -77,17 +79,6 @@
 		},
 		{
 			"type": "prompt",
-			"alignment": "left",
-			"segments": [
-				{
-					"type": "text",
-					"style": "plain",
-					"template": "\n 󱞩 "
-				}
-			]
-		},
-		{
-			"type": "rprompt",
 			"alignment": "right",
 			"segments": [
 				{
@@ -99,8 +90,41 @@
 				{
 					"type": "python",
 					"style": "plain",
-					"foreground": "red",
-					"template": " 󰌠 {{ .Full }} "
+					"foreground": "yellow",
+					"template": " 󰌠 {{ .Full }} ",
+					"options": {
+						"display_mode": "context"
+					}
+				},
+				{
+					"type": "lua",
+					"style": "plain",
+					"foreground": "blue",
+					"template": "  {{ .Full }} "
+				},
+				{
+					"type": "php",
+					"style": "plain",
+					"foreground": "magenta",
+					"template": "  {{ .Full }} "
+				},
+				{
+					"type": "text",
+					"style": "plain",
+					"foreground": "cyan",
+					"template": "{{ if .Env.IN_NIX_SHELL }}  {{ trimPrefix \"nix (Nix) \" (cmd \"nix\" \"--version\") }} {{ end }}"
+				}
+			]
+		},
+		{
+			"type": "prompt",
+			"alignment": "left",
+			"newline": true,
+			"segments": [
+				{
+					"type": "text",
+					"style": "plain",
+					"template": " 󱞩 "
 				}
 			]
 		}

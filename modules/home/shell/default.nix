@@ -188,8 +188,10 @@
   xdg.configFile."oh-my-posh/config.json".text = configLib.renderTemplate {
     "@light-path@" = settings.theme.light.shade4;
     "@light-vcs@" = settings.theme.light.shade3;
+    "@light-muted@" = settings.theme.light.muted;
     "@dark-path@" = settings.theme.dark.shade4;
     "@dark-vcs@" = settings.theme.dark.shade3;
+    "@dark-muted@" = settings.theme.dark.muted;
   } ./configs/oh-my-posh/config.json;
 
   programs.zoxide = {
