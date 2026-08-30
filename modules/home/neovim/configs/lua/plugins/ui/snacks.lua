@@ -17,18 +17,8 @@ function M.setup()
 		require("snacks").terminal.focus()
 	end, { desc = "Focus terminal" })
 	vim.keymap.set("n", "<leader>gg", function()
-		-- TODO: make this a custom command or global function.
-		-- the same thing is used in heirline as a click action
-		local cwd = vim.fs.root(0, { ".git" }) or vim.fn.getcwd()
-		require("snacks").terminal.toggle("lazygit", {
-			cwd = cwd,
-			win = {
-				style = "terminal",
-				position = "bottom",
-				height = 0.4,
-			},
-		})
-	end, { desc = "LazyGit status" })
+		require("plugins.ui.vcs").open(0)
+	end, { desc = "VCS status" })
 end
 
 return M

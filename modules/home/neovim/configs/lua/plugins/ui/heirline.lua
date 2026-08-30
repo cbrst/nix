@@ -21,6 +21,7 @@ function M.setup()
 	local colors = require("config.ui_colors")
 	local conditions = require("heirline.conditions")
 	local utils = require("heirline.utils")
+	local vcs = require("plugins.ui.vcs")
 
 	local mode = {
 		init = function(self)
@@ -113,42 +114,67 @@ function M.setup()
 		end,
 	}
 
-	local git = {
-		condition = conditions.is_git_repo,
+	local vcs_segment = {
+		condition = function()
+			return vcs.get(0) ~= nil
+		end,
+		init = function(self)
+			self.vcs = vcs.get(0)
+		end,
 		on_click = {
 			callback = function()
-				local cwd = vim.fs.root(0, { ".git" }) or vim.fn.getcwd()
-				require("snacks").terminal.toggle("lazygit", {
-					cwd = cwd,
-					win = {
-						style = "terminal",
-						position = "bottom",
-						height = 0.4,
-					},
-				})
+				vcs.open(0)
 			end,
-			name = "heirline_git",
+			name = "heirline_vcs",
 		},
-		provider = function()
-			local status = vim.b.gitsigns_status_dict
-			if not status or not status.head then
-				return ""
-			end
-			local changes = {}
-			if status.added and status.added > 0 then
-				table.insert(changes, "+" .. status.added)
-			end
-			if status.changed and status.changed > 0 then
-				table.insert(changes, "~" .. status.changed)
-			end
-			if status.removed and status.removed > 0 then
-				table.insert(changes, "-" .. status.removed)
-			end
-			return "  " .. status.head .. (#changes > 0 and " " .. table.concat(changes, " ") or "") .. " "
-		end,
 		hl = function()
 			return { bg = colors.get().tab, fg = colors.get().fg }
 		end,
+		{
+			provider = function(self)
+				local status = self.vcs
+				if status.kind == "git" then
+					return status.head and "  " .. status.head or ""
+				end
+				if not status.available then
+					return ""
+				end
+
+				return "  " .. (status.bookmarks ~= "" and status.bookmarks or "") .. "@" .. status.prefix
+			end,
+		},
+		{
+			condition = function(self)
+				return self.vcs.kind == "jj" and self.vcs.available and self.vcs.rest ~= ""
+			end,
+			provider = function(self)
+				return self.vcs.rest
+			end,
+			hl = function()
+				return { bg = colors.get().tab, fg = colors.get().muted }
+			end,
+		},
+		{
+			provider = function(self)
+				local status = self.vcs
+				if (status.kind == "git" and not status.head) or (status.kind == "jj" and not status.available) then
+					return ""
+				end
+
+				local changes = {}
+				if status.available and status.added > 0 then
+					table.insert(changes, "+" .. status.added)
+				end
+				if status.available and status.changed > 0 then
+					table.insert(changes, "~" .. status.changed)
+				end
+				if status.available and status.removed > 0 then
+					table.insert(changes, "-" .. status.removed)
+				end
+
+				return (#changes > 0 and " " .. table.concat(changes, " ") or "") .. " "
+			end,
+		},
 	}
 
 	local diagnostics = {
@@ -236,7 +262,7 @@ function M.setup()
 			{ provider = "%=" },
 			lsp,
 			label_separator_pre,
-			git,
+			vcs_segment,
 			label_separator_post,
 			position,
 		},
