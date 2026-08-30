@@ -3,6 +3,28 @@ local M = {}
 -- ╭─────────────────────────────╮
 -- │ Persistent file exploration │
 -- ╰─═══════════════════════════─╯
+
+local additional_nesting_rules = {
+	["README.*"] = {
+		"AGENTS*",
+		"INSTALL*",
+	},
+}
+
+local function nesting_rules()
+	local nr = require("neotree-file-nesting-config").nesting_rules
+
+	for parent, children in pairs(additional_nesting_rules) do
+		if nr[parent] and nr[parent].files then
+			for _, child in ipairs(children) do
+				table.insert(nr[parent].files, child)
+			end
+		end
+	end
+
+	return nr
+end
+
 function M.setup()
 	require("neo-tree").setup({
 		sources = {
@@ -30,7 +52,7 @@ function M.setup()
 				expander_expanded = "",
 			},
 		},
-		nesting_rules = require("neotree-file-nesting-config").nesting_rules,
+		nesting_rules = nesting_rules(),
 	})
 
 	-- Always reveal the current buffer so the tree opens in the relevant directory.
