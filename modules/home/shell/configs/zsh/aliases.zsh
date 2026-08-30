@@ -7,3 +7,7 @@
 (($+commands[batman])) && () {
 	alias man="batman"
 }
+
+(($+commands[doggo])) && () {
+	alias dig="doggo"
+}

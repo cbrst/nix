@@ -6,8 +6,31 @@
   settings,
   ...
 }:
+let
+  fzfPreview = pkgs.writeShellApplication {
+    name = "fzf-preview";
+    runtimeInputs = [
+      pkgs.bat
+      pkgs.coreutils
+      pkgs.eza
+    ];
+
+    text = ''
+      path=$1
+      if test -d "$path"; then
+        eza --tree --color=always --icons=always --git "$path" | head -200
+      else
+        bat -p --color=always "$path"
+      fi
+    '';
+  };
+in
 {
-  home.packages = [ pkgs.jq ];
+  home.packages = [
+    pkgs.jq
+    pkgs.doggo
+    fzfPreview
+  ];
 
   # Home Manager installs and configures Zsh for this user.
   programs.zsh = {

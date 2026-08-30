@@ -1,27 +1,19 @@
 # vim: set ft=zsh:
 
-function fzf-preview() {
-	if test -d "$@"; then
-		eza --tree --color=always --icons=always --git "$@" | head -200
-	else
-		if type bat &>/dev/null; then
-			bat --theme="$bat_theme" -p --color=always "$@"
-		else
-			cat "$@"
-		fi
-	fi
-}
-
 function main() {
 	local command=${1}
 	shift
 
-	case "${command}" in
-		cd) fzf --preview 'eza --tree --color=always {} | head -200' "$@" ;;
-		export|unset) fzf --preview "eval 'echo \$' {}" "$@" ;;
-		ssh) fzf --preview 'dig {}' "$@" ;;
-		cat|bat) fzf --preview 'bat -n --color=always {}' "$@" ;;
-		*) fzf --preview 'fzf-preview {}' "$@" ;;
+	case "$command" in
+	export | unset)
+		fzf --preview "eval 'echo $'{}" "$@"
+		;;
+	ssh)
+		fzf --preview "(doggo {} 2> /dev/null || dig {})" "$@"
+		;;
+	*)
+		fzf --preview "fzf-preview {}" "$@"
+		;;
 	esac
 }
 
