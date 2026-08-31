@@ -73,10 +73,10 @@ spawn-at-startup "env" "QT_QPA_PLATFORMTHEME=gtk3" "noctalia"
 layer-rule {
 	match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
 	background-effect {
-		blur true
+		blur false
 		xray false
-		noise 0.015
-		saturation 1.1
+		// noise 0.015
+		// saturation 1.1
 	}
 	popups {
 		background-effect {

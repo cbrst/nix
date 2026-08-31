@@ -1,39 +1,68 @@
 [backdrop]
+blur_intensity = 0.99999997764825821
 enabled = true
+tint_intensity = 0.73999998345971107
 
 [bar]
 order = [ "main" ]
 
     [bar.main]
     background_opacity = 0.0
+    capsule = true
+    capsule_padding = 10.0
+    capsule_radius = 6
+    capsule_thickness = 0.79999998584389687
     center = [ "clock" ]
     color = "primary"
-    contact_shadow = true
-    end = [ "media", "tray", "notifications", "clipboard", "volume", "control-center", "session" ]
+    concave_edge_corners = false
+    contact_shadow = false
+    end = [ "group:g3", "tray", "group:g1", "session" ]
     icon_color = "tertiary"
-    margin_edge = 0
+    margin_edge = 6
     margin_ends = 0
     padding = 14
     panel_overlap = 0
     position = "top"
-    radius = 8
+    radius = 0
     radius_top_left = 0
     radius_top_right = 0
     reserve_space = true
-    shadow = true
+    scale = 1.0500000081956387
+    shadow = false
     start = [ "group:g2" ]
     thickness = 34
-    widget_spacing = 18
+    widget_spacing = 12
 
         [[bar.main.capsule_group]]
         accordion = false
         accordion_direction = "end"
         enabled = true
-        fill = "primary"
+        fill = "surface_variant"
         id = "g2"
         members = [ "workspaces", "active_window" ]
-        opacity = 0.10000000149011612
-        padding = 8.0
+        opacity = 1.0
+        padding = 10.0
+
+        [[bar.main.capsule_group]]
+        accordion = false
+        accordion_direction = "end"
+        enabled = true
+        fill = "surface_variant"
+        id = "g1"
+        members = [ "notifications", "clipboard", "volume" ]
+        opacity = 1.0
+        padding = 10.0
+
+        [[bar.main.capsule_group]]
+        accordion = false
+        accordion_direction = "end"
+        enabled = true
+        fill = "surface_variant"
+        id = "g3"
+        members = [ "audio_visualizer", "media" ]
+        opacity = 1.0
+        padding = 10.0
+        radius = 6.0
 
 [control_center]
 hidden_tabs = [ "power" ]
@@ -42,6 +71,15 @@ sidebar_section = "full"
 
 [desktop_widgets]
 enabled = false
+schema_version = 2
+widget_order = []
+
+    [desktop_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [desktop_widgets.widget]
 
 [dock]
 background_opacity = 0.099999997764825821
@@ -62,7 +100,7 @@ timeout = 600
 auto_locate = true
 
 [lockscreen]
-blur_intensity = 0.55000000000000004
+blur_intensity = 0.99999997764825821
 blurred_desktop = true
 enabled = true
 tint_intensity = 0.25
@@ -124,8 +162,9 @@ clipboard_enabled = true
 clipboard_keep_from_closed_apps = true
 corner_radius_scale = 1.25
 date_format = "%A, %x"
-font_family = "@font@"
+font_family = "0xProto"
 input_borders = false
+panel_anchor_bar = "main"
 popup_borders = false
 screen_time_enabled = true
 telemetry_enabled = false
@@ -138,6 +177,7 @@ time_format = "{:%H:%M}"
     [shell.launcher]
     categories = true
     compact = false
+    show_app_actions = true
     show_icons = true
     sort_by_usage = true
 
@@ -145,13 +185,14 @@ time_format = "{:%H:%M}"
     borders = false
     clipboard_placement = "floating"
     clipboard_position = "top_right"
-    control_center_placement = "attached"
+    control_center_placement = "floating"
     launcher_placement = "floating"
     launcher_position = "center"
+    open_near_click_control_center = true
     open_near_click_wallpaper = true
     polkit_position = "top_right"
     shadow = true
-    transparency_mode = "glass"
+    transparency_mode = "solid"
 
     [shell.screen_corners]
     enabled = false
@@ -170,7 +211,7 @@ source = "wallpaper"
 wallpaper_scheme = "m3-monochrome"
 
     [theme.templates]
-    builtin_ids = []
+    builtin_ids = [ "niri" ]
 
 [wallpaper]
 directory = "~/Pictures/Wallpapers"
@@ -197,16 +238,27 @@ display = "text_only"
 font_weight = 700
 icon_size = 38
 
+[widget.audio_visualizer]
+bands = 8
+color_1 = "error"
+mirrored = false
+scale = 0.80000000000000004
+width = 24
+
 [widget.clock]
 font_weight = 700
+
+    [widget.clock.actions]
+    left = "panel-toggle control-center"
 
 [widget.media]
 artist_first = true
 capsule = true
-capsule_fill = "primary"
+capsule_fill = "on_surface_variant"
 capsule_opacity = 0.10000000000000001
 capsule_padding = 8
 font_weight = 700
+hide_album_art = true
 hide_when_no_media = true
 max_length = 602
 title_scroll = "on_hover"
@@ -218,5 +270,11 @@ only_active_workspace = true
 drawer = true
 
 [widget.workspaces]
+active_pill_size = 1.3
+empty_color = "on_surface_variant"
+focused_color = "error"
+inactive_pill_size = 1.3
 label_source = "name"
 max_label_chars = 20
+occupied_color = "primary"
+style = "minimal"
