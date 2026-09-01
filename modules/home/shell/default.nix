@@ -70,6 +70,7 @@ in
     };
     initContent = lib.mkMerge [
       (lib.mkOrder 500 ''
+        mkdir -p -- "''${XDG_DATA_HOME:-$HOME/.local/share}/zsh"
         fpath+=($ZDOTDIR/functions)
         autoload -Uz $ZDOTDIR/functions/*(.:t)
       '')
