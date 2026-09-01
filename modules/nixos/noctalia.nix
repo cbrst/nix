@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 {
   imports = [
     inputs.noctalia.nixosModules.default
@@ -8,4 +8,6 @@
     enable = true;
     recommendedServices.enable = true;
   };
+
+  environment.systemPackages = [ pkgs.libnotify ];
 }

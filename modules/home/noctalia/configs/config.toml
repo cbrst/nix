@@ -132,10 +132,19 @@ position = "left"
 radius = 8
 show_instance_count = false
 
-[idle.behavior.lock]
-action = "lock"
-enabled = true
-timeout = 600
+[idle]
+behavior_order = [ "lock", "idle-behavior" ]
+
+    [idle.behavior.idle-behavior]
+    action = "suspend"
+    enabled = true
+    lock_before_suspend = false
+    timeout = 1200.0
+
+    [idle.behavior.lock]
+    action = "screen_off"
+    enabled = true
+    timeout = 300.0
 
 [location]
 auto_locate = true
