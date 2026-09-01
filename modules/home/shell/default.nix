@@ -224,9 +224,11 @@ in
     "@light-path@" = settings.theme.light.shade4;
     "@light-vcs@" = settings.theme.light.shade3;
     "@light-muted@" = settings.theme.light.muted;
+    "@light-shade4@" = settings.theme.light.shade4;
     "@dark-path@" = settings.theme.dark.shade4;
     "@dark-vcs@" = settings.theme.dark.shade3;
     "@dark-muted@" = settings.theme.dark.muted;
+    "@dark-shade4@" = settings.theme.dark.shade4;
   } ./configs/oh-my-posh/config.json;
 
   programs.pay-respects = {

@@ -3,26 +3,28 @@
 	"version": 4,
 	"final_space": false,
 	"shell_integration": true,
-	"transient_prompt": {
-		"foreground": "yellow",
-		"template": "{{ .PWD }} ",
-		"filler": "─",
-		"newline": true
-	},
 	"palettes": {
 		"template": "{{ if eq .Env.POSH_COLOR_MODE \"light\" }}light{{ else }}dark{{ end }}",
 		"list": {
 			"light": {
 				"path": "@light-path@",
 				"vcs": "@light-vcs@",
-				"muted": "@light-muted@"
+				"muted": "@light-muted@",
+				"shade": "@light-shade4@"
 			},
 			"dark": {
 				"path": "@dark-path@",
 				"vcs": "@dark-vcs@",
-				"muted": "@dark-muted@"
+				"muted": "@dark-muted@",
+				"shade": "@dark-shade4@"
 			}
 		}
+	},
+	"transient_prompt": {
+		"foreground": "default",
+		"template": "<p:muted> </><b>{{ .PWD }}</b> ",
+		"filler": "<p:shade>─</>",
+		"newline": true
 	},
 	"blocks": [
 		{
