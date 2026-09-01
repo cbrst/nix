@@ -51,8 +51,20 @@ function M.setup()
 				expander_collapsed = "",
 				expander_expanded = "",
 			},
+			name = {
+				use_filtered_colors = true,
+				use_git_status_colors = false,
+			},
 		},
 		nesting_rules = nesting_rules(),
+		event_handlers = {
+			{
+				event = "neo_tree_buffer_enter",
+				handler = function()
+					vim.opt_local.foldcolumn = "0"
+				end,
+			},
+		},
 	})
 
 	-- Always reveal the current buffer so the tree opens in the relevant directory.

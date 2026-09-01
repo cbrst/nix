@@ -44,6 +44,9 @@ function M.apply()
 	-- Keep command entry distinct with subdued text and without changing editor surfaces.
 	vim.api.nvim_set_hl(0, "MsgArea", { bg = colors.command, fg = colors.muted })
 	vim.api.nvim_set_hl(0, "MsgSeparator", { bg = colors.command, fg = colors.command })
+
+	-- Keep neo-tree colors clean
+	vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { link = "NeoTreeFileName" })
 end
 
 return M
