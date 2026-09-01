@@ -9,15 +9,19 @@ order = [ "main" ]
     [bar.main]
     background_opacity = 0.0
     capsule = true
+    capsule_border = "surface_variant"
+    capsule_fill = "surface_variant"
+    capsule_foreground = "on_surface_variant"
     capsule_padding = 10.0
     capsule_radius = 6
     capsule_thickness = 0.79999998584389687
-    center = [ "clock" ]
+    center = [ "group:g4" ]
     color = "primary"
     concave_edge_corners = false
     contact_shadow = false
     end = [ "group:g3", "tray", "group:g1", "session" ]
-    icon_color = "tertiary"
+    font_weight = 700
+    icon_color = "primary"
     margin_edge = 6
     margin_ends = 0
     padding = 14
@@ -36,8 +40,10 @@ order = [ "main" ]
         [[bar.main.capsule_group]]
         accordion = false
         accordion_direction = "end"
+        border = ""
         enabled = true
         fill = "surface_variant"
+        foreground = "primary"
         id = "g2"
         members = [ "workspaces", "active_window" ]
         opacity = 1.0
@@ -46,8 +52,10 @@ order = [ "main" ]
         [[bar.main.capsule_group]]
         accordion = false
         accordion_direction = "end"
+        border = ""
         enabled = true
         fill = "surface_variant"
+        foreground = "primary"
         id = "g1"
         members = [ "notifications", "clipboard", "volume" ]
         opacity = 1.0
@@ -58,16 +66,49 @@ order = [ "main" ]
         accordion_direction = "end"
         enabled = true
         fill = "surface_variant"
+        foreground = "primary"
         id = "g3"
         members = [ "audio_visualizer", "media" ]
         opacity = 1.0
         padding = 10.0
         radius = 6.0
 
+        [[bar.main.capsule_group]]
+        accordion = false
+        accordion_direction = "end"
+        border = ""
+        enabled = true
+        fill = "surface_variant"
+        foreground = "primary"
+        id = "g4"
+        members = [ "clock", "weather" ]
+        opacity = 1.0
+        padding = 10.0
+        radius = 6.0
+
 [control_center]
 hidden_tabs = [ "power" ]
+show_shortcut_labels = false
 sidebar = "full"
-sidebar_section = "full"
+sidebar_section = "none"
+
+    [[control_center.shortcuts]]
+    type = "wifi"
+
+    [[control_center.shortcuts]]
+    type = "bluetooth"
+
+    [[control_center.shortcuts]]
+    type = "caffeine"
+
+    [[control_center.shortcuts]]
+    type = "nightlight"
+
+    [[control_center.shortcuts]]
+    type = "notification"
+
+    [[control_center.shortcuts]]
+    type = "dark_mode"
 
 [desktop_widgets]
 enabled = false
@@ -189,26 +230,32 @@ time_format = "{:%H:%M}"
     launcher_placement = "floating"
     launcher_position = "center"
     open_near_click_control_center = true
+    open_near_click_session = true
     open_near_click_wallpaper = true
     polkit_position = "top_right"
+    session_placement = "floating"
     shadow = true
     transparency_mode = "solid"
+    wallpaper_placement = "floating"
 
     [shell.screen_corners]
     enabled = false
     size = 12
+
+    [shell.session]
+    show_shortcuts = false
 
     [shell.shadow]
     alpha = 0.47999999999999998
     direction = "down"
 
 [theme]
-builtin = "Tokyo-Night"
+builtin = "Ayu"
 community_palette = "Monochrome"
+custom_palette = "palette"
 mode = "dark"
 pure_black_dark = false
-source = "wallpaper"
-wallpaper_scheme = "m3-monochrome"
+source = "custom"
 
     [theme.templates]
     builtin_ids = [ "niri" ]
@@ -240,7 +287,8 @@ icon_size = 38
 
 [widget.audio_visualizer]
 bands = 8
-color_1 = "error"
+color_1 = "on_tertiary"
+color_2 = "error"
 mirrored = false
 scale = 0.80000000000000004
 width = 24
@@ -267,14 +315,22 @@ title_scroll = "on_hover"
 only_active_workspace = true
 
 [widget.tray]
+detached_panel = true
 drawer = true
 
+[widget.weather]
+font_weight = 700
+show_condition = false
+
 [widget.workspaces]
-active_pill_size = 1.3
-empty_color = "on_surface_variant"
-focused_color = "error"
-inactive_pill_size = 1.3
+active_pill_size = 2.0
+change_color_on_hover = false
+empty_color = "tertiary"
+focused_color = "primary"
+inactive_pill_size = 1.0
 label_source = "name"
 max_label_chars = 20
-occupied_color = "primary"
-style = "minimal"
+occupied_color = "secondary"
+pill_scale = 0.59999999999999998
+show_labels = false
+style = "regular"
