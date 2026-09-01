@@ -199,10 +199,10 @@ offset_x = 20
 offset_y = 12
 
 [osd]
-background_opacity = 0.93999999999999995
+background_opacity = 0.99999997764825821
 offset_x = 20
 offset_y = 12
-position = "top_right"
+position = "top_center"
 
 [shell]
 avatar_path = "/home/cbrst/.face.png"
