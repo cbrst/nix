@@ -122,9 +122,6 @@ binds {
 	Mod+Q repeat=false { close-window; }
 	Mod+O { toggle-overview; }
 	Mod+T { toggle-column-tabbed-display; }
-	Print { screenshot; }
-	Ctrl+Print { screenshot-screen; }
-	Mod+Print { screenshot-window; }
 
 	// Launchers
 	Mod+Return { spawn "ghostty"; }
@@ -184,4 +181,26 @@ binds {
 	// Touchpads have "natural" scrolling, so these are reversed
 	Mod+TouchpadScrollDown { focus-workspace-up; }
 	Mod+TouchpadScrollUp { focus-workspace-down; }
+
+	// Media keys
+	XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up"; }
+	XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
+	XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
+	XF86AudioPrev allow-when-locked=true { spawn "noctalia" "msg" "media" "prev"; }
+	XF86AudioPlay allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
+	XF86AudioNext allow-when-locked=true { spawn "noctalia" "msg" "media" "next"; }
+
+	// Screenshot
+	Print { screenshot-screen; }
+	Shift+Print { screenshot; }
+	Ctrl+Print { screenshot-window; }
+}
+
+// Recents
+recent-windows {
+	highlight {
+		active-color "@active-from@"
+		padding 8
+		corner-radius 8
+	}
 }
