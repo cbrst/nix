@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   # Enable ca-derivations, flakes and the modern `nix` command for
   # this NixOS machine.
@@ -26,4 +26,20 @@
   system.stateVersion = "26.05";
 
   programs.zsh.enable = true;
+
+  environment.systemPackages = [
+    pkgs.nvd
+  ];
+
+  system.activationScripts.diff = {
+    supportsDryActivation = true;
+    text = ''
+      export PATH=$PATH:${pkgs.nix}/bin
+      if [[ -e /run/current-system ]]; then
+        echo "\n=== Package Version Changes ==="
+        ${pkgs.nvd}/bin/nvd diff /run/current-system "$systemConfig"
+        echo "=== Package Version Changes ===\n"
+      fi
+    '';
+  };
 }
