@@ -24,16 +24,32 @@
   # for the required toolchain
   boot.loader.limine = {
     enable = true;
+    # Change this to true after enrolling the keys from Secure Boot Setup mode
+    secureBoot.enable = true;
     maxGenerations = 10;
-    resolution = "2560x1440x32";
     extraEntries = ''
       /Windows
         protocol: efi_boot_entry
         entry: Windows Boot Manager
     '';
-    # Change this to true after enrolling the keys from Secure Boot Setup mode
-    secureBoot.enable = true;
-    style.interface.resolution = "2560x1440";
+    resolution = "2560x1440x32";
+    style = {
+      backdrop = "171616";
+      wallpapers = [ ];
+      interface = {
+        branding = "";
+        resolution = "2560x1440";
+        helpColor = "96bddf";
+        helpColorBright = "96bddf";
+      };
+      graphicalTerminal = {
+        font.scale = "1x1";
+        foreground = "e2e0df";
+        background = "171616";
+        brightBackground = "454240";
+        palette = "454240;e99696;98cdaa;dfd286;96bddf;eaa4c9;96d8e3;b1ada9";
+      };
+    };
   };
 
   # NixOS owns the account itself. Home Manager below owns files and packages
