@@ -127,7 +127,6 @@ in
         with pkgs.nur.repos.rycee.firefox-addons;
         [
           tridactyl
-          bitwarden
           export-cookies-txt
           ublock-origin
           stylus
