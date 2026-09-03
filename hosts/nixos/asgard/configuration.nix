@@ -75,6 +75,7 @@
         ../../../users/cbrst/home.nix
         ../../../profiles/home/development.nix
         ../../../profiles/home/desktop-linux.nix
+        ../../../profiles/home/gaming.nix
       ];
     };
   };
