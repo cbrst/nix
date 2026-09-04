@@ -80,9 +80,11 @@ user's Home Manager configuration in the NixOS output.
 
 `flake.nix` is the entry point. It pins `nixpkgs` unstable, Home Manager,
 Noctalia, Noctalia Greeter, NUR, Serena, zshcs, and non-flake theme/package
-sources. Shared `settings` define fonts and the theme family. `configLib` comes
-from `lib/default.nix`. Both are passed to modules through `specialArgs` or
-`extraSpecialArgs`.
+sources. Shared `defaultSettings` define fonts and the theme family. Each host
+publishes its resolved `settings` through `_module.args`, which lets the host
+apply machine-specific overrides before dependent modules are evaluated.
+`configLib` comes from `lib/default.nix`; flake inputs and shared defaults are
+passed through `specialArgs` or `extraSpecialArgs`.
 
 Exported outputs:
 

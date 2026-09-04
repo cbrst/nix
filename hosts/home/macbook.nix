@@ -1,5 +1,8 @@
-{ pkgs, ... }:
+{ defaultSettings, pkgs, ... }:
 {
+  # Use the shared settings without machine-specific overrides.
+  _module.args.settings = defaultSettings;
+
   # Home Manager modules and profiles can be shared with Linux and NixOS.
   imports = [
     ../../profiles/home/development.nix

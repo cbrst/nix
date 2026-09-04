@@ -1,11 +1,15 @@
 {
   inputs,
   pkgs,
+  defaultSettings,
   settings,
   configLib,
   ...
 }:
 {
+  # Use the shared settings without machine-specific overrides.
+  _module.args.settings = defaultSettings;
+
   # A profile is a named group of reusable NixOS modules.
   imports = [
     ./hardware-configuration.nix

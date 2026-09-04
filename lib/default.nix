@@ -21,7 +21,7 @@ let
         username,
         homeDirectory,
         modules,
-        settings,
+        defaultSettings,
       }:
       home-manager.lib.homeManagerConfiguration {
         # Import nixpkgs for the target CPU and operating system combination.
@@ -36,8 +36,8 @@ let
           ];
         };
 
-        # Make flake inputs available to Home Manager modules when needed.
-        extraSpecialArgs = { inherit inputs settings configLib; };
+        # Hosts derive their final settings from these shared defaults.
+        extraSpecialArgs = { inherit inputs defaultSettings configLib; };
 
         modules = [
           # These values identify the account being configured.
