@@ -41,6 +41,7 @@ nix build --no-link '.#nixosConfigurations.asgard.config.system.build.toplevel'
 nix build --no-link '.#nixosConfigurations.example-nixos.config.system.build.toplevel'
 nix build --no-link '.#homeConfigurations."example-user@generic-linux".activationPackage'
 nix eval '.#homeConfigurations."example-user@macbook".activationPackage.drvPath'
+nix eval '.#homeConfigurations."cbrst@niflheim".activationPackage.drvPath'
 ```
 
 For Asgard's embedded Home Manager configuration:
@@ -73,8 +74,8 @@ nix run github:nix-community/home-manager -- switch \
   --flake '.#example-user@generic-linux'
 ```
 
-There is no standalone `cbrst` Home Manager flake output; Asgard embeds that
-user's Home Manager configuration in the NixOS output.
+Asgard embeds `cbrst`'s Home Manager configuration in the NixOS output, while
+Niflheim exposes a standalone Home Manager output for the same user.
 
 ## Flake Architecture
 
@@ -94,6 +95,7 @@ Exported outputs:
 | `nixosConfigurations.example-nixos` | `x86_64-linux` | Template NixOS host plus integrated Home Manager for `example-user` |
 | `homeConfigurations."example-user@generic-linux"` | `x86_64-linux` | Standalone Home Manager development environment |
 | `homeConfigurations."example-user@macbook"` | `aarch64-darwin` | Standalone Home Manager development environment plus macOS additions |
+| `homeConfigurations."cbrst@niflheim"` | `aarch64-darwin` | Real Niflheim Home Manager environment for `cbrst` |
 
 The normal composition flow is:
 
@@ -138,6 +140,16 @@ flake.nix
             └── profiles/home/desktop-base.nix
 ```
 
+Niflheim:
+
+```text
+flake.nix
+└── hosts/home/niflheim.nix
+    ├── users/cbrst/home.nix
+    ├── profiles/home/development.nix
+    └── profiles/home/desktop-base.nix
+```
+
 Home profiles:
 
 ```text
@@ -179,7 +191,7 @@ secrets-management design.
 ## Neovim Ownership
 
 The Home Manager module is `modules/home/neovim/default.nix`. It is imported by
-`profiles/home/development.nix`, so Asgard and both standalone development
+`profiles/home/development.nix`, so Asgard and all standalone development
 outputs receive the same editor setup.
 
 Nix owns the Neovim runtime surface:

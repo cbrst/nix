@@ -14,7 +14,7 @@
     settings = {
       shell-integration-features = "ssh-env,ssh-terminfo";
       font-family = settings.fonts.mono;
-      font-size = 11;
+      font-size = settings.fonts.terminalSize;
       font-feature = "ss01";
       env = "CONFIG_POWERLINE_GLYPHS=1";
       adjust-cursor-thickness = 2;

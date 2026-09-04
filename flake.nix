@@ -67,6 +67,7 @@
         fonts = {
           sans = "0xPropo";
           mono = "0xProto";
+          terminalSize = 11;
         };
         theme = import ./lib/themes.nix { family = "meowsoot"; };
       };
@@ -119,6 +120,17 @@
         modules = [
           ./users/example-user/home.nix
           ./hosts/home/macbook.nix
+        ];
+      };
+
+      homeConfigurations."cbrst@niflheim" = configLib.mkHome {
+        system = "aarch64-darwin";
+        username = "cbrst";
+        homeDirectory = "/Users/cbrst";
+        inherit defaultSettings;
+        modules = [
+          ./users/cbrst/home.nix
+          ./hosts/home/niflheim.nix
         ];
       };
     };
