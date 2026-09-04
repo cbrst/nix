@@ -23,4 +23,9 @@ in
       }
     ) hookFiles;
   };
+
+  programs.lazygit = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 }

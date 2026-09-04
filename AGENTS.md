@@ -211,8 +211,8 @@ Nix owns the Neovim runtime surface:
 When adding a plugin, parser, LSP server, formatter, or command, update
 `default.nix`; do not assume a host-global executable or runtime download.
 Adding a Lua `require` without declaring its plugin in Nix can make startup
-fail. `blazingjj` is supplied by `modules/home/jj/default.nix`. The Lua VCS UI
-references `lazygit`, but this repository currently does not package it.
+fail. `blazingjj` is supplied by `modules/home/jj/default.nix`, and `lazygit` by
+`modules/home/git/default.nix` for the Lua VCS UI.
 
 ## Neovim Startup Order
 
