@@ -134,7 +134,8 @@ flake.nix
     └── home-manager.users.cbrst
         ├── users/cbrst/home.nix
         ├── profiles/home/development.nix
-        └── profiles/home/desktop.nix
+        └── profiles/home/desktop-linux.nix
+            └── profiles/home/desktop-base.nix
 ```
 
 Home profiles:
@@ -147,8 +148,12 @@ profiles/home/development.nix
 ├── profiles/home/minimal.nix
 └── modules/home/{jj,code,neovim,ai,direnv}
 
-profiles/home/desktop.nix
-└── modules/home/{imv,firefox,ghostty,mpv,nautilus,niri,noctalia}
+profiles/home/desktop-base.nix
+└── modules/home/{fonts,ghostty}
+
+profiles/home/desktop-linux.nix
+├── profiles/home/desktop-base.nix
+└── modules/home/{firefox,imv,mpv,nautilus,niri,noctalia}
 ```
 
 `example-nixos` is a template with placeholder disk/boot values and must not be
@@ -304,8 +309,8 @@ UI responsibilities:
   and animation.
 
 Treesitter grammars come from Nix. Do not reintroduce dynamic parser downloads
-without redesigning ownership. Nerd Font support is assumed; NixOS installs the
-configured font, while standalone users must supply it separately.
+without redesigning ownership. Nerd Font support is assumed; the portable
+desktop profile installs the configured fonts through Home Manager.
 
 ## Neovim Validation Before Activation
 

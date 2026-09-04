@@ -1,9 +1,16 @@
-{ inputs, settings, ... }:
+{
+  inputs,
+  settings,
+  pkgs,
+  ...
+}:
 {
   # home.packages = [ pkgs.ghostty ];
   programs.ghostty = {
     enable = true;
     enableZshIntegration = true;
+    package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
+
     settings = {
       shell-integration-features = "ssh-env,ssh-terminfo";
       font-family = settings.fonts.mono;

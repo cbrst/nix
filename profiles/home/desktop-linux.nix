@@ -1,9 +1,9 @@
 { ... }:
 {
   imports = [
-    ../../modules/home/imv
+    ./desktop-base.nix
     ../../modules/home/firefox
-    ../../modules/home/ghostty
+    ../../modules/home/imv
     ../../modules/home/mpv
     ../../modules/home/nautilus
     ../../modules/home/niri

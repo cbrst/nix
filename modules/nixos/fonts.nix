@@ -8,8 +8,6 @@
     commit-mono
     nerd-fonts.jetbrains-mono
     geist-font
-    _0xproto
-    _0xpropo
   ];
 
   fonts.fontconfig = {

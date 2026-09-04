@@ -5,6 +5,7 @@
 
   # Home Manager modules and profiles can be shared with Linux and NixOS.
   imports = [
+    ../../profiles/home/desktop-base.nix
     ../../profiles/home/development.nix
   ];
 
