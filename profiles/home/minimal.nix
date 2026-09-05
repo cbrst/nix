@@ -4,7 +4,7 @@
   imports = [
     ../../modules/home/shell
     ../../modules/home/ssh.nix
-    ../../modules/home/git
+    ../../modules/home/vcs
     # ../../modules/home/bitwarden.nix
     ../../modules/home/1password.nix
   ];

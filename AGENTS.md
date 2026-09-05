@@ -154,11 +154,11 @@ Home profiles:
 
 ```text
 profiles/home/minimal.nix
-└── modules/home/{shell,ssh,git,bitwarden}
+└── modules/home/{shell,ssh,vcs,bitwarden}
 
 profiles/home/development.nix
 ├── profiles/home/minimal.nix
-└── modules/home/{jj,code,neovim,ai,direnv}
+└── modules/home/{code,neovim,ai,direnv}
 
 profiles/home/desktop-base.nix
 └── modules/home/{fonts,ghostty}
@@ -211,8 +211,8 @@ Nix owns the Neovim runtime surface:
 When adding a plugin, parser, LSP server, formatter, or command, update
 `default.nix`; do not assume a host-global executable or runtime download.
 Adding a Lua `require` without declaring its plugin in Nix can make startup
-fail. `blazingjj` is supplied by `modules/home/jj/default.nix`, and `lazygit` by
-`modules/home/git/default.nix` for the Lua VCS UI.
+fail. `blazingjj` and `lazygit` are supplied by
+`modules/home/vcs/default.nix` for the Lua VCS UI.
 
 ## Neovim Startup Order
 
