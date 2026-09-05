@@ -77,8 +77,11 @@ in
       (lib.mkOrder 600 ''
         source ${zshAutocomplete}/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
       '')
-      (lib.mkOrder 1001 (builtins.readFile ./configs/zsh/zstyle.zsh))
-      (lib.mkOrder 1002 (builtins.readFile ./configs/zsh/aliases.zsh))
+      (lib.mkOrder 1001 ''
+        source ${./configs/zsh/poshcontext.zsh}
+      '')
+      (lib.mkOrder 1002 (builtins.readFile ./configs/zsh/zstyle.zsh))
+      (lib.mkOrder 1003 (builtins.readFile ./configs/zsh/aliases.zsh))
     ];
     history = {
       append = true;
