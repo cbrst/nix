@@ -130,12 +130,14 @@ flake.nix
 └── hosts/nixos/asgard/
     ├── hardware-configuration.nix
     ├── modules/nixos/secure-boot.nix
+    ├── modules/nixos/gaming.nix
     ├── profiles/nixos/desktop.nix
     │   └── modules/nixos/{base,archives,nautilus,fonts,gtk,multimedia,
     │                       niri,noctalia,noctalia-greeter,1password,pipewire}
     └── home-manager.users.cbrst
         ├── users/cbrst/home.nix
         ├── profiles/home/development.nix
+        ├── profiles/home/gaming.nix
         └── profiles/home/desktop-linux.nix
             └── profiles/home/desktop-base.nix
 ```
@@ -159,6 +161,9 @@ profiles/home/minimal.nix
 profiles/home/development.nix
 ├── profiles/home/minimal.nix
 └── modules/home/{code,neovim,ai,direnv}
+
+profiles/home/gaming.nix
+└── modules/home/mangohud.nix
 
 profiles/home/desktop-base.nix
 └── modules/home/{fonts,ghostty}

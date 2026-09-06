@@ -69,6 +69,7 @@
           mono = "0xProto";
           terminalSize = 11;
         };
+        gaming.vrrOutput = null;
         theme = import ./lib/themes.nix { family = "meowsoot"; };
       };
 

@@ -1,5 +1,6 @@
 {
   inputs,
+  lib,
   pkgs,
   defaultSettings,
   settings,
@@ -7,13 +8,15 @@
   ...
 }:
 {
-  # Use the shared settings without machine-specific overrides.
-  _module.args.settings = defaultSettings;
+  _module.args.settings = lib.recursiveUpdate defaultSettings {
+    gaming.vrrOutput = "PNP(AOC) AG276QZD2 1322131231233";
+  };
 
   # A profile is a named group of reusable NixOS modules.
   imports = [
     ./hardware-configuration.nix
     ../../../modules/nixos/secure-boot.nix
+    ../../../modules/nixos/gaming.nix
     ../../../profiles/nixos/desktop.nix
   ];
 
@@ -60,7 +63,10 @@
   # inside that account's home directory.
   users.users.cbrst = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [
+      "wheel"
+      "gamemode"
+    ];
     shell = pkgs.zsh;
   };
 

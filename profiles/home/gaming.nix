@@ -1,7 +1,6 @@
 { ... }:
 {
-  # Start with the minimal environment, then add development-specific tools.
   imports = [
-    ../../modules/home/steam.nix
+    ../../modules/home/mangohud.nix
   ];
 }

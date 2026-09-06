@@ -12,6 +12,7 @@
   };
 
   hardware.amdgpu.initrd.enable = true;
+  hardware.cpu.intel.updateMicrocode = true;
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/c2271f7c-ea42-4dbf-b644-28deade854f5";
