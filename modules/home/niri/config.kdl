@@ -134,6 +134,8 @@ binds {
 	Mod+B { spawn "firefox"; }
 	Mod+Space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
 
+	Mod+V { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
+
 	// Focus / Move
 	Mod+H { focus-column-left; }
 	Mod+J { focus-window-down; }

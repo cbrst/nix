@@ -57,7 +57,7 @@ order = [ "main" ]
         fill = "surface_variant"
         foreground = "primary"
         id = "g1"
-        members = [ "notifications", "clipboard", "volume" ]
+        members = [ "widget", "status", "taildrop", "notifications", "clipboard", "volume" ]
         opacity = 1.0
         padding = 10.0
 
@@ -204,6 +204,26 @@ offset_x = 20
 offset_y = 12
 position = "top_center"
 
+[plugin_settings."autumn/network-toolkit"]
+panel_placement = "floating"
+
+[plugin_settings."carlocamacho/taildrop"]
+send_open_near_click = true
+send_position = "auto"
+
+[plugin_settings."davemhammer/tailscale"]
+manager_position = "top_right"
+notify_on_peer_change = false
+
+[plugins]
+enabled = [
+    "liamwh/emoji-picker",
+    "autumn/network-toolkit",
+    "cleboost/ssh-launcher",
+    "davemhammer/tailscale",
+    "carlocamacho/taildrop"
+]
+
 [shell]
 avatar_path = "/home/cbrst/.face.png"
 button_borders = false
@@ -281,13 +301,13 @@ transition_on_startup = true
     enabled = false
 
     [wallpaper.default]
-    path = "/home/cbrst/Pictures/Wallpapers/wallpaper.jpg"
+    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-gpmv73.png"
 
     [wallpaper.last]
-    path = "/home/cbrst/Pictures/Wallpapers/wallpaper.jpg"
+    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-gpmv73.png"
 
     [wallpaper.monitors.DP-1]
-    path = "/home/cbrst/Pictures/Wallpapers/wallpaper.jpg"
+    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-gpmv73.png"
 
 [widget.active_window]
 display = "text_only"
@@ -320,6 +340,20 @@ hide_when_no_media = true
 max_length = 602
 title_scroll = "on_hover"
 
+[widget.status]
+show_counts = false
+type = "davemhammer/tailscale:status"
+
+[widget.status_2]
+type = "davemhammer/tailscale:status"
+
+[widget.taildrop]
+glyph = "send"
+type = "custom_button"
+
+    [widget.taildrop.actions]
+    left = "panel-toggle carlocamacho/taildrop:send"
+
 [widget.taskbar]
 only_active_workspace = true
 
@@ -330,6 +364,12 @@ drawer = true
 [widget.weather]
 font_weight = 700
 show_condition = false
+
+[widget.widget]
+type = "autumn/network-toolkit:widget"
+
+[widget.widget_2]
+type = "autumn/network-toolkit:widget"
 
 [widget.workspaces]
 active_pill_size = 2.0
