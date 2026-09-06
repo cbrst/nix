@@ -37,7 +37,6 @@ in
     withRuby = false;
 
     extraPackages = with pkgs; [
-      # codecompanion
       file
       ripgrep
 
@@ -48,6 +47,7 @@ in
       lua-language-server
       man-db
       mdsf
+      nixd
       nil
       phpactor
       prettier
@@ -66,8 +66,8 @@ in
 
     plugins = with pkgs.vimPlugins; [
       auto-dark-mode-nvim
+      avante-nvim
       blink-cmp
-      codecompanion-nvim
       conform-nvim
       dropbar-nvim
       fidget-nvim

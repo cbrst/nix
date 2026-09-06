@@ -2,7 +2,7 @@ local M = {}
 
 function M.setup()
 	require("render-markdown").setup({
-		file_types = { "markdown", "codecompanion" },
+		file_types = { "markdown", "Avante" },
 		render_modes = true,
 	})
 	require("dropbar").setup({

@@ -285,7 +285,7 @@ Preserve meaningful ordering:
 | `configs/lua/utils/icons.lua` | Shared icons |
 | `configs/lua/plugins/theme/` | Meowsoot, Kanagawa, and Auto Dark Mode setup |
 | `configs/lua/plugins/ui/` | Statusline, navigation, pickers, VCS, terminals, symbols, and visual UI |
-| `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and CodeCompanion |
+| `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and Avante |
 | `configs/lua/plugins/lsp/` | LSP capability merge, executable checks, and server enablement |
 | `configs/lua/plugins/integrations/` | Overseer and cross-plugin workflows |
 
@@ -302,6 +302,12 @@ resolved command is executable; TypeScript Tools is configured separately.
 Server definitions belong in `config/lsp_servers.lua`, mappings in
 `config/lsp_keymaps.lua`, package declarations in `default.nix`, and
 orchestration in `plugins/lsp/init.lua`.
+
+Avante uses the local OpenCode CLI through its built-in ACP provider. OpenCode
+is selected as Avante's default provider and is included on Neovim's wrapped
+`PATH`; its Home Manager configuration remains owned by `modules/home/ai/`.
+Automatic suggestions stay disabled because Avante's suggestion subsystem does
+not use ACP providers.
 
 Completion is configured in `plugins/smart/autocompletion.lua`. Sources are
 LazyDev, LSP, paths, LuaSnip, and buffer completion. Formatting is configured in
