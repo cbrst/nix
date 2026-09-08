@@ -50,4 +50,15 @@
     device = "/dev/disk/by-uuid/0155-1CB0";
     fsType = "vfat";
   };
+  fileSystems."/mnt/games" = {
+    device = "/dev/disk/by-uuid/1ABAA16FBAA14859";
+    fsType = "ntfs3";
+    options = [
+      "rw"
+      "nofail"
+      "uid=1000"
+      "gid=100"
+      "umask=0022"
+    ];
+  };
 }

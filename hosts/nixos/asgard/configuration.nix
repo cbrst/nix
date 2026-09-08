@@ -23,6 +23,9 @@
   # This value is specific to this computer.
   networking.hostName = "asgard";
 
+  # set tailscale operator
+  services.tailscale.extraSetFlags = [ "--operator=cbrst" ];
+
   # Set timezone
   time.timeZone = "Europe/Berlin";
 
