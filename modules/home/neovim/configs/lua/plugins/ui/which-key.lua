@@ -38,6 +38,7 @@ function M.setup()
 		spec = {
 			{ "<leader>b", group = "Buffer" },
 			{ "<leader>c", group = "Code", mode = { "n", "x" } },
+			{ "<leader>d", group = "Debug", mode = { "n", "x" } },
 			{ "<leader>f", group = "File" },
 			{ "<leader>g", group = "Git", mode = { "n", "x" } },
 			{ "<leader>h", group = "Help" },

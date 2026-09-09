@@ -20,6 +20,7 @@ function M.setup()
 	require("plugins.ui.outline").setup()
 	require("plugins.ui.nvim-highlight-colors").setup()
 	require("plugins.ui.gitsigns").setup()
+	require("plugins.debug").setup()
 
 	-- Blink must initialize before LSP capabilities are derived from it.
 	require("plugins.smart").setup()

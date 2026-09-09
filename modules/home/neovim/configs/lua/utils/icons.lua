@@ -7,6 +7,13 @@ M.general = {
 	folder = "",
 }
 
+M.debugger = {
+	breakpoint = " ",
+	rejected = " ",
+	logpoint = " ",
+	stopped = " ",
+}
+
 M.diagnostics = {
 	error = " ",
 	warning = " ",
