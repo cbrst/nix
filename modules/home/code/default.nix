@@ -22,7 +22,7 @@ let
   };
 in
 {
-  programs.vscodium = {
+  programs.vscode = {
     enable = true;
     profiles.default = {
       enableExtensionUpdateCheck = false;
@@ -42,10 +42,12 @@ in
         marketplaceExtensions.kanagawa
       ];
       userSettings = builtins.fromJSON (builtins.readFile ./configs/userSettings.json) // {
+        "editor.fontFamily" = "'${settings.fonts.mono}'";
+        "editor.fontSize" = settings.fonts.terminalSize;
         "window.autoDetectColorScheme" = true;
-        "workbench.colorTheme" = settings.theme.apps.vscodium.dark;
-        "workbench.preferredDarkColorTheme" = settings.theme.apps.vscodium.dark;
-        "workbench.preferredLightColorTheme" = settings.theme.apps.vscodium.light;
+        "workbench.colorTheme" = settings.theme.apps.vscode.dark;
+        "workbench.preferredDarkColorTheme" = settings.theme.apps.vscode.dark;
+        "workbench.preferredLightColorTheme" = settings.theme.apps.vscode.light;
       };
     };
   };

@@ -93,7 +93,7 @@ let
           light = "meowsoot-dawn";
           dark = "meowsoot";
         };
-        vscodium = {
+        vscode = {
           light = "Meowsoot Dawn";
           dark = "Meowsoot Night";
         };
@@ -199,7 +199,7 @@ let
           light = "kanagawa-lotus";
           dark = "kanagawa-wave";
         };
-        vscodium = {
+        vscode = {
           light = "Kanagawa Lotus";
           dark = "Kanagawa Wave";
         };
