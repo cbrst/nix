@@ -54,3 +54,8 @@ nix run github:nix-community/home-manager -- switch \
 
 Home Manager cannot configure system services or hardware on non-NixOS systems.
 It manages packages and files in the selected user's home directory.
+
+The macOS desktop profile manages the Karabiner-Elements configuration but not
+the application. Install Karabiner-Elements with its official macOS installer
+so that its privileged services and DriverKit system extension are installed
+and registered correctly.

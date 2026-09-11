@@ -188,6 +188,12 @@ passwords, `/var/lib/sbctl`, `~/.ssh/hosts`, and password-manager agent sockets.
 Do not attempt to make these declarative unless the user specifically requests a
 secrets-management design.
 
+The Karabiner-Elements application is also installed externally with its
+official macOS installer. `modules/home/karabiner/` owns only
+`~/.config/karabiner/karabiner.json`; do not add `pkgs.karabiner-elements` to
+Home Manager because it does not install the required root-owned services or
+DriverKit system extension.
+
 ## Neovim Ownership
 
 The Home Manager module is `modules/home/neovim/default.nix`. It is imported by
