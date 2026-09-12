@@ -20,6 +20,7 @@ function M.setup()
 			}
 		end,
 		formatters_by_ft = {
+			css = { "css_beautify" },
 			html = { "prettierd", "prettier", stop_after_first = true },
 			lua = { "stylua" },
 			markdown = { "mdsf", "rumdl" },

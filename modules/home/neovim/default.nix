@@ -44,6 +44,7 @@ in
       # Language tools (conform & LSP)
       bash-language-server
       emmet-language-server
+      js-beautify
       lua-language-server
       man-db
       mdsf
