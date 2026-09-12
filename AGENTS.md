@@ -259,6 +259,7 @@ plugins.ui.snacks
 plugins.ui.outline
 plugins.ui.nvim-highlight-colors
 plugins.ui.gitsigns
+plugins.debug
 plugins.smart
 plugins.lsp
 plugins.integrations
@@ -291,6 +292,7 @@ Preserve meaningful ordering:
 | `configs/lua/plugins/theme/` | Meowsoot, Kanagawa, and Auto Dark Mode setup |
 | `configs/lua/plugins/ui/` | Statusline, navigation, pickers, VCS, terminals, symbols, and visual UI |
 | `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and Avante |
+| `configs/lua/plugins/debug/` | DAP adapters, debugger UI, and debug keymaps |
 | `configs/lua/plugins/lsp/` | LSP capability merge, executable checks, and server enablement |
 | `configs/lua/plugins/integrations/` | Overseer and cross-plugin workflows |
 
@@ -313,6 +315,11 @@ is selected as Avante's default provider and is included on Neovim's wrapped
 `PATH`; its Home Manager configuration remains owned by `modules/home/ai/`.
 Automatic suggestions stay disabled because Avante's suggestion subsystem does
 not use ACP providers.
+
+Debugging uses nvim-dap with Nix-owned adapters for Python, JavaScript and
+TypeScript, Bash-compatible shell scripts, standalone Lua, and Neovim Lua. The
+Bash adapter is also offered for `zsh` buffers, but it cannot interpret
+Zsh-specific syntax because no native Zsh DAP adapter is available.
 
 Completion is configured in `plugins/smart/autocompletion.lua`. Sources are
 LazyDev, LSP, paths, LuaSnip, and buffer completion. Formatting is configured in
