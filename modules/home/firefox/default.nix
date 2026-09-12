@@ -133,7 +133,7 @@ in
           tampermonkey
         ]
         ++ [
-          pkgs.nur.repos.ethancedwards8.firefox-addons.sponsorblock
+          pkgs.nur.repos.bandithedoge.firefoxAddons.sponsorblock
         ];
     };
   };
