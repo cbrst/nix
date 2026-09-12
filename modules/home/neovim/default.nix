@@ -15,6 +15,29 @@ let
     version = "unstable-2026-05-10";
     src = inputs.kanagawa;
   };
+  scssQueries = pkgs.vimPlugins.nvim-treesitter.builtGrammars.scss.associatedQuery;
+  scssGrammar = pkgs.vimPlugins.nvim-treesitter.builtGrammars.scss.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
+      pkgs.nodejs
+      pkgs.tree-sitter
+    ];
+    patches = (old.patches or [ ]) ++ [ ./patches/tree-sitter-scss-namespaces.patch ];
+    preBuild = ''
+      tree-sitter generate
+    ''
+    + (old.preBuild or "");
+    postInstall = (old.postInstall or "") + ''
+      rm -rf "$out/queries"
+      mkdir "$out/queries"
+      cp -LR "${scssQueries}/queries/scss" "$out/queries/scss"
+    '';
+  });
+  nvimTreesitter = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+    _:
+    map (
+      grammar: if grammar.pname == "tree-sitter-scss" then scssGrammar else grammar
+    ) pkgs.vimPlugins.nvim-treesitter.allGrammars
+  );
   neotree-file-nesting-config = pkgs.vimUtils.buildVimPlugin {
     pname = "neotree-file-nesting-config";
     version = "unstable-2025-03-06";
@@ -24,31 +47,9 @@ let
       stripRoot = true;
     };
   };
-  bashDebugExtension = pkgs.vscode-utils.buildVscodeMarketplaceExtension {
-    mktplcRef = {
-      name = "bash-debug";
-      publisher = "rogalmic";
-      version = "0.3.9";
-      hash = "sha256-f8FUZCvz/PonqQP9RCNbyQLZPnN5Oce0Eezm/hD19Fg=";
-    };
-  };
-  bashDebugAdapter = pkgs.writeShellApplication {
-    name = "bash-debug-adapter";
-    runtimeInputs = [ pkgs.nodejs ];
-    text = ''
-      exec node "${bashDebugExtension}/share/vscode/extensions/rogalmic.bash-debug/out/bashDebug.js" "$@"
-    '';
-  };
-  luaDebugExtension = pkgs.vscode-extensions.tomblind.local-lua-debugger-vscode;
-  luaDebugAdapter = pkgs.writeShellApplication {
-    name = "local-lua-debug-adapter";
-    runtimeInputs = [ pkgs.nodejs ];
-    text = ''
-      exec node "${luaDebugExtension}/share/vscode/extensions/tomblind.local-lua-debugger-vscode/extension/debugAdapter.js" "$@"
-    '';
-  };
 in
 {
+  imports = [ ../editor-tools ];
   # Install Neovim for the current Home Manager user.
   programs.neovim = {
     enable = true;
@@ -59,43 +60,7 @@ in
     withPython3 = false;
     withRuby = false;
 
-    extraPackages = with pkgs; [
-      bash
-      bashdb
-      bashDebugAdapter
-      file
-      lua
-      luaDebugAdapter
-      python3
-      python3Packages.debugpy
-      ripgrep
-      vscode-js-debug
-
-      # Language tools (conform & LSP)
-      bash-language-server
-      emmet-language-server
-      js-beautify
-      lua-language-server
-      man-db
-      mdsf
-      nixd
-      nil
-      nodejs
-      phpactor
-      prettier
-      ruff
-      rumdl
-      stylua
-      shellharden
-      shfmt
-      tree-sitter
-      typescript
-      vscode-langservers-extracted
-      yaml-language-server
-      zsh
-      inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
-      zuban
-    ];
+    extraPackages = import ../editor-tools/packages.nix { inherit inputs pkgs; };
 
     plugins = with pkgs.vimPlugins; [
       auto-dark-mode-nvim
@@ -123,7 +88,7 @@ in
       nvim-lspconfig
       nvim-nio
       # TODO: I probably don't need ALL grammars
-      nvim-treesitter.withAllGrammars
+      nvimTreesitter
       outline-nvim
       one-small-step-for-vimkind
       overseer-nvim
@@ -146,19 +111,6 @@ in
   # configuration directory instead of copying and maintaining it manually.
   xdg.configFile."nvim/init.lua".source = ./configs/init.lua;
   xdg.configFile."nvim/lua".source = ./configs/lua;
-
-  # Project-local rumdl and markdownlint configuration takes precedence over
-  # this user-level fallback.
-  xdg.configFile."rumdl/rumdl.toml".text = ''
-    [MD013]
-    line-length = 80
-    reflow = true
-    reflow-mode = "normalize"
-    code-blocks = false
-    tables = false
-    headings = false
-    math-blocks = false
-  '';
 
   home.sessionVariables.CONFIG_THEME_FAMILY = settings.theme.family;
 }
