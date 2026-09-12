@@ -7,84 +7,47 @@ tint_intensity = 0.73999998345971107
 order = [ "main" ]
 
     [bar.main]
-    background_opacity = 0.0
-    capsule = true
+    background_opacity = 0.81999998167157173
+    capsule = false
     capsule_border = "surface_variant"
     capsule_fill = "surface_variant"
     capsule_foreground = "on_surface_variant"
+    capsule_group = []
     capsule_padding = 10.0
     capsule_radius = 6
     capsule_thickness = 0.79999998584389687
-    center = [ "group:g4" ]
+    center = [ "clock", "weather" ]
     color = "primary"
-    concave_edge_corners = false
+    concave_edge_corners = true
     contact_shadow = false
-    end = [ "group:g3", "tray", "group:g1", "session" ]
+    end = [
+        "audio_visualizer",
+        "media",
+        "tray",
+        "widget",
+        "status",
+        "taildrop",
+        "notifications",
+        "clipboard",
+        "volume",
+        "session"
+    ]
     font_weight = 700
     icon_color = "primary"
-    margin_edge = 6
+    margin_edge = 0
     margin_ends = 0
-    padding = 14
+    padding = 12
     panel_overlap = 0
     position = "top"
-    radius = 0
+    radius = 8
     radius_top_left = 0
     radius_top_right = 0
     reserve_space = true
     scale = 1.0500000081956387
-    shadow = false
-    start = [ "group:g2" ]
+    shadow = true
+    start = [ "workspaces", "active_window" ]
     thickness = 34
     widget_spacing = 12
-
-        [[bar.main.capsule_group]]
-        accordion = false
-        accordion_direction = "end"
-        border = ""
-        enabled = true
-        fill = "surface_variant"
-        foreground = "primary"
-        id = "g2"
-        members = [ "workspaces", "active_window" ]
-        opacity = 1.0
-        padding = 10.0
-
-        [[bar.main.capsule_group]]
-        accordion = false
-        accordion_direction = "end"
-        border = ""
-        enabled = true
-        fill = "surface_variant"
-        foreground = "primary"
-        id = "g1"
-        members = [ "widget", "status", "taildrop", "notifications", "clipboard", "volume" ]
-        opacity = 1.0
-        padding = 10.0
-
-        [[bar.main.capsule_group]]
-        accordion = false
-        accordion_direction = "end"
-        enabled = true
-        fill = "surface_variant"
-        foreground = "primary"
-        id = "g3"
-        members = [ "audio_visualizer", "media" ]
-        opacity = 1.0
-        padding = 10.0
-        radius = 6.0
-
-        [[bar.main.capsule_group]]
-        accordion = false
-        accordion_direction = "end"
-        border = ""
-        enabled = true
-        fill = "surface_variant"
-        foreground = "primary"
-        id = "g4"
-        members = [ "clock", "weather" ]
-        opacity = 1.0
-        padding = 10.0
-        radius = 6.0
 
 [control_center]
 hidden_tabs = [ "power" ]
