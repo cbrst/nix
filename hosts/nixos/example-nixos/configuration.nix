@@ -13,6 +13,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../../profiles/nixos/desktop.nix
+    ../../../profiles/nixos/development.nix
   ];
 
   # This value is specific to this computer.
