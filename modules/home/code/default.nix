@@ -24,31 +24,32 @@ in
 {
   programs.vscode = {
     enable = true;
-    profiles.default = {
-      enableExtensionUpdateCheck = false;
-      enableUpdateCheck = false;
-      enableMcpIntegration = true;
-      extensions = with pkgs.vscode-extensions; [
-        vscodevim.vim
-        jnoortheen.nix-ide
-        svelte.svelte-vscode
-        timonwong.shellcheck
-        usernamehw.errorlens
-        bradlc.vscode-tailwindcss
-        gruntfuggly.todo-tree
-        editorconfig.editorconfig
-        tamasfe.even-better-toml
-        marketplaceExtensions.meowsoot
-        marketplaceExtensions.kanagawa
-      ];
-      userSettings = builtins.fromJSON (builtins.readFile ./configs/userSettings.json) // {
-        "editor.fontFamily" = "'${settings.fonts.mono}'";
-        "editor.fontSize" = settings.fonts.terminalSize;
-        "window.autoDetectColorScheme" = true;
-        "workbench.colorTheme" = settings.theme.apps.vscode.dark;
-        "workbench.preferredDarkColorTheme" = settings.theme.apps.vscode.dark;
-        "workbench.preferredLightColorTheme" = settings.theme.apps.vscode.light;
-      };
-    };
+    # profiles.default = {
+    #   enableExtensionUpdateCheck = false;
+    #   enableUpdateCheck = false;
+    #   enableMcpIntegration = true;
+    #   extensions = with pkgs.vscode-extensions; [
+    #     vscodevim.vim
+    #     jnoortheen.nix-ide
+    #     svelte.svelte-vscode
+    #     timonwong.shellcheck
+    #     usernamehw.errorlens
+    #     bradlc.vscode-tailwindcss
+    #     gruntfuggly.todo-tree
+    #     editorconfig.editorconfig
+    #     tamasfe.even-better-toml
+    #     marketplaceExtensions.meowsoot
+    #     marketplaceExtensions.kanagawa
+    #   ];
+    #   userSettings = builtins.fromJSON (builtins.readFile ./configs/userSettings.json) // {
+    #     "editor.fontFamily" = "'${settings.fonts.mono}'";
+    #     "editor.fontSize" = settings.fonts.terminalSize + 3;
+    #     "editor.lineHeight" = "1.5";
+    #     "window.autoDetectColorScheme" = true;
+    #     "workbench.colorTheme" = settings.theme.apps.vscode.dark;
+    #     "workbench.preferredDarkColorTheme" = settings.theme.apps.vscode.dark;
+    #     "workbench.preferredLightColorTheme" = settings.theme.apps.vscode.light;
+    #   };
+    # };
   };
 }
