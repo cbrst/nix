@@ -12,7 +12,6 @@ order = [ "main" ]
     capsule_border = "surface_variant"
     capsule_fill = "surface_variant"
     capsule_foreground = "on_surface_variant"
-    capsule_group = []
     capsule_padding = 10.0
     capsule_radius = 6
     capsule_thickness = 0.79999998584389687
@@ -20,18 +19,7 @@ order = [ "main" ]
     color = "primary"
     concave_edge_corners = true
     contact_shadow = false
-    end = [
-        "audio_visualizer",
-        "media",
-        "tray",
-        "widget",
-        "status",
-        "taildrop",
-        "notifications",
-        "clipboard",
-        "volume",
-        "session"
-    ]
+    end = [ "group:g1", "tray", "widget", "status", "taildrop", "notifications", "clipboard", "volume", "session" ]
     font_weight = 700
     icon_color = "primary"
     margin_edge = 0
@@ -48,6 +36,19 @@ order = [ "main" ]
     start = [ "workspaces", "active_window" ]
     thickness = 34
     widget_spacing = 12
+
+        [[bar.main.capsule_group]]
+        accordion = true
+        accordion_direction = "start"
+        border = ""
+        enabled = true
+        fill = "outline"
+        foreground = "on_surface_variant"
+        id = "g1"
+        members = [ "audio_visualizer", "media" ]
+        opacity = 0.30000001192092896
+        padding = 10.0
+        radius = 6.0
 
 [control_center]
 hidden_tabs = [ "power" ]
@@ -293,7 +294,7 @@ font_weight = 700
 
 [widget.media]
 artist_first = true
-capsule = true
+capsule = false
 capsule_fill = "on_surface_variant"
 capsule_opacity = 0.10000000000000001
 capsule_padding = 8
