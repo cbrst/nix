@@ -106,9 +106,9 @@ window-rule {
 	open-floating true
 }
 
-// Keep Firefox readable by opening its tiled column at four fifths
+// Keep browsers readable by opening its tiled column at four fifths
 window-rule {
-	match app-id="firefox"
+	match app-id=r#"^(brave-origin|firefox)$"#
 	default-column-width { proportion 0.8; }
 }
 // Keep Firefox popup player floating

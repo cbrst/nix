@@ -1,13 +1,27 @@
 {
   description = "Reusable NixOS and Home Manager configuration";
 
+  nixConfig = {
+    extra-substituters = [ "https://cache.forall.systems" ];
+    extra-trusted-public-keys = [
+      "cache.forall.systems:5PmD7QO4MSF8YgyRZtkSGXRDo96H3bybIf2SsQh8ScI="
+    ];
+  };
+
   # Inputs are external Nix projects this configuration depends on.
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    affinity-nix.url = "github:mrshmllow/affinity-nix";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       # Use the same nixpkgs revision for NixOS and Home Manager.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    brave-origin = {
+      url = "github:Daniel-42-z/brave-origin-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

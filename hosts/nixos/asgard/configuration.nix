@@ -12,12 +12,22 @@
     gaming.vrrOutput = "PNP(AOC) AG276QZD2 1322131231233";
   };
 
+  nixpkgs.overlays = [ inputs.affinity-nix.overlays.default ];
+
+  nix.settings = {
+    extra-substituters = [ "https://cache.forall.systems" ];
+    extra-trusted-public-keys = [
+      "cache.forall.systems:5PmD7QO4MSF8YgyRZtkSGXRDo96H3bybIf2SsQh8ScI="
+    ];
+  };
+
   # A profile is a named group of reusable NixOS modules.
   imports = [
     ./hardware-configuration.nix
     ../../../modules/nixos/secure-boot.nix
     ../../../modules/nixos/gaming.nix
     ../../../profiles/nixos/desktop.nix
+    ../../../profiles/nixos/development.nix
   ];
 
   # This value is specific to this computer.
