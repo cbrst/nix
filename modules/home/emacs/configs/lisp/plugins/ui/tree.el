@@ -1,0 +1,28 @@
+;;; tree.el --- Filesystem and symbol sidebars -*- lexical-binding: t; -*-
+(require 'treemacs)
+(require 'treemacs-evil)
+(setq treemacs-width 32
+      treemacs-show-hidden-files t
+      treemacs-follow-after-init t
+      treemacs-is-never-other-window t)
+(treemacs-follow-mode 1)
+(treemacs-filewatch-mode 1)
+(treemacs-git-mode 'deferred)
+(defun config-tree-toggle ()
+  (interactive)
+  (if (eq (treemacs-current-visibility) 'visible)
+      (treemacs)
+    (let ((buffer (current-buffer))
+          (root (config-project-root)))
+      (unless (cl-some (lambda (project)
+                        (file-in-directory-p root (treemacs-project->path project)))
+                      (treemacs-workspace->projects (treemacs-current-workspace)))
+        (treemacs-add-project-to-workspace root))
+      (if (buffer-file-name buffer)
+          (with-current-buffer buffer (treemacs-find-file))
+        (treemacs-select-window)))))
+(evil-define-key 'normal 'global (kbd "\\") #'config-tree-toggle)
+(config-bind "o p" #'config-tree-toggle)
+(require 'imenu-list)
+(setq imenu-list-position 'right imenu-list-auto-resize t)
+(config-bind "s i" #'imenu-list-smart-toggle)

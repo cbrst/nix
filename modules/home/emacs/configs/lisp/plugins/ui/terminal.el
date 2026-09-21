@@ -1,0 +1,52 @@
+;;; terminal.el --- Project terminals and repository UIs -*- lexical-binding: t; -*-
+(require 'eat)
+(defvar config-terminal-buffers (make-hash-table :test #'equal))
+(add-to-list 'display-buffer-alist
+             '("\\*\\(?:terminal:\\|vcs:\\)"
+               (display-buffer-reuse-window display-buffer-at-bottom)
+               (window-height . 0.4)))
+(defun config-terminal (&optional fresh command)
+  "Display a terminal at the project root; FRESH starts another shell."
+  (interactive "P")
+  (let* ((root (config-project-root))
+         (key (cons root command))
+         (buffer (gethash key config-terminal-buffers))
+         (default-directory root))
+    (unless (and (not fresh) (buffer-live-p buffer) (get-buffer-process buffer))
+      (setq buffer (eat-make
+                    (generate-new-buffer-name
+                     (format "%s:%s" (if command "vcs" "terminal")
+                             (file-name-nondirectory (directory-file-name root))))
+                    (or command (getenv "SHELL") shell-file-name)))
+      (puthash key buffer config-terminal-buffers))
+    (pop-to-buffer buffer)
+    (evil-insert-state)
+    buffer))
+(defun config-terminal-toggle ()
+  (interactive)
+  (let* ((buffer (gethash (cons (config-project-root) nil) config-terminal-buffers))
+         (window (and (buffer-live-p buffer) (get-buffer-window buffer))))
+    (if window (quit-window nil window) (config-terminal))))
+(defun config-terminal-new () (interactive) (config-terminal t))
+(defun config-vcs-terminal ()
+  (interactive)
+  (pcase (car (config-repository))
+    ('jj (config-terminal nil "blazingjj"))
+    ('git (config-terminal nil "lazygit"))
+    (_ (user-error "Not in a Git or jj repository"))))
+(defun config-terminal-normal ()
+  (interactive) (eat-emacs-mode) (evil-normal-state))
+(define-key eat-semi-char-mode-map (kbd "ESC ESC") #'config-terminal-normal)
+(define-key eat-semi-char-mode-map (kbd "<escape> <escape>") #'config-terminal-normal)
+(add-hook 'eat-mode-hook
+          (lambda ()
+            (evil-local-set-key 'normal (kbd "SPC") config-leader-map)
+            (evil-local-set-key 'insert (kbd "<escape> <escape>") #'config-terminal-normal)))
+(add-hook 'evil-insert-state-entry-hook
+          (lambda () (when (and (derived-mode-p 'eat-mode) eat-terminal) (eat-semi-char-mode))))
+(add-hook 'evil-normal-state-entry-hook
+          (lambda () (when (and (derived-mode-p 'eat-mode) eat-terminal) (eat-emacs-mode))))
+(config-bind "o t" #'config-terminal-toggle)
+(config-bind "o T" #'config-terminal-new)
+(config-bind "o f" #'config-terminal)
+(config-bind "g g" #'config-vcs-terminal)

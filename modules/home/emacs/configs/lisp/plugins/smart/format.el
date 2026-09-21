@@ -1,0 +1,45 @@
+;;; format.el --- Shared sequential formatter policy -*- lexical-binding: t; -*-
+(require 'apheleia)
+(setf (alist-get 'mdsf apheleia-formatters) '("mdsf" "format" inplace)
+      (alist-get 'shellharden apheleia-formatters) '("shellharden" "--transform" input)
+      (alist-get 'ruff-fix apheleia-formatters)
+      '("ruff" "check" "--fix" "--exit-zero" "--stdin-filename" filepath "-")
+      (alist-get 'prettier-html apheleia-formatters)
+      '("prettier" "--stdin-filepath" filepath)
+      (alist-get 'stylua apheleia-formatters)
+      '("stylua" "--search-parent-directories" "--stdin-filepath" filepath "-"))
+;; Do not inherit Apheleia defaults for undeclared tools (black, npx, etc.).
+(setq apheleia-mode-alist
+      '((css-mode . css-beautify) (css-ts-mode . css-beautify)
+        (html-mode . prettier-html) (html-ts-mode . prettier-html)
+        (lua-mode . stylua) (lua-ts-mode . stylua)
+        (markdown-mode . (mdsf rumdl)) (gfm-mode . (mdsf rumdl))
+        (php-mode . (html-beautify mago)) (php-ts-mode . (html-beautify mago))
+        (python-mode . (ruff-fix ruff ruff-isort))
+        (python-ts-mode . (ruff-fix ruff ruff-isort))
+        (zsh-mode . (shellharden shfmt))))
+(defun config-formatter ()
+  "Return only the explicitly configured chain for this major mode."
+  (alist-get major-mode apheleia-mode-alist))
+(defun config-format ()
+  "Format with the shared tool chain, or the attached language server.
+For a selection use LSP range formatting, if the server supports it."
+  (interactive)
+  (cond
+   ((use-region-p)
+    (if (and (bound-and-true-p lsp-mode) (lsp-feature? "textDocument/rangeFormatting"))
+        (lsp-format-region (region-beginning) (region-end))
+      (user-error "Range formatting is not supported; deselect to format the buffer")))
+   ((config-formatter) (apheleia-format-buffer (config-formatter)))
+   ((and (bound-and-true-p lsp-mode) (lsp-feature? "textDocument/formatting"))
+    (lsp-format-buffer))
+   (t (user-error "No formatter for %s" major-mode))))
+(defun config-format-on-save ()
+  (unless (or (config-formatter)
+              (derived-mode-p 'c-mode 'c++-mode 'c-ts-mode 'c++-ts-mode))
+    (when (and (bound-and-true-p lsp-mode) (lsp-feature? "textDocument/formatting"))
+      (lsp-format-buffer))))
+(add-hook 'before-save-hook #'config-format-on-save)
+(add-hook 'after-change-major-mode-hook
+          (lambda () (when (config-formatter) (apheleia-mode 1))))
+(config-bind "c f" #'config-format)

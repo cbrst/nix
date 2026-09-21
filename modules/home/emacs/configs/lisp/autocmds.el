@@ -1,0 +1,10 @@
+;;; autocmds.el --- Buffer-local presentation -*- lexical-binding: t; -*-
+(defun config-editing-buffer ()
+  (display-line-numbers-mode 1)
+  (hl-line-mode 1))
+(add-hook 'prog-mode-hook #'config-editing-buffer)
+(add-hook 'text-mode-hook #'config-editing-buffer)
+(require 'pulse)
+(defun config-pulse-yank (beg end &rest _)
+  (pulse-momentary-highlight-region beg end))
+(advice-add 'evil-yank :after #'config-pulse-yank)
