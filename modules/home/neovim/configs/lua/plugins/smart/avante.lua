@@ -25,7 +25,14 @@ function M.setup()
 		},
 		windows = {
 			sidebar_header = {
+				align = "left",
 				include_model = true,
+				rounded = false,
+			},
+			edit = {},
+			ask = {
+				floating = true,
+				start_insert = true,
 			},
 		},
 	})
