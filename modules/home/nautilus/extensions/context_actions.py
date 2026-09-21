@@ -1,5 +1,5 @@
-import subprocess
-from gi.repository import GObject, Nautilus
+from gi.repository import Gio, GLib, GObject, Nautilus
+
 
 class ContextActions(GObject.GObject, Nautilus.MenuProvider):
     def get_background_items(self, _current_folder):
@@ -41,7 +41,33 @@ class ContextActions(GObject.GObject, Nautilus.MenuProvider):
         return []
 
     def _launch(self, _item, executable, path):
-        subprocess.Popen(
-            [executable, path],
-            start_new_session=True,
+        try:
+            process = Gio.Subprocess.new(
+                [executable, path],
+                Gio.SubprocessFlags.NONE,
+            )
+        except GLib.Error as error:
+            GLib.log_default_handler(
+                "context-actions",
+                GLib.LogLevelFlags.LEVEL_WARNING,
+                f"Failed to launch {executable}: {error.message}",
+                None,
+            )
+            return
+
+        process.wait_check_async(
+            None,
+            self._on_process_finished,
+            executable,
         )
+
+    def _on_process_finished(self, process, result, executable):
+        try:
+            process.wait_check_finish(result)
+        except GLib.Error as error:
+            GLib.log_default_handler(
+                "context-actions",
+                GLib.LogLevelFlags.LEVEL_WARNING,
+                f"{executable} failed: {error.message}",
+                None,
+            )
