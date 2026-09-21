@@ -17,7 +17,8 @@ function M.setup()
 
 	local builtin = require("telescope.builtin")
 	local function project_root()
-		return vim.fs.root(0, { ".jj", ".git" }) or vim.fn.getcwd()
+		local root = require("plugins.ui.vcs").context(0)
+		return root or vim.fn.getcwd()
 	end
 
 	vim.keymap.set("n", "<leader>hh", builtin.help_tags, { desc = "Search help" })

@@ -41,7 +41,13 @@ function M.setup()
 				"snippets",
 				"buffer",
 			},
+			per_filetype = {
+				opencode_ask = { "lsp", "buffer" },
+			},
 			providers = {
+				lsp = {
+					fallbacks = {},
+				},
 				lazydev = {
 					name = "LazyDev",
 					module = "lazydev.integrations.blink",

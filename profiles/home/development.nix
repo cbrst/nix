@@ -5,7 +5,7 @@
     ./minimal.nix
     ../../modules/home/code
     ../../modules/home/neovim
-    ../../modules/home/emacs
+    # ../../modules/home/emacs
     ../../modules/home/ai
     ../../modules/home/direnv.nix
     ../../modules/home/lazydocker.nix

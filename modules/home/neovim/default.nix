@@ -15,6 +15,18 @@ let
     version = "unstable-2026-05-10";
     src = inputs.kanagawa;
   };
+  neojjNvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "neojj";
+    version = "1.8.0";
+    dependencies = [ pkgs.vimPlugins.plenary-nvim ];
+    # Diffview is optional and disabled in the Lua configuration.
+    nvimSkipModules = [ "neojj.integrations.diffview" ];
+    src = pkgs.fetchzip {
+      url = "https://github.com/NicholasZolton/neojj/archive/d84589a265c44b5183887a43a456fe14550c0b56.tar.gz";
+      hash = "sha256-9gMM55aeHYfEkEEU3gFq9XqZG3sIMoL4zkDb71eRquE=";
+      stripRoot = true;
+    };
+  };
   scssQueries = pkgs.vimPlugins.nvim-treesitter.builtGrammars.scss.associatedQuery;
   scssGrammar = pkgs.vimPlugins.nvim-treesitter.builtGrammars.scss.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
@@ -67,6 +79,7 @@ in
       avante-nvim
       blink-cmp
       conform-nvim
+      diffs-nvim
       dropbar-nvim
       fidget-nvim
       gitsigns-nvim
@@ -78,6 +91,8 @@ in
       monokai-pro-nvim
       meowsootNvim
       kanagawaNvim
+      neogit
+      neojjNvim
       neo-tree-nvim
       neotree-file-nesting-config
       nui-nvim
@@ -89,6 +104,7 @@ in
       nvim-nio
       # TODO: I probably don't need ALL grammars
       nvimTreesitter
+      opencode-nvim
       outline-nvim
       one-small-step-for-vimkind
       overseer-nvim

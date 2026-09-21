@@ -223,8 +223,9 @@ Nix owns the Neovim runtime surface:
 When adding a plugin, parser, LSP server, formatter, or command, update
 `default.nix`; do not assume a host-global executable or runtime download.
 Adding a Lua `require` without declaring its plugin in Nix can make startup
-fail. `blazingjj` and `lazygit` are supplied by
-`modules/home/vcs/default.nix` for the Lua VCS UI.
+fail. NeoJJ is a pinned local Vim plugin derivation because it is not available
+in the pinned nixpkgs. `blazingjj` and `lazygit` remain supplied by
+`modules/home/vcs/default.nix` for shell use, not for the Neovim VCS UI.
 
 ## Neovim Startup Order
 
@@ -270,7 +271,9 @@ Preserve meaningful ordering:
 
 - Leaders are set before mappings.
 - Mini Icons provides `nvim-web-devicons` compatibility before consumers load.
-- VCS state is initialized before Heirline and Snacks consume it.
+- VCS state and the Neogit/NeoJJ interfaces initialize before Heirline consumes
+  them. The diffs.nvim global configuration is also set before Vim sources its
+  plugin runtime.
 - Blink and LazyDev initialize before LSP capabilities and Lua completion use
   them.
 - Theme plugins configure themselves before the final colorscheme application.
@@ -292,7 +295,7 @@ Preserve meaningful ordering:
 | `configs/lua/utils/icons.lua` | Shared icons |
 | `configs/lua/plugins/theme/` | Meowsoot, Kanagawa, and Auto Dark Mode setup |
 | `configs/lua/plugins/ui/` | Statusline, navigation, pickers, VCS, terminals, symbols, and visual UI |
-| `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and Avante |
+| `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and AI integrations |
 | `configs/lua/plugins/debug/` | DAP adapters, debugger UI, and debug keymaps |
 | `configs/lua/plugins/lsp/` | LSP capability merge, executable checks, and server enablement |
 | `configs/lua/plugins/integrations/` | Overseer and cross-plugin workflows |
@@ -311,11 +314,11 @@ Server definitions belong in `config/lsp_servers.lua`, mappings in
 `config/lsp_keymaps.lua`, package declarations in `default.nix`, and
 orchestration in `plugins/lsp/init.lua`.
 
-Avante uses the local OpenCode CLI through its built-in ACP provider. OpenCode
-is selected as Avante's default provider and is included on Neovim's wrapped
-`PATH`; its Home Manager configuration remains owned by `modules/home/ai/`.
-Automatic suggestions stay disabled because Avante's suggestion subsystem does
-not use ACP providers.
+opencode.nvim is the active Neovim AI integration. It starts the local OpenCode
+CLI through Snacks terminal, uses Snacks input/picker and Blink completion, and
+is included on Neovim's wrapped `PATH`; OpenCode's Home Manager configuration
+remains owned by `modules/home/ai/`. Avante remains declared and configured as
+an inactive alternative, but its setup is disabled in `plugins/smart/init.lua`.
 
 Debugging uses nvim-dap with Nix-owned adapters for Python, JavaScript and
 TypeScript, Bash-compatible shell scripts, standalone Lua, and Neovim Lua. The
@@ -333,11 +336,18 @@ UI responsibilities:
 
 - `plugins/ui/heirline.lua`: global statusline presentation only.
 - `plugins/ui/vcs.lua`: asynchronous Git/jj root detection, cached repository
-  diff counters, identity metadata, refresh events, and VCS terminal selection.
-  `.jj` wins in colocated repositories. Git counters are unstaged tracked
-  changes; jj counters cover working-copy commit `@`.
+  diff counters, identity metadata, refresh events, and repository-aware
+  Neogit/NeoJJ dispatch. `.jj` wins in colocated repositories. Shared `:Vcs`
+  actions and `<leader>g` mappings use NeoJJ for jj and Neogit for plain Git.
+  Git counters are unstaged tracked changes; jj counters cover working-copy
+  commit `@`.
 - `plugins/ui/snacks.lua`: Snacks input, picker, and terminal mappings.
-- `plugins/ui/gitsigns.lua`: current-buffer Git hunks and hunk actions.
+- `plugins/ui/gitsigns.lua`: current-buffer Git hunks and `<leader>gh` hunk
+  actions.
+- diffs.nvim: syntax-aware and intra-line highlighting for Neogit, NeoJJ,
+  Gitsigns previews, Telescope previews, commit diffs, and conflict markers.
+  Its standalone `:Diff` command remains Git-specific and is not the shared VCS
+  dispatcher.
 - `plugins/ui/telescope.lua`: Ivy-style file/search/buffer/LSP workflows. Its
   project-root helper uses the nearest `.jj` or `.git` marker.
 - `plugins/ui/neo-tree.lua`: filesystem, buffers, Git, symbols, nesting, and
@@ -363,17 +373,19 @@ nvim -n --headless \
   '+qa'
 ```
 
-If plugin or executable declarations changed, build/use the newly evaluated
-wrapped package instead of the installed one:
+If plugin or executable declarations changed, build the Home Manager generation
+so its generated pack directory and wrapped package are both available. Add that
+pack directory before loading the checkout configuration:
 
 ```bash
-nix build --no-link \
-  '.#homeConfigurations."example-user@generic-linux".config.programs.neovim.finalPackage'
+generation="$(nix build --no-link --print-out-paths \
+  '.#homeConfigurations."example-user@generic-linux".activationPackage')"
 
 CONFIG_THEME_FAMILY=meowsoot \
 nix shell \
   '.#homeConfigurations."example-user@generic-linux".config.programs.neovim.finalPackage' \
   -c nvim -n --headless \
+  --cmd "set packpath^=$generation/home-files/.local/share/nvim/site" \
   --cmd "set runtimepath^=$PWD/modules/home/neovim/configs" \
   -u "$PWD/modules/home/neovim/configs/init.lua" \
   '+qa'

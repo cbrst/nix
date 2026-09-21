@@ -243,6 +243,24 @@ function M.setup()
 		end,
 	}
 
+	local opencode = {
+		condition = function()
+			return require("opencode.events.status").url ~= nil
+		end,
+		provider = function()
+			return " " .. require("opencode").statusline() .. " "
+		end,
+		on_click = {
+			callback = function()
+				require("plugins.smart.opencode").toggle()
+			end,
+			name = "heirline_opencode",
+		},
+		hl = function()
+			return { bg = colors.get().bar, fg = colors.get().muted }
+		end,
+	}
+
 	local position = {
 		provider = " %3l:%-2c %P ",
 		hl = function()
@@ -261,6 +279,7 @@ function M.setup()
 			diagnostics,
 			{ provider = "%=" },
 			lsp,
+			opencode,
 			label_separator_pre,
 			vcs_segment,
 			label_separator_post,
