@@ -55,7 +55,7 @@ with pkgs;
   shellharden
   shfmt
   tree-sitter
-  typescript
+  typescript_5
   vscode-langservers-extracted
   yaml-language-server
   zsh
