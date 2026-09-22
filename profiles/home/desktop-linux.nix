@@ -8,6 +8,7 @@
     ../../modules/home/imv
     ../../modules/home/mpv
     ../../modules/home/nautilus
+    ../../modules/home/nextcloud.nix
     ../../modules/home/niri
     ../../modules/home/noctalia
     ../../modules/home/sone.nix
