@@ -5,6 +5,15 @@
   ...
 }:
 let
+  codedocs = pkgs.vimUtils.buildVimPlugin {
+    pname = "codedocs";
+    version = "0.6.0";
+    src = pkgs.fetchzip {
+      url = "https://github.com/jeangiraldoo/codedocs.nvim/archive/refs/tags/v0.6.0.tar.gz";
+      hash = "sha256-aoYhVUSmjri2R3qH+9Js9YffSs8aLxlOL9NCCEzZICQ=";
+      stripRoot = true;
+    };
+  };
   meowsootNvim = pkgs.vimUtils.buildVimPlugin {
     pname = "meowsoot.nvim";
     version = "unstable-2026-07-19";
@@ -78,6 +87,7 @@ in
       auto-dark-mode-nvim
       avante-nvim
       blink-cmp
+      codedocs
       conform-nvim
       diffs-nvim
       dropbar-nvim
