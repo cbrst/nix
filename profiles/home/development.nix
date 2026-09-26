@@ -1,4 +1,4 @@
-{ ... }:
+{ config, pkgs, ... }:
 {
   # Start with the minimal environment, then add development-specific tools.
   imports = [
@@ -10,4 +10,8 @@
     ../../modules/home/direnv.nix
     ../../modules/home/lazydocker.nix
   ];
+
+  home.packages = [ pkgs.nodejs ];
+  home.sessionPath = [ "${config.xdg.dataHome}/npm/bin" ];
+  home.sessionVariables.NPM_CONFIG_PREFIX = "${config.xdg.dataHome}/npm";
 }

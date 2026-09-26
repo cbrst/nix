@@ -19,6 +19,8 @@ let
 in
 {
   home.packages = [
+    pkgs.playwright
+    pkgs.playwright-test
     rtk
     serena
   ];
