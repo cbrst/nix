@@ -34,7 +34,17 @@ return {
 			},
 		},
 	},
-	nil_ls = {},
+	nil_ls = {
+		settings = {
+			["nil"] = {
+				nix = {
+					-- Fetch missing flake inputs automatically instead of popping up
+					-- an unanswerable confirmation prompt on every buffer attach.
+					flake = { autoArchive = true },
+				},
+			},
+		},
+	},
 	phpactor = {},
 	rumdl = {},
 	somesass_ls = {},

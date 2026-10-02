@@ -5,3 +5,6 @@ __pycache__
 # Nix files
 *.qcow2
 result
+
+# Claude Code local settings
+.claude/settings.local.json

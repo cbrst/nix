@@ -108,16 +108,20 @@ function M.setup()
 		terminal = {
 			provider = "snacks",
 			split_side = "right",
-			auto_insert = false,
+			auto_insert = true,
 			snacks_win_opts = {
 				position = "right",
-				enter = false,
+				enter = true,
 				wo = { winbar = "" },
 			},
 		},
 	})
 
-	vim.keymap.set({ "n", "t" }, "<leader>oll", M.toggle, { desc = "Toggle Claude Code" })
+	-- Terminal-mode ("t") keymaps intercept keystrokes before they reach the
+	-- running program, so they must not share a prefix with anything you'd
+	-- type into Claude Code's prompt. Only bind these in normal mode; use
+	-- <Esc><Esc> (see keymap.lua) to drop to terminal-normal mode first.
+	vim.keymap.set("n", "<leader>oll", M.toggle, { desc = "Toggle Claude Code" })
 	vim.keymap.set({ "n", "x" }, "<leader>ola", function()
 		M.ask()
 	end, { desc = "Ask Claude Code" })

@@ -30,13 +30,16 @@ function M.setup()
 		},
 		terminal = { enabled = true },
 	})
-	vim.keymap.set({ "n", "t" }, "<leader>ot", function()
+	-- Normal mode only: a "t" (terminal-mode) binding here would eat the
+	-- literal "<space>t"/"<space>f" keystrokes typed into any terminal buffer
+	-- (e.g. Claude Code's prompt), firing this instead of sending them through.
+	vim.keymap.set("n", "<leader>ot", function()
 		require("snacks").terminal.toggle()
 	end, { desc = "Toggle terminal popup" })
 	vim.keymap.set("n", "<leader>oT", function()
 		require("snacks").terminal.open()
 	end, { desc = "Open terminal here" })
-	vim.keymap.set({ "n", "t" }, "<leader>of", function()
+	vim.keymap.set("n", "<leader>of", function()
 		require("snacks").terminal.focus()
 	end, { desc = "Focus terminal" })
 end

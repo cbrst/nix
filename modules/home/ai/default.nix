@@ -58,17 +58,20 @@ in
 
     hooks.rtk-rewrite = inputs.rtk-src + "/hooks/claude/rtk-rewrite.sh";
 
-    settings.hooks.PreToolUse = [
-      {
-        matcher = "Bash";
-        hooks = [
-          {
-            type = "command";
-            command = "${config.programs.claude-code.configDir}/hooks/rtk-rewrite";
-          }
-        ];
-      }
-    ];
+    settings = {
+      effortLevel = "medium";
+      hooks.PreToolUse = [
+        {
+          matcher = "Bash";
+          hooks = [
+            {
+              type = "command";
+              command = "${config.programs.claude-code.configDir}/hooks/rtk-rewrite";
+            }
+          ];
+        }
+      ];
+    };
   };
 
   programs.opencode = {

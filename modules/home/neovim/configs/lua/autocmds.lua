@@ -29,6 +29,19 @@ vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType", "TermOpen" }, {
 
 set_editing_statuscolumn(vim.api.nvim_get_current_buf())
 
+-- Terminal buffers (e.g. Claude Code's TUI) move the cursor on nearly every
+-- line of output. mini.animate's cursor-jump animation turns that into a
+-- continuous stream of timer-driven redraws, which makes typing in the
+-- terminal feel laggy. cursorline repaints add to that, so skip both there.
+vim.api.nvim_create_autocmd("TermOpen", {
+	desc = "Disable cursor animation and cursorline in terminal buffers",
+	group = vim.api.nvim_create_augroup("terminal-performance", { clear = true }),
+	callback = function()
+		vim.b.minianimate_disable = true
+		vim.wo.cursorline = false
+	end,
+})
+
 -- Overwrite highlight FlnStatusBg on BufEnter
 -- Somehow the gui=bold gets removed sometimes
 -- vim.api.nvim_create_autocmd("BufEnter", {

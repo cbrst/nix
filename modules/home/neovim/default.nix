@@ -88,8 +88,9 @@ in
 
     plugins = with pkgs.vimPlugins; [
       auto-dark-mode-nvim
-      avante-nvim
+      # avante-nvim
       blink-cmp
+      claudecode-nvim
       codedocs
       conform-nvim
       diffs-nvim
@@ -117,7 +118,6 @@ in
       nvim-nio
       # TODO: I probably don't need ALL grammars
       nvimTreesitter
-      claudecode-nvim
       outline-nvim
       one-small-step-for-vimkind
       overseer-nvim
