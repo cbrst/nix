@@ -56,6 +56,18 @@ in
     };
     skills = ./skills;
 
+    context = ''
+      ## Version control: jj first
+
+      Many repos here are managed with Jujutsu (`jj`), often colocated with
+      Git (so `git status` can show a detached HEAD — that is expected, not
+      a problem to fix). Before running any git status/diff/commit/log
+      command, check whether the repo is jj-managed (e.g. a `.jj` directory,
+      or `jj status` succeeding) and prefer `jj` commands when it is. Load
+      the `idiomatic-jj` skill up front in that case rather than falling
+      back to git habits.
+    '';
+
     hooks.rtk-rewrite = inputs.rtk-src + "/hooks/claude/rtk-rewrite.sh";
 
     settings = {
