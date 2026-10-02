@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate draft commit messages with OpenCode for Git and Jujutsu.
+# Generate draft commit messages with Claude Code for Git and Jujutsu.
 # Failures leave the normal editor flow untouched.
 
 set -u
@@ -45,11 +45,11 @@ else
 	exit 0
 fi
 
-if ! command -v opencode >/dev/null 2>&1; then
+if ! command -v claude >/dev/null 2>&1; then
 	exit 0
 fi
 
-tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/opencode-commit.XXXXXX") || exit 0
+tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/claude-commit.XXXXXX") || exit 0
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 diff_file=$tmp_dir/commit.diff
@@ -63,15 +63,23 @@ else
 	[ -s "$diff_file" ] || exit 0
 fi
 
-printf '%s\n' 'Generating commit-message draft with OpenCode...' >&2
+printf '%s\n' 'Generating commit-message draft with Claude Code...' >&2
 
-OPENCODE_CONFIG_CONTENT='{"snapshot":false}' \
-	opencode run --agent "write-commit-msg" --file "${diff_file}" -- "${prompt}" \
+claude --print \
+	--agent write-commit-msg \
+	--output-format text \
+	--permission-mode dontAsk \
+	--permission-prompts none \
+	--tools "" \
+	--disallowed-tools "mcp__*" \
+	--no-session-persistence \
+	"${prompt}" \
+	<"${diff_file}" \
 	>"${output_file}"
-opencode_status=$?
+claude_status=$?
 
-if [ "$opencode_status" -ne 0 ]; then
-	printf '%s\n' 'OpenCode could not generate a commit message; continuing normally.' >&2
+if [ "$claude_status" -ne 0 ]; then
+	printf '%s\n' 'Claude Code could not generate a commit message; continuing normally.' >&2
 	exit 0
 fi
 

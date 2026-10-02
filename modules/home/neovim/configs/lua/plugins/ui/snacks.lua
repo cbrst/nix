@@ -9,19 +9,22 @@ function M.setup()
 			win = {
 				input = {
 					keys = {
-						["<a-o>"] = { "opencode_send", mode = { "n", "i" } },
+						["<a-o>"] = { "claudecode_send", mode = { "n", "i" } },
 					},
 				},
 			},
 			actions = {
-				opencode_send = function(picker)
-					local items = vim.tbl_map(function(item)
-						return item.file
-								and require("opencode").format({ path = item.file, from = item.pos, to = item.end_pos })
-							or item.text
-					end, picker:selected({ fallback = true }))
+				claudecode_send = function(picker)
+					local claudecode = require("claudecode")
+					local path = require("snacks").picker.util.path
 
-					require("opencode").prompt(table.concat(items, ", ") .. " ")
+					for _, item in ipairs(picker:selected({ fallback = true })) do
+						if item.file then
+							local start_line = item.pos and item.pos[1] and item.pos[1] - 1 or nil
+							local end_line = item.end_pos and item.end_pos[1] and item.end_pos[1] - 1 or start_line
+							claudecode.send_at_mention(path(item), start_line, end_line, "SnacksPicker")
+						end
+					end
 				end,
 			},
 		},

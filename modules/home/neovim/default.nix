@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   pkgs,
   settings,
@@ -81,7 +82,9 @@ in
     withPython3 = false;
     withRuby = false;
 
-    extraPackages = import ../editor-tools/packages.nix { inherit inputs pkgs; };
+    extraPackages = (import ../editor-tools/packages.nix { inherit inputs pkgs; }) ++ [
+      config.programs.claude-code.finalPackage
+    ];
 
     plugins = with pkgs.vimPlugins; [
       auto-dark-mode-nvim
@@ -114,7 +117,7 @@ in
       nvim-nio
       # TODO: I probably don't need ALL grammars
       nvimTreesitter
-      opencode-nvim
+      claudecode-nvim
       outline-nvim
       one-small-step-for-vimkind
       overseer-nvim

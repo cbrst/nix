@@ -1,13 +1,3 @@
----
-description: Writes a commit message for the currently staged files
-mode: primary
-hidden: true
-model: openai/gpt-5.6-luna
-permission:
-    edit: deny
-    bash: deny
----
-
 # Write a Git commit message for the attached staged diff
 
 ## Workflow
@@ -33,5 +23,4 @@ newlines in a wrapped paragraph.
 
 Do not use Markdown fences, headings, trailers, or validation results.
 
-DO NOT stage any additional files. Only work on the staged files being
-commited.
+Do not stage or modify files. Work only from the supplied diff.

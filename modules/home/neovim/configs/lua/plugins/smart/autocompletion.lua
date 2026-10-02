@@ -41,9 +41,6 @@ function M.setup()
 				"snippets",
 				"buffer",
 			},
-			per_filetype = {
-				opencode_ask = { "lsp", "buffer" },
-			},
 			providers = {
 				lsp = {
 					fallbacks = {},

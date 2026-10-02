@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   pkgs,
   settings,
@@ -11,6 +12,11 @@ let
   };
 
   serena = inputs.serena.packages.${pkgs.stdenv.hostPlatform.system}.serena;
+
+  agentPrompts = {
+    dennis = builtins.readFile ./agents/dennis.md;
+    writeCommitMessage = builtins.readFile ./agents/write-commit-msg.md;
+  };
 
   themeColor = name: {
     dark = settings.theme.dark.${name};
@@ -25,8 +31,48 @@ in
     serena
   ];
 
-  programs.opencode = {
+  programs.claude-code = {
     enable = true;
+    enableMcpIntegration = true;
+    agents = {
+      dennis = ''
+        ---
+        name: dennis
+        description: Designs, implements, visually inspects, and iteratively improves polished web UIs
+        model: inherit
+        ---
+        ${agentPrompts.dennis}
+      '';
+      write-commit-msg = ''
+        ---
+        name: write-commit-msg
+        description: Writes a commit message from a supplied diff
+        tools: []
+        model: haiku
+        permissionMode: dontAsk
+        ---
+        ${agentPrompts.writeCommitMessage}
+      '';
+    };
+    skills = ./skills;
+
+    hooks.rtk-rewrite = inputs.rtk-src + "/hooks/claude/rtk-rewrite.sh";
+
+    settings.hooks.PreToolUse = [
+      {
+        matcher = "Bash";
+        hooks = [
+          {
+            type = "command";
+            command = "${config.programs.claude-code.configDir}/hooks/rtk-rewrite";
+          }
+        ];
+      }
+    ];
+  };
+
+  programs.opencode = {
+    enable = false;
     enableMcpIntegration = true;
     extraPackages = [
       pkgs.lua-language-server
@@ -100,7 +146,27 @@ in
       thinkingOpacity = 0.6;
     };
 
-    agents = ./agents;
+    agents = {
+      dennis = ''
+        ---
+        description: Designs, implements, visually inspects, and iteratively improves polished web UIs
+        mode: primary
+        ---
+        ${agentPrompts.dennis}
+      '';
+      write-commit-msg = ''
+        ---
+        description: Writes a commit message for the currently staged files
+        mode: primary
+        hidden: true
+        model: openai/gpt-5.6-luna
+        permission:
+          edit: deny
+          bash: deny
+        ---
+        ${agentPrompts.writeCommitMessage}
+      '';
+    };
     skills = ./skills;
   };
 

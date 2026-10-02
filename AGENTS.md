@@ -314,11 +314,12 @@ Server definitions belong in `config/lsp_servers.lua`, mappings in
 `config/lsp_keymaps.lua`, package declarations in `default.nix`, and
 orchestration in `plugins/lsp/init.lua`.
 
-opencode.nvim is the active Neovim AI integration. It starts the local OpenCode
-CLI through Snacks terminal, uses Snacks input/picker and Blink completion, and
-is included on Neovim's wrapped `PATH`; OpenCode's Home Manager configuration
-remains owned by `modules/home/ai/`. Avante remains declared and configured as
-an inactive alternative, but its setup is disabled in `plugins/smart/init.lua`.
+claudecode.nvim is the active Neovim AI integration. It starts the Claude Code
+CLI through a right-side Snacks terminal, exposes editor context through its IDE
+bridge, and is included on Neovim's wrapped `PATH`; Claude Code's Home Manager
+configuration remains owned by `modules/home/ai/`. Avante remains declared and
+configured as an inactive alternative, but its setup is disabled in
+`plugins/smart/init.lua`.
 
 Debugging uses nvim-dap with Nix-owned adapters for Python, JavaScript and
 TypeScript, Bash-compatible shell scripts, standalone Lua, and Neovim Lua. The

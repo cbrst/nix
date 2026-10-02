@@ -243,18 +243,16 @@ function M.setup()
 		end,
 	}
 
-	local opencode = {
+	local claudecode = {
 		condition = function()
-			return require("opencode.events.status").url ~= nil
+			return require("claudecode.terminal").get_active_terminal_bufnr() ~= nil
 		end,
-		provider = function()
-			return " " .. require("opencode").statusline() .. " "
-		end,
+		provider = " Claude ",
 		on_click = {
 			callback = function()
-				require("plugins.smart.opencode").toggle()
+				require("plugins.smart.claudecode").toggle()
 			end,
-			name = "heirline_opencode",
+			name = "heirline_claudecode",
 		},
 		hl = function()
 			return { bg = colors.get().bar, fg = colors.get().muted }
@@ -279,7 +277,7 @@ function M.setup()
 			diagnostics,
 			{ provider = "%=" },
 			lsp,
-			opencode,
+			claudecode,
 			label_separator_pre,
 			vcs_segment,
 			label_separator_post,
