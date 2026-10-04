@@ -45,7 +45,24 @@ else
 	exit 0
 fi
 
+# Explain a missing draft on stderr and as a comment in the editor buffer,
+# where it stays visible after the editor clears the terminal.
+report() {
+	printf 'Claude Code commit draft: %s\n' "$1" >&2
+	if [ "$vcs" = git ]; then
+		comment_prefix='#'
+	else
+		comment_prefix='JJ:'
+	fi
+	{
+		printf '%s Claude Code commit draft: %s\n' "$comment_prefix" "$1"
+		cat "$message_file"
+	} >"$message_file.claude-report" &&
+		mv "$message_file.claude-report" "$message_file"
+}
+
 if ! command -v claude >/dev/null 2>&1; then
+	report 'claude is not on PATH; skipped.'
 	exit 0
 fi
 
@@ -79,11 +96,14 @@ claude --print \
 claude_status=$?
 
 if [ "$claude_status" -ne 0 ]; then
-	printf '%s\n' 'Claude Code could not generate a commit message; continuing normally.' >&2
+	# claude --print reports failures such as "Not logged in" on stdout.
+	reason=$(tr '\n' ' ' <"$output_file" | sed 's/ *$//' | cut -c 1-200)
+	report "failed (exit $claude_status): ${reason:-no output}"
 	exit 0
 fi
 
 if [ ! -s "$output_file" ]; then
+	report 'claude returned an empty message.'
 	exit 0
 fi
 
