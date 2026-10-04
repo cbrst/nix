@@ -83,6 +83,22 @@ in
       (lib.mkOrder 1002 (builtins.readFile ./configs/zsh/zstyle.zsh))
       (lib.mkOrder 1003 (builtins.readFile ./configs/zsh/aliases.zsh))
     ];
+    # macOS updates restore /etc/zshrc and drop the Nix installer's hook, so
+    # load the daemon environment from the user's own startup files instead.
+    envExtra = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin ''
+      if [[ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      fi
+    '';
+    # path_helper in /etc/zprofile moves system directories ahead of Nix in
+    # login shells; put the Nix profiles back in front.
+    profileExtra = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin ''
+      for profile in ''${(z)NIX_PROFILES}; do
+        path=($profile/bin $path)
+      done
+      unset profile
+      typeset -U path
+    '';
     history = {
       append = true;
       expireDuplicatesFirst = true;
