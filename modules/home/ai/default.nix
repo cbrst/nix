@@ -34,6 +34,9 @@ in
   programs.claude-code = {
     enable = true;
     enableMcpIntegration = true;
+    # Keep ~/.claude/settings.json writable so /config changes persist;
+    # declared keys below are merged over it on each activation.
+    mutableSettings = true;
     agents = {
       dennis = ''
         ---
@@ -83,6 +86,10 @@ in
           ];
         }
       ];
+      attribution = {
+        commit = "";
+        pr = "";
+      };
     };
   };
 
