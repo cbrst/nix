@@ -91,6 +91,9 @@
       configLib = import ./lib { inherit inputs; };
     in
     {
+      overlays.typescript-language-server-pnpm-hash-fix =
+        import ./overlays/typescript-language-server-pnpm-hash-fix.nix;
+
       # Apply with: sudo nixos-rebuild switch --flake .#example-nixos
       nixosConfigurations.example-nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";

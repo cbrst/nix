@@ -33,6 +33,7 @@ let
           # Add NUR packages, including Firefox add-ons, to pkgs.
           overlays = [
             nur.overlays.default
+            inputs.self.overlays.typescript-language-server-pnpm-hash-fix
           ];
         };
 
