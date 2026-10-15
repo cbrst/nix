@@ -200,6 +200,12 @@ official macOS installer. `modules/home/karabiner/` owns only
 Home Manager because it does not install the required root-owned services or
 DriverKit system extension.
 
+Raycast is likewise installed outside Nix (official installer or
+`brew install --cask raycast`). Do not add `pkgs.raycast` to Home Manager:
+every activation replaces the app bundle, and its databases and extensions
+(`~/Library/Application Support/com.raycast.macos`, `~/.config/raycast`) were
+being lost or broken. Raycast updates itself from `/Applications`.
+
 ## Neovim Ownership
 
 The Home Manager module is `modules/home/neovim/default.nix`. It is imported by

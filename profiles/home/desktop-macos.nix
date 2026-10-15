@@ -7,6 +7,5 @@
 
   home.packages = [
     pkgs.ice-bar
-    pkgs.raycast
   ];
 }
