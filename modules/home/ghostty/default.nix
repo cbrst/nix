@@ -30,6 +30,7 @@
       macos-titlebar-style = "transparent"; # "tabs" titlebar is buggy in 1.3.1 on Golden Gate
       gtk-titlebar = false;
       theme = "light:${settings.theme.apps.ghostty.light},dark:${settings.theme.apps.ghostty.dark}";
+      config-file = "?config-custom";
     };
   };
 
