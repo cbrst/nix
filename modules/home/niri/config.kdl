@@ -120,6 +120,13 @@ window-rule {
 	default-floating-position x=20 y=20 relative-to="bottom-right"
 }
 
+// Disable mouse acceleration
+input {
+	mouse {
+		accel-profile "flat"
+	}
+}
+
 // Keybindings
 binds {
 
