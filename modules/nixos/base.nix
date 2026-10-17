@@ -28,6 +28,7 @@
   programs.zsh.enable = true;
 
   environment.systemPackages = [
+    pkgs.btop
     pkgs.nvd
   ];
 
