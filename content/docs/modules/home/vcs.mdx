@@ -29,12 +29,16 @@ to summarise.
 | --- | --- |
 | `jj logn` | Shows `trunk()..@` plus the parent of that range: a compact view of local, unpublished work |
 | `jj pull` | Fetches from the Git remote, then rebases the mutable stack rooted at `roots(trunk()..stack(@))` onto `trunk()` |
-| `jj sync` | Runs `pull`, then pushes all changed bookmarks with `--allow-new` so new bookmarks publish on their first push |
+| `jj sync` | Runs `pull`, then pushes every bookmark in the current stack with `-b exact:<name>`, which also tracks new bookmarks on their first push; prints a message instead when the stack has no bookmarks |
 
 `pull` and `sync` run through `jj util exec` with `sh -c`, so the fetch,
 rebase, and push run as one sequence that stops at the first failure. The
 rebase source only moves the unpushed stack and leaves already-merged history
 alone.
+
+The `stack(x)` revset alias is `reachable(x, mutable())`: the mutable commits
+connected to `x`. `sync` pushes only bookmarks inside `stack(@)`, so bookmarks
+on unrelated stacks are left alone.
 
 ## Zsh completion for jj
 
