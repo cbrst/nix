@@ -38,6 +38,8 @@ in
       };
       ui.editor = [ "${jjCommitEditor}/bin/jj-commit-editor" ];
       templates.draft_commit_description = "builtin_draft_commit_description_with_diff";
+      # The mutable commits connected to x, i.e. the stack x belongs to.
+      revset-aliases."stack(x)" = "reachable(x, mutable())";
       aliases = {
         logn = [
           "log"
@@ -53,9 +55,10 @@ in
           ''
             jj git fetch &&
             jj rebase -s "roots(trunk()..stack(@))" \
-            -d "trunk()"
+            -o "trunk()"
           ''
         ];
+        # Pushes every bookmark in the stack; -b also tracks new ones.
         sync = [
           "util"
           "exec"
@@ -65,8 +68,14 @@ in
           ''
             jj git fetch &&
             jj rebase -s "roots(trunk()..stack(@))" \
-            -d "trunk()" &&
-            jj git push --changed --allow-new
+            -o "trunk()" &&
+            bookmarks=$(jj bookmark list -r "stack(@)" \
+              -T '"-b exact:" ++ name ++ "\n"') &&
+            if [ -n "$bookmarks" ]; then
+              jj git push $bookmarks
+            else
+              echo "No bookmarks in the current stack to push."
+            fi
           ''
         ];
       };
