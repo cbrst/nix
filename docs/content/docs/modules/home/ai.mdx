@@ -15,10 +15,8 @@ Home Manager installs and configures [Claude Code](https://claude.com/claude-cod
   pull request attribution lines. `settings.json` stays writable
   (`mutableSettings`), so changes made with `/config` persist; the declared keys
   are merged over it on every activation.
-- **Global context** (`~/.claude/CLAUDE.md`) tells every session to check for a
-  jj repository before using Git commands. In a colocated repository Git shows
-  a detached `HEAD`, which is expected, and the `idiomatic-jj` skill should be
-  loaded instead of falling back to Git habits.
+- **Global rules** (`~/.claude/CLAUDE.md`) come from the shared `agentRules`
+  set in `default.nix`, described under [Shared rules](#shared-rules).
 - **MCP integration** shares the MCP servers declared in `programs.mcp`.
 - **RTK hook.** A `PreToolUse` hook on the Bash tool runs RTK's rewrite script,
   which compresses command output before it reaches the model.
@@ -41,6 +39,19 @@ Everything in `skills/` is installed as Claude Code skills, including:
 - `group-unstaged-commits`: splitting working-copy changes into coherent commits.
 - A set of front-end design skills (brand kits, image-to-code, minimalist,
   brutalist, motion, and web interface guidelines) used together with `dennis`.
+
+## Shared rules
+
+`agentRules` is a single attribute set of instruction sections. Claude Code
+receives it as `rules`, and OpenCode's `context` is the same sections joined
+with newlines, so both tools read one source.
+
+| Rule | Effect |
+| --- | --- |
+| `code-style` | Use consistent formatting, follow language conventions, and obey an `.editorconfig` or other defined standard |
+| `collaboration` | Act as a critical collaborator: raise risks, tradeoffs, and missing requirements before a nontrivial change, propose a plan and wait for approval, separate facts from assumptions, and restate the risk before proceeding if the request is repeated |
+| `jj-first` | Check whether a repository is jj-managed before running Git commands and prefer `jj`. In a colocated repository Git shows a detached `HEAD`, which is expected, and the `idiomatic-jj` skill should be loaded instead of falling back to Git habits |
+| `subagents` | Read-only search, exploration, or planning subagents may start without asking for broad sweeps or independent investigations; small lookups are done directly. Ask before starting any subagent that can edit files, run builds or other consequential commands, or act outside the repository, and report when subagents were used |
 
 ## Serena
 
