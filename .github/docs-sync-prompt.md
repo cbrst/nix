@@ -50,4 +50,4 @@ Ignore commits that only touch `docs/`, `.github/`, or `flake.lock`.
   sidebar section is genuinely needed.
 - Never copy secrets, password hashes, keys, filesystem UUIDs, email addresses,
   or tokens into the documentation.
-- Finish by writing the head commit hash to `docs/.last-sync` as instructed.
+- Do not edit `docs/.last-sync`; the workflow updates it.

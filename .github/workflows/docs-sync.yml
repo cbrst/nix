@@ -47,20 +47,24 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           git log --oneline "$base..$head"
 
-      - name: Update documentation
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: |
-            Follow the instructions in .github/docs-sync-prompt.md.
+      # claude-code-action rejects push events, so run the CLI directly. It
+      # authenticates with the subscription OAuth token from the environment.
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code@2.1.296
 
-            The commit range to document is
-            ${{ steps.range.outputs.base }}..${{ steps.range.outputs.head }}.
-            When you are done, write ${{ steps.range.outputs.head }} followed
-            by a newline to docs/.last-sync.
-          claude_args: >-
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git log:*),Bash(git show:*),Bash(git diff:*),Bash(git rev-parse:*)"
+      - name: Update documentation
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          RANGE: ${{ steps.range.outputs.base }}..${{ steps.range.outputs.head }}
+        run: |
+          claude --print \
+            --permission-mode dontAsk \
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git log:*),Bash(git show:*),Bash(git diff:*),Bash(git rev-parse:*)" \
+            --output-format text \
+            "Follow the instructions in .github/docs-sync-prompt.md. The commit range to document is $RANGE."
+
+      - name: Record synced commit
+        run: echo "${{ steps.range.outputs.head }}" > docs/.last-sync
 
       - name: Open or update pull request
         uses: peter-evans/create-pull-request@v8
