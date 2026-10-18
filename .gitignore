@@ -8,3 +8,8 @@ result
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Documentation site
+docs/node_modules
+docs/dist
+docs/.astro

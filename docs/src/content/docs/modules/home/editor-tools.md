@@ -1,0 +1,37 @@
+---
+title: Editor tools
+description: The shared list of language servers, formatters, and debuggers used by both editors.
+sidebar:
+  order: 5
+---
+
+[`modules/home/editor-tools/`](https://github.com/cbrst/nix/tree/main/modules/home/editor-tools)
+keeps the external toolchain in one place so [Neovim](/nix/modules/home/neovim/)
+and [Emacs](/nix/modules/home/emacs/) use exactly the same executables.
+
+## packages.nix
+
+`packages.nix` is a plain list that each editor adds to its own `PATH`. It is
+not installed into the user profile.
+
+| Kind | Tools |
+| --- | --- |
+| Language servers | bash-language-server, emmet-language-server, lua-language-server, nil, nixd, phpactor, some-sass-language-server, vscode-langservers-extracted, yaml-language-server, zshcs, Zuban |
+| Formatters and linters | js-beautify, Mago, mdsf, Prettier, Ruff, rumdl, Shellharden, shfmt, StyLua |
+| Debuggers | debugpy, js-debug, bashdb with the Bash Debug adapter, and the local Lua debugger |
+| Runtimes and utilities | Bash, Lua, Python 3, Node.js, TypeScript 5, Zsh, ripgrep, tree-sitter, file, man-db |
+
+The Bash and Lua debug adapters are taken from their VS Code extensions and
+wrapped in small scripts that run them with Node.js.
+
+## Fallback configuration
+
+`default.nix` writes two global fallback files. A project's own configuration
+always takes precedence.
+
+- `~/.config/mago.toml`: PHP formatting with two-space tabs and double quotes.
+- `~/.config/rumdl/rumdl.toml`: Markdown lines are reflowed to 80 characters,
+  except code blocks, tables, headings, and math.
+
+Additions that both editors need belong here; editor-specific packages stay in
+that editor's own `default.nix`.

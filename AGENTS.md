@@ -53,8 +53,9 @@ nix build --no-link \
 
 Use `--no-link` to avoid creating a root `result` symlink. Builds may populate
 the Nix store but do not activate their outputs. Do not update `flake.lock` as
-incidental validation. There is no flake `formatter`, `checks`, dev shell, CI
-workflow, Makefile, or Justfile; do not claim that `nix fmt` is supported.
+incidental validation. There is no flake `formatter`, `checks`, dev shell,
+Makefile, or Justfile; do not claim that `nix fmt` is supported. The only CI
+workflows build and update the documentation site (see "Documentation Site").
 
 At minimum, also run the relevant source formatter or parser and:
 
@@ -115,6 +116,7 @@ Directory ownership:
 | `users/` | Person-specific Home Manager state and compatibility versions |
 | `lib/` | Helper functions and theme data; these are not modules |
 | `packages/` | Local derivations such as RTK and the Kanagawa GTK theme |
+| `docs/` | Astro Starlight documentation site published to GitHub Pages |
 | `overlays/` | Reserved/documented overlay location; currently no local overlay implementation |
 
 Do not move host-specific values into reusable profiles or modules. Do not put
@@ -408,6 +410,30 @@ When validating asynchronous UI integrations, open a real file inside a test
 repository, add the checkout runtime path, wait for the callback, and inspect
 the returned state. An unnamed buffer may resolve roots differently and is not a
 sufficient VCS test.
+
+## Documentation Site
+
+`docs/` is an Astro Starlight project published to
+<https://cbrst.github.io/nix/>. Pages are Markdown in
+`docs/src/content/docs/` and describe the current configuration; they are not
+a changelog. `.github/workflows/docs-sync.yml` runs Claude Code on pushes to
+`main` that change configuration, revises the affected pages for the commits
+since `docs/.last-sync`, and opens or updates a `docs/sync` pull request.
+`.github/workflows/docs-deploy.yml` publishes the site when `docs/` changes on
+`main`. The sync agent follows `.github/docs-sync-prompt.md`.
+
+When a change alters behaviour that the pages describe, updating the matching
+page in the same change is welcome but not required. Validate documentation
+edits with:
+
+```bash
+cd docs
+nix shell nixpkgs#nodejs -c npm ci
+nix shell nixpkgs#nodejs -c npm run build
+```
+
+`docs/node_modules`, `docs/dist`, and `docs/.astro` are ignored. Install
+dependencies only after `.gitignore` is in place, or jj will snapshot them.
 
 ## Change Discipline
 

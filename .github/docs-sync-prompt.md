@@ -1,0 +1,53 @@
+# Documentation sync
+
+You maintain the documentation site in `docs/` for this Nix flake. The site is
+an Astro Starlight project; its pages are Markdown or MDX files in
+`docs/src/content/docs/`. Your job is to make those pages describe the
+repository as it is **now**, after the commits in the range you were given.
+
+## Inputs
+
+1. Read `AGENTS.md` for the repository structure and conventions. Where it
+   disagrees with the source, the source wins.
+2. List the commits in the range with `git log --format='%H%n%B%n----' <range>`.
+   The commit bodies explain what changed and why; treat them as the primary
+   description of intent.
+3. Inspect each relevant diff with `git show` or `git diff <range> -- <path>`
+   and read the current source files to confirm every claim. Never describe
+   behaviour that the current source does not support.
+
+Ignore commits that only touch `docs/`, `.github/`, or `flake.lock`.
+
+## What to change
+
+- Update the existing pages that cover the changed modules, profiles, hosts, or
+  workflows. Edit in place and keep the surrounding structure.
+- Write the result as a current description. Do not add "new", "now",
+  "changed in", dates, or changelog sections. The commit history is the
+  changelog.
+- When a commit adds a substantial module or feature with no page, add one in
+  the matching directory with `title`, `description`, and `sidebar.order`
+  frontmatter, and link it from the relevant profile page. Small single-file
+  modules go into `modules/home/small-modules.md` or the closest existing page.
+- When something is removed or renamed, remove or rename its documentation and
+  fix every link to it.
+- Keep composition graphs, output tables, key tables, and profile lists in sync
+  with the source.
+- If nothing user-facing changed, leave the pages alone.
+
+## Style
+
+- Write like the repository's commit bodies: plain, specific prose that says
+  what something does, how it does it, and which constraints matter.
+- Use sentence-case headings, short paragraphs, and tables for reference data.
+- Internal links use the site base, for example `/nix/modules/home/neovim/`.
+  Link to source files as `https://github.com/cbrst/nix/blob/main/<path>`.
+
+## Rules
+
+- Only modify files under `docs/`. Do not touch `docs/package.json`,
+  `docs/package-lock.json`, or `docs/astro.config.mjs` unless a new top-level
+  sidebar section is genuinely needed.
+- Never copy secrets, password hashes, keys, filesystem UUIDs, email addresses,
+  or tokens into the documentation.
+- Finish by writing the head commit hash to `docs/.last-sync` as instructed.

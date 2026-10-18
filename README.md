@@ -9,6 +9,8 @@ This repository is a starter layout for two related jobs:
 The configuration is a [Nix flake](https://nixos.wiki/wiki/Flakes):
 `flake.nix` names the external dependencies and exports named configurations.
 
+Full documentation is published at <https://cbrst.github.io/nix/>.
+
 ## Layout
 
 ```text
