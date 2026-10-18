@@ -1,0 +1,78 @@
+---
+title: Shell
+description: Zsh, the Oh My Posh prompt, and the command-line tools around them.
+sidebar:
+  order: 1
+---
+
+[`modules/home/shell/`](https://github.com/cbrst/nix/tree/main/modules/home/shell)
+configures Zsh and a set of command-line tools. It is part of the
+[minimal profile](/nix/profiles/home/#minimal), so every user machine gets it.
+
+## Zsh
+
+Home Manager installs Zsh with its configuration under `~/.config/zsh`
+(`ZDOTDIR`). The setup:
+
+- Uses Vi insert mode as the default keymap, and `autocd` so a bare directory
+  name changes into it.
+- Suggests completions as you type from history and the completion system
+  (`zsh-autosuggestions`), and highlights syntax.
+- Uses **zsh-autocomplete** for live completion menus. Because it initialises
+  the completion system itself, Home Manager's own `compinit` is disabled. The
+  package is extended with the `zasync` helper it expects.
+- Keeps 2000 lines of shared, de-duplicated history.
+- Defines directory hashes: `~nix` is `/etc/nix-config`, `~p` is
+  `~/Projects`.
+- Creates the Zsh data directory under `XDG_DATA_HOME` on start-up, and
+  autoloads every function in `configs/zsh/functions`.
+
+Initialisation is ordered explicitly with `lib.mkOrder` so the function path
+exists before zsh-autocomplete loads, and the prompt context, `zstyle` rules,
+and aliases come after it. The [VCS module](/nix/modules/home/vcs/#zsh-completion-for-jj)
+adds its jj completion wrapper last.
+
+### Aliases and functions
+
+Aliases are only defined when their target exists:
+
+| Alias | Runs |
+| --- | --- |
+| `cat` | `bat` |
+| `<cmd> -h`, `<cmd> --help` | Pipes help output through `bat` with help highlighting |
+| `man` | `batman` |
+| `dig` | `doggo` |
+
+`mkcd <dir>` creates a directory and changes into it. `pay-respects` corrects
+the previous command and is bound to the alias `fuck`.
+
+### macOS
+
+macOS updates restore `/etc/zshrc` and remove the Nix installer's hook, and
+`/etc/zprofile` runs `path_helper`, which moves system directories ahead of Nix.
+On Darwin the module therefore sources the Nix daemon profile from `.zshenv`
+and puts every Nix profile's `bin` back at the front of `PATH` in login shells.
+
+## Prompt
+
+[Oh My Posh](https://ohmyposh.dev/) draws a pill-style prompt with segments for
+the path, Git or jj status, and project languages, and a compact transient
+prompt for previous commands. Its configuration is a template rendered with
+`configLib.renderTemplate`, so its colours follow the active
+[theme family](/nix/architecture/settings-and-themes/) in both light and dark
+variants. A small Zsh context function detects the system appearance on macOS
+and reads the freedesktop portal colour-scheme on Linux, so the prompt switches
+palettes with the desktop.
+
+## Tools
+
+| Tool | Configuration |
+| --- | --- |
+| `bat` | Replaces `cat`; includes `batdiff`, `batman`, `batgrep`, `batwatch` |
+| `eza` | Directories first, Git status, headers, and icons |
+| `fzf` | Reverse layout at half height with custom glyphs; `Ctrl-O` opens the selection in `$EDITOR`. A small `fzf-preview` script shows a tree for directories and `bat` for files |
+| `zoxide` | Frecency-based `cd` |
+| `fastfetch` | A tree-style system summary with a custom logo |
+| `jq`, `doggo` | JSON processing and DNS lookups |
+
+`EDITOR` is set to `nvim`.

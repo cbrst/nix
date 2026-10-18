@@ -1,0 +1,54 @@
+---
+title: Asgard
+description: The NixOS desktop workstation, with Niri, Noctalia, gaming support, and Secure Boot.
+sidebar:
+  order: 1
+---
+
+Asgard is an `x86_64-linux` NixOS workstation: an Intel CPU with an AMD GPU,
+dual-booting Windows. It is exported as `nixosConfigurations.asgard` and its
+source is
+[`hosts/nixos/asgard/`](https://github.com/cbrst/nix/tree/main/hosts/nixos/asgard).
+
+## What the host selects
+
+- **Profiles:** the NixOS [desktop and development](/nix/profiles/nixos/)
+  profiles, plus the [Secure Boot](/nix/modules/nixos/secure-boot/) and
+  [gaming](/nix/modules/nixos/gaming/) modules directly.
+- **User:** `cbrst`, with Zsh as the login shell and membership in `wheel` and
+  `gamemode`. NixOS owns the account itself; Home Manager owns what is inside
+  the home directory.
+- **Home Manager:** embedded in the system configuration with the shared
+  system package set (`useGlobalPkgs`) and per-user package installation
+  (`useUserPackages`). It imports the user's `home.nix` and the
+  [development, desktop-linux, and gaming](/nix/profiles/home/) home profiles.
+
+## Host-specific values
+
+| Setting | Value |
+| --- | --- |
+| Hostname | `asgard` |
+| Time zone | `Europe/Berlin` |
+| Settings override | `gaming.vrrOutput` set to the AOC AG276QZD2 monitor, enabling on-demand VRR in Niri |
+| Tailscale | `cbrst` is the Tailscale operator, so the tray and CLI work without `sudo` |
+| Extra overlay and cache | Affinity overlay and the `cache.forall.systems` binary cache |
+
+## Boot loader
+
+Asgard boots with **Limine**, with Secure Boot signing enabled and up to ten
+generations in the menu. An extra entry chain-loads the **Windows Boot
+Manager**. The menu runs at 2560×1440 and is themed with the Meowsoot dark
+palette: no wallpaper, a dark backdrop, and Meowsoot colours for the help text
+and the terminal palette.
+
+## Hardware
+
+`hardware-configuration.nix` describes the real disks and must be regenerated
+for any other machine. It enables:
+
+- Linux firmware, 32-bit graphics support, AMD GPU in the initrd, and Intel
+  microcode updates.
+- The Btrfs layout described in [Installing Asgard](/nix/getting-started/installation/),
+  with zstd compression on every subvolume.
+- An NTFS games volume at `/mnt/games`, owned by the user and mounted with
+  `nofail` so a missing disk does not block boot.
