@@ -29,6 +29,7 @@ source is
 | Time zone | `Europe/Berlin` |
 | Settings override | `gaming.vrrOutput` set to the AOC AG276QZD2 monitor, enabling on-demand VRR in Niri |
 | Tailscale | `cbrst` is the Tailscale operator, so the tray and CLI work without `sudo` |
+| Blacklisted modules | `brcmfmac` is blacklisted. The onboard BCM43602 Wi-Fi is unused (the host is wired), and the driver fails to enter D3, which aborts suspend and can leave the GPU unable to resume |
 | Extra overlay and cache | Affinity overlay and the `cache.forall.systems` binary cache |
 
 ## Boot loader
