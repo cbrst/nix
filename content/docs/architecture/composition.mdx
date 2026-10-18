@@ -1,0 +1,112 @@
+---
+title: Composition
+description: How flake outputs, hosts, profiles, and modules combine into one configuration.
+---
+
+Every configuration in this repository is assembled the same way:
+
+```text
+flake output -> host -> profile -> module -> package or configuration file
+```
+
+## Modules
+
+A module is a Nix function that returns configuration attributes. It is the
+smallest reusable unit and owns exactly one concern, such as Zsh, Firefox, or
+PipeWire. Nix merges all imported modules into one final configuration; if two
+modules set incompatible values, evaluation fails instead of silently picking
+one.
+
+- [`modules/nixos/`](https://github.com/cbrst/nix/tree/main/modules/nixos)
+  holds operating-system features. These only work on NixOS.
+- [`modules/home/`](https://github.com/cbrst/nix/tree/main/modules/home) holds
+  user features. These work through Home Manager on NixOS, other Linux
+  distributions, and macOS.
+
+A module is either a single `name.nix` file or a directory whose `default.nix`
+is the module and whose other files (often under `configs/`) are the assets it
+installs.
+
+## Profiles
+
+A profile is a named bundle of modules for a role. Hosts import profiles rather
+than long lists of modules, so adding a module to a profile adds it to every
+machine with that role. See [Home profiles](/profiles/home/) and
+[NixOS profiles](/profiles/nixos/).
+
+## Hosts
+
+A host is one machine. Host files stay small: they import profiles and supply
+the values that cannot be shared, such as the hostname, boot loader, hardware
+configuration, user account, and setting overrides. Operating-system
+differences, such as macOS-only packages, are also kept at the host boundary.
+
+## Users
+
+[`users/`](https://github.com/cbrst/nix/tree/main/users) holds settings that
+belong to one person on every machine. Currently that is the Home Manager
+`stateVersion` and enabling Home Manager itself.
+
+## Flake outputs
+
+`flake.nix` turns each host into a named output:
+
+- NixOS hosts become `nixosConfigurations.<name>` through
+  `nixpkgs.lib.nixosSystem`, with the Home Manager NixOS module added so the
+  user's environment is built and activated together with the system.
+- Standalone Home Manager hosts become `homeConfigurations."<user>@<host>"`
+  through `configLib.mkHome` in
+  [`lib/default.nix`](https://github.com/cbrst/nix/blob/main/lib/default.nix).
+  `mkHome` imports nixpkgs for the target system with unfree packages allowed,
+  applies the NUR overlay and the local overlays, sets the username and home
+  directory, and passes the shared arguments through `extraSpecialArgs`.
+
+Every module can receive `inputs` (the flake inputs), `configLib` (the helper
+library), and `settings` (the host's resolved settings) as arguments.
+
+## Composition graphs
+
+### Asgard
+
+```text
+flake.nix
+└── hosts/nixos/asgard/
+    ├── hardware-configuration.nix
+    ├── modules/nixos/secure-boot.nix
+    ├── modules/nixos/gaming.nix
+    ├── profiles/nixos/desktop.nix
+    │   └── modules/nixos/{base,network,archives,nautilus,fonts,gtk,
+    │                       multimedia,niri,noctalia,noctalia-greeter,
+    │                       1password,pipewire}
+    ├── profiles/nixos/development.nix
+    │   └── modules/nixos/{docker,jetbrains}
+    └── home-manager.users.cbrst
+        ├── users/cbrst/home.nix
+        ├── profiles/home/development.nix
+        ├── profiles/home/desktop-linux.nix
+        └── profiles/home/gaming.nix
+```
+
+### Niflheim
+
+```text
+flake.nix
+└── hosts/home/niflheim.nix
+    ├── users/cbrst/home.nix
+    ├── profiles/home/desktop-macos.nix
+    └── profiles/home/development.nix
+```
+
+## Where things belong
+
+| Change | Location |
+| --- | --- |
+| A new reusable feature | A module under `modules/home/` or `modules/nixos/` |
+| Making a feature part of a role | The matching profile |
+| A value only one machine needs | That host's file |
+| A personal preference on every machine | `users/<name>/` or a Home Manager module |
+| A helper function or palette | `lib/` |
+| A package that nixpkgs lacks | `packages/` |
+
+Hardware details never go into reusable modules, and user preferences never go
+into hardware modules.

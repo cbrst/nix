@@ -1,0 +1,73 @@
+---
+title: Niri
+description: The scrolling tiling Wayland compositor configuration and keybindings.
+---
+
+[Niri](https://github.com/YaLTeR/niri) is the Wayland compositor on Asgard. The
+NixOS [desktop module](/modules/nixos/desktop/#niri) installs it; the Home
+Manager module in
+[`modules/home/niri/`](https://github.com/cbrst/nix/tree/main/modules/home/niri)
+writes its configuration.
+
+## How the configuration is built
+
+`config.kdl` is a template. Its window-border gradient and inactive colour come
+from the active [theme family](/architecture/settings-and-themes/). When the
+host sets `gaming.vrrOutput`, an `output` block enabling **on-demand variable
+refresh rate** for that display is prepended; other hosts get no VRR output
+block.
+
+The module also installs the Bibata Modern Classic cursor (24 px) for Wayland,
+GTK, and X11 applications.
+
+## Layout and appearance
+
+- Columns default to half the screen, with ⅓, ½, and ⅔ presets. A single column
+  is centred, and the focused column is centred when it would overflow.
+- 12 px gaps, a 2 px gradient border instead of a focus ring, rounded 8 px
+  corners that also clip window content, and soft shadows. Applications are
+  asked not to draw their own decorations so the rounded geometry stays clean.
+- Tabbed columns show a gradient indicator on the left.
+- Animations run slightly faster than default.
+- Mouse acceleration is off (`flat` profile).
+
+## Window rules
+
+| Windows | Rule |
+| --- | --- |
+| Steam games and Gamescope | Variable refresh rate enabled (when the output allows it) |
+| Firefox and Brave | Open at 80% width |
+| Firefox Picture-in-Picture | Floating, 480×270, in the bottom-right corner |
+| Volume, Bluetooth, and network settings dialogs | Floating |
+
+Noctalia's bar, notifications, panels, dock, and on-screen displays get blur,
+a little noise, and extra saturation. Noctalia is started with
+`QT_QPA_PLATFORMTHEME=gtk3` so it follows the GTK appearance without changing
+the environment for other applications.
+
+## Keybindings
+
+`Mod` is the Super key.
+
+| Keys | Action |
+| --- | --- |
+| `Mod+Return` | Ghostty |
+| `Mod+B` | Firefox |
+| `Mod+Space` | Noctalia launcher |
+| `Mod+V` | Noctalia clipboard history |
+| `Mod+Q` | Close window |
+| `Mod+O` | Overview |
+| `Mod+T` | Toggle tabbed column |
+| `Mod+H/J/K/L` | Focus left, down, up, right |
+| `Mod+Alt+H/J/K/L` | Move column or window |
+| `Mod+F`, `Mod+Shift+F` | Maximise column, full screen |
+| `Mod+Shift+Space` | Toggle floating |
+| `Mod+,` / `Mod+.` | Narrow or widen the column by 10% |
+| `Mod+Alt+,` / `Mod+Alt+.` | Shrink or grow the window height by 10% |
+| `Mod+-` / `Mod+=` | Move the window into or out of the neighbouring column |
+| `Mod+1`…`Mod+8` | Focus workspace |
+| `Mod+Alt+1`…`Mod+Alt+8` | Move the column to a workspace |
+| `Mod+I` / `Mod+N`, `Mod`+wheel | Previous or next workspace |
+| Media keys | Volume and playback through Noctalia, also while locked |
+| `Print`, `Ctrl+Print` | Screenshot the screen or the window |
+| `Mod+Shift+E` | Quit Niri |

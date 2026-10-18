@@ -1,0 +1,50 @@
+---
+title: Introduction
+description: What the repository configures and how it is organised.
+---
+
+This repository configures two related things:
+
+- **Complete NixOS machines**: the operating system, boot loader, services,
+  hardware support, and the desktop session.
+- **One user's environment**: packages, dotfiles, and programs in the home
+  directory, through [Home Manager](https://github.com/nix-community/home-manager).
+  This works on NixOS, on other Linux distributions, and on macOS.
+
+On NixOS, Home Manager runs as part of the system configuration, so a single
+`nixos-rebuild switch` updates both. On macOS and other Linux distributions,
+Home Manager runs on its own and only manages the user's home directory; it
+cannot configure system services or hardware there.
+
+## Repository layout
+
+```text
+flake.nix     Entry point: inputs, shared defaults, and exported configurations
+hosts/        One directory or file per machine; small, machine-specific choices
+profiles/     Named bundles of modules, such as "development" or "gaming"
+modules/      Independent, reusable features (nixos/ for the system, home/ for the user)
+users/        Settings that belong to one person across machines
+lib/          Helper functions and the theme palettes
+packages/     Local derivations, such as RTK and the Kanagawa GTK theme
+overlays/     Local package fixes applied on top of nixpkgs
+docs/         This documentation site
+```
+
+Configuration always flows in one direction:
+
+```text
+flake output -> host -> profile -> module -> package or configuration file
+```
+
+A host never implements a feature itself. It selects profiles and supplies the
+values that cannot be shared, such as the hostname, the CPU architecture, or
+the disk layout. See [Composition](/architecture/composition/) for the
+details.
+
+## Source of truth
+
+The checkout at `/etc/nix-config` is the editable source. Everything that is
+installed, including `~/.config` files, the shell configuration, and system
+services, is generated from it into the read-only `/nix/store` and only changes
+when a new generation is built and activated. Edit the repository, not the
+generated files.

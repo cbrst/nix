@@ -1,0 +1,47 @@
+---
+title: Commit message drafting
+description: Detailed commit messages drafted by Claude Code for Git and jj.
+---
+
+The commit history of this repository doubles as its change documentation:
+each message explains what changed and how. Writing that by hand for every
+change is tedious, so a hook drafts it, and you review and edit it in the
+editor before committing.
+
+## How it works
+
+One script,
+[`modules/home/vcs/hooks/prepare-commit-msg`](https://github.com/cbrst/nix/blob/main/modules/home/vcs/hooks/prepare-commit-msg),
+serves both version-control systems:
+
+- **Git** runs it as a global `prepare-commit-msg` hook. It skips messages that
+  already exist (`-m`, templates, merges, squashes, amends) and drafts from the
+  staged diff.
+- **jj** runs it through `jj-commit-editor`, the configured `ui.editor`. It only
+  drafts when the description is still empty and the editor buffer contains
+  jj's diff below `JJ: ignore-rest`; that diff comes from the
+  `builtin_draft_commit_description_with_diff` template. The draft is placed
+  above the existing buffer content.
+
+The script sends the diff to `claude --print` with the `write-commit-msg` agent
+(see [AI tooling](/modules/home/ai/#agents)). The agent runs on Haiku with
+no tools, no MCP servers, no permission prompts, and no saved session.
+
+## Message style
+
+The prompt asks for:
+
+- An imperative subject of at most 72 characters, preferably `type: summary`
+  with `feat`, `fix`, or `chore`.
+- A body that explains what user-visible behaviour or repository state changed
+  and how the implementation achieves it, including important constraints.
+- Lines wrapped at 80 characters, with no Markdown, trailers, or validation
+  results.
+
+## When drafting fails
+
+Failures never block a commit; the normal editor opens either way. The reason is
+written to stderr and also inserted as a comment at the top of the editor buffer
+(`#` for Git, `JJ:` for jj), because the editor clears the terminal. This covers
+a missing `claude` executable, a non-zero exit (with Claude Code's own output,
+such as "Not logged in"), and an empty response.
