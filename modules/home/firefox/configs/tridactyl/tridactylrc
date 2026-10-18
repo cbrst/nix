@@ -38,10 +38,12 @@ unbind <C-y>
 " Search engines
 "
 set searchurls.amazon https://www.amazon.de/s?k=%s
+set searchurls.duck https://duckduckgo.com/?q=%s
 set searchurls.github https://github.com/search?q=%s
 set searchurls.modrinth https://modrinth.com/mods?q=%s
 set searchurls.nzb https://nzbfinder.ws/search?search=%s
 set searchurls.wayback https://web.archive.org/web/*/%s
+set searchurls.perplexity https://www.perplexity.ai/?q=%s
 
 " Nix searches
 set searchurls.nixpkgs https://search.nixos.org/packages?query=%s
