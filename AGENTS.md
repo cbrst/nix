@@ -116,7 +116,7 @@ Directory ownership:
 | `users/` | Person-specific Home Manager state and compatibility versions |
 | `lib/` | Helper functions and theme data; these are not modules |
 | `packages/` | Local derivations such as RTK and the Kanagawa GTK theme |
-| `docs/` | Astro Starlight documentation site published to GitHub Pages |
+| `docs/` | Fumadocs (Next.js) documentation site published to GitHub Pages |
 | `overlays/` | Reserved/documented overlay location; currently no local overlay implementation |
 
 Do not move host-specific values into reusable profiles or modules. Do not put
@@ -413,10 +413,11 @@ sufficient VCS test.
 
 ## Documentation Site
 
-`docs/` is an Astro Starlight project published to
-<https://cbrst.github.io/nix/>. Pages are Markdown in
-`docs/src/content/docs/` and describe the current configuration; they are not
-a changelog. `.github/workflows/docs-sync.yml` runs Claude Code on pushes to
+`docs/` is a Fumadocs project on Next.js, statically exported and published
+to <https://cbrst.github.io/nix/>. Pages are MDX in `docs/content/docs/`,
+ordered by a `meta.json` per folder, and describe the current configuration;
+they are not a changelog. Internal links omit the `/nix` base path, which
+Next.js adds. `.github/workflows/docs-sync.yml` runs Claude Code on pushes to
 `main` that change configuration, revises the affected pages for the commits
 since `docs/.last-sync`, and opens or updates a `docs/sync` pull request.
 `.github/workflows/docs-deploy.yml` publishes the site when `docs/` changes on
@@ -432,7 +433,8 @@ nix shell nixpkgs#nodejs -c npm ci
 nix shell nixpkgs#nodejs -c npm run build
 ```
 
-`docs/node_modules`, `docs/dist`, and `docs/.astro` are ignored. Install
+`docs/node_modules`, `docs/.next`, `docs/.source`, and `docs/out` are
+ignored. Install
 dependencies only after `.gitignore` is in place, or jj will snapshot them.
 
 ## Change Discipline

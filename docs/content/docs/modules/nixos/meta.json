@@ -1,0 +1,4 @@
+{
+  "title": "NixOS",
+  "pages": ["base", "network", "desktop", "gaming", "secure-boot", "development"]
+}

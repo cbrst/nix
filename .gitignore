@@ -11,5 +11,8 @@ result
 
 # Documentation site
 docs/node_modules
-docs/dist
-docs/.astro
+docs/.next
+docs/.source
+docs/out
+docs/next-env.d.ts
+docs/*.tsbuildinfo

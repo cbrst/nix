@@ -1,0 +1,64 @@
+---
+title: Desktop
+description: Niri, Noctalia and its greeter, PipeWire, fonts, GTK, Nautilus, and desktop applications at the system level.
+---
+
+These modules are bundled by the [desktop profile](/profiles/nixos/#desktop).
+They set up the system side of the desktop; the matching Home Manager modules
+configure the user side.
+
+## Niri
+
+`niri.nix` enables the Niri compositor and installs `xwayland-satellite`, which
+gives X11 applications an Xwayland server on demand. Niri's user service does
+not inherit the default `PATH`, so the session uses the user's own environment.
+The configuration itself is written by the [Niri Home Manager
+module](/modules/home/niri/).
+
+## Noctalia
+
+`noctalia.nix` imports the Noctalia NixOS module, enables the shell with its
+recommended services, and installs `libnotify`. See the
+[Noctalia Home Manager module](/modules/home/noctalia/) for its settings.
+
+`noctalia-greeter.nix` enables the Noctalia Greeter as the login screen, with
+Niri as the default session and an output scale of 1.
+
+## PipeWire
+
+`pipewire.nix` enables PipeWire with ALSA (including 32-bit applications, for
+games) and PulseAudio compatibility.
+
+## Fonts
+
+`fonts.nix` installs Noto, Noto CJK, and Noto Color Emoji as system fallbacks
+and configures fontconfig: slight hinting, greyscale anti-aliasing, and the
+shared sans and monospace families from the
+[settings](/architecture/settings-and-themes/) first in their default lists.
+The 0xProto families themselves come from the Home Manager desktop profile.
+
+## GTK
+
+`gtk.nix` applies one GTK appearance for GTK 3, GTK 4, and dconf: the theme
+named by the active theme family (Adwaita dark for Meowsoot, the locally
+packaged Kanagawa theme for Kanagawa), the Fluent dark icon theme, a dark
+preference, and the shared sans font at 11 pt. Fluent and Papirus icon themes
+are installed.
+
+## Nautilus
+
+`nautilus.nix` installs Nautilus with `nautilus-python`, enables GVfs (trash,
+mounts, and network locations), points Nautilus at the system extension
+directory, and makes it the default handler for folders. The context-menu
+actions are added by the [Home Manager module](/modules/home/desktop-apps/#nautilus).
+
+## Multimedia and archives
+
+`multimedia.nix` installs imv and mpv system-wide. `archives.nix` installs 7-Zip
+(`7zz`).
+
+## 1Password
+
+`1password.nix` enables the 1Password CLI and desktop application, with
+`cbrst` as a polkit policy owner so the app can unlock the CLI and SSH agent
+with system authentication.

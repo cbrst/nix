@@ -1,0 +1,167 @@
+---
+title: Neovim
+description: The default editor, with plugins, language servers, formatters, debuggers, and grammars all owned by Nix.
+---
+
+Neovim is the default editor (`EDITOR=nvim`). The module lives in
+[`modules/home/neovim/`](https://github.com/cbrst/nix/tree/main/modules/home/neovim)
+and is imported by the [development profile](/profiles/home/#development),
+so Asgard, Niflheim, and the templates all get the same setup.
+
+## Ownership: Nix installs, Lua configures
+
+There is no plugin manager such as Lazy.nvim, packer, or Mason, and nothing is
+downloaded when Neovim starts.
+
+- **Nix** (`default.nix`) owns the runtime surface. `programs.neovim.plugins`
+  declares every plugin and every Tree-sitter grammar.
+  `programs.neovim.extraPackages` puts language servers, formatters, debuggers,
+  search tools, and the Claude Code CLI on Neovim's `PATH`. Most of these come
+  from the shared [editor tools](/modules/home/editor-tools/) list.
+- **Lua** (`configs/init.lua` and `configs/lua/`) configures what Nix
+  installed. Home Manager links both into `~/.config/nvim` as read-only store
+  paths.
+
+Adding a Lua `require` for a plugin that is not declared in Nix makes start-up
+fail, so a new plugin, parser, server, or formatter is always added to
+`default.nix` first. Plugins missing from the pinned nixpkgs (NeoJJ, codedocs,
+neo-tree file-nesting rules, and the theme plugins) are built locally from
+pinned sources.
+
+The Python and Ruby providers are disabled. `CONFIG_THEME_FAMILY` is exported
+from the shared [theme settings](/architecture/settings-and-themes/) so the
+Lua side picks the matching colour scheme.
+
+## Start-up order
+
+Start-up is eager and ordered:
+
+```text
+config.globals.setup()      leaders and capability flags
+options
+keymap
+autocmds
+languages.setup()           filetype behaviour
+plugins.setup()             explicit, ordered plugin groups
+config.theme.set_colorscheme()
+```
+
+The colour scheme is applied last because applying one clears the highlight
+groups that Heirline and other UI plugins generate. Within the plugin groups,
+leaders exist before any mappings, Mini Icons provides `nvim-web-devicons`
+compatibility before its consumers load, VCS state is ready before the
+statusline reads it, and Blink and LazyDev initialise before the LSP
+configuration requests their capabilities.
+
+## Editing features
+
+| Area | Plugins and behaviour |
+| --- | --- |
+| Completion | Blink with LazyDev, LSP, paths, LuaSnip, and buffer sources; automatic command-line completion |
+| Language servers | The `vim.lsp.config` / `vim.lsp.enable` API. Servers are enabled only when their executable exists: Bash, Emmet, JSON, Lua, Nix (`nil`), PHP (Phpactor), rumdl, Sass, YAML, Zsh (zshcs), and Python (Zuban). TypeScript uses TypeScript Tools |
+| Formatting | Conform, on save: StyLua for Lua, mdsf then rumdl for Markdown, Ruff for Python, Shellharden then shfmt for Zsh, js-beautify for CSS, Mago for PHP, Prettier as the HTML fallback |
+| Tree-sitter | Every grammar from nixpkgs. The SCSS grammar is patched and regenerated so it understands namespaced mixins and function calls |
+| Debugging | nvim-dap with DAP UI and virtual text. Adapters for Python (debugpy), JavaScript and TypeScript (js-debug), Bash, standalone Lua, and Neovim Lua (one-small-step-for-vimkind). The Bash adapter is also offered for Zsh files but cannot interpret Zsh-only syntax |
+| Annotations | codedocs.nvim generates documentation comments with `<leader>cA` |
+
+## Interface
+
+- **Heirline** draws the global statusline, including Git or jj diff counters.
+- **Telescope** (Ivy layout) handles files, search, buffers, and LSP pickers.
+  Its project root is the nearest `.jj` or `.git` directory.
+- **Neo-tree** shows the file system, buffers, Git status, and symbols, with
+  file nesting and current-file following.
+- **Snacks** provides input, picker, and terminal windows.
+- **Mini** adds text objects, surrounds, pairs, indent scope, icons, and
+  animation. Cursor animation and the cursor line are disabled in terminal
+  buffers because they made typing in TUIs lag.
+- **Which-key** shows the leader groups. Bindings follow Doom Emacs.
+- Dropbar, Outline, Trouble, todo-comments, render-markdown, and
+  nvim-highlight-colors round out the UI.
+- **Auto Dark Mode** switches between the light and dark variant of the theme
+  with the system appearance.
+
+### Leader groups
+
+The leader is `Space`; the local leader is `,`.
+
+| Prefix | Group |
+| --- | --- |
+| `<leader>b` | Buffers |
+| `<leader>c` | Code: actions, rename, format (`cf`), diagnostics |
+| `<leader>d` | Debugging |
+| `<leader>f` | Files: find (`ff`), recent (`fr`), configuration (`fp`) |
+| `<leader>g` | Version control |
+| `<leader>h` | Help |
+| `<leader>o` | Open: project sidebar (`op`), terminals (`ot`, `oT`, `of`), AI (`ol`) |
+| `<leader>s` | Search |
+| `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines |
+| `<leader>w` | Window commands |
+| `<leader>q` | Quit and session |
+
+## Version control
+
+Repository actions use **NeoJJ** in a jj repository and **Neogit** in a plain
+Git repository. A colocated repository counts as jj, because `.jj` wins. The VCS
+layer detects the root asynchronously, caches diff counters for the statusline
+(unstaged tracked changes for Git, the working-copy commit `@` for jj), and
+dispatches the shared actions:
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>gg` | Status |
+| `<leader>gc` | Commit |
+| `<leader>gd` | Diff |
+| `<leader>gf` | Fetch |
+| `<leader>gl` | Log |
+| `<leader>gp` | Push |
+| `<leader>gr` | Rebase |
+| `<leader>gm` | Remotes |
+| `<leader>gb` | Git branches or jj bookmarks |
+| `<leader>gw` | Git worktrees or jj workspaces |
+
+The same actions are available as `:Vcs [action]`. Gitsigns hunk operations
+live under `<leader>gh`, for example `<leader>ghp` to preview, `<leader>ghs` to
+stage, and `<leader>ghr` to revert a hunk. **diffs.nvim** adds syntax-aware and
+intra-line diff highlighting to Neogit, NeoJJ, Gitsigns previews, Telescope
+previews, and conflict markers. Its own `:Diff` command only understands Git,
+so the portable entry point is `<leader>gd`.
+
+## Claude Code
+
+[claudecode.nvim](https://github.com/coder/claudecode.nvim) runs the Claude Code
+CLI in a right-side Snacks terminal and exposes the editor's context (open
+files, selections, diagnostics) through its IDE bridge. The terminal is focused
+and in insert mode as soon as it opens, and the leader mappings that open
+terminals are normal-mode only so typing into Claude Code cannot trigger them.
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>oll` | Toggle Claude Code |
+| `<leader>ola` | Add the file or selection to the context |
+| `<leader>ols` | Pick a Claude Code action |
+| `<leader>oln` | New session |
+| `<leader>olc` | Select a model |
+| `<leader>olr` | Ask Claude Code to edit the selection |
+| `<leader>olR` | Review code |
+
+Avante is still declared and configured as an inactive alternative; its setup
+is disabled.
+
+## Validating changes
+
+The installed `nvim` runs the last activated configuration. To test edits in
+the checkout, load it explicitly:
+
+```bash
+CONFIG_THEME_FAMILY=meowsoot \
+nvim -n --headless \
+  --cmd "set runtimepath^=$PWD/modules/home/neovim/configs" \
+  -u "$PWD/modules/home/neovim/configs/init.lua" \
+  '+qa'
+```
+
+When plugins or executables changed, build a Home Manager generation first and
+add its pack directory with `--cmd "set packpath^=..."`; the exact command is in
+[`AGENTS.md`](https://github.com/cbrst/nix/blob/main/AGENTS.md#neovim-validation-before-activation).
+Format changed Lua with `stylua`.

@@ -20,14 +20,24 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
     steps:
       - uses: actions/checkout@v7
         with:
-          # Full history gives Starlight accurate "last updated" dates.
+          # Full history gives Fumadocs accurate "last updated" dates.
           fetch-depth: 0
-      - uses: withastro/action@v6
+      - uses: actions/setup-node@v7
         with:
-          path: docs
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/out
 
   deploy:
     needs: build

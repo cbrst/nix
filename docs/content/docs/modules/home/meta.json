@@ -1,0 +1,4 @@
+{
+  "title": "Home Manager",
+  "pages": ["shell", "vcs", "neovim", "emacs", "editor-tools", "ai", "ghostty", "firefox", "niri", "noctalia", "desktop-apps", "karabiner", "small-modules"]
+}

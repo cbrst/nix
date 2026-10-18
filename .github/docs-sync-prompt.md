@@ -1,8 +1,9 @@
 # Documentation sync
 
 You maintain the documentation site in `docs/` for this Nix flake. The site is
-an Astro Starlight project; its pages are Markdown or MDX files in
-`docs/src/content/docs/`. Your job is to make those pages describe the
+a Fumadocs (Next.js) project; its pages are MDX files in
+`docs/content/docs/`, and each folder has a `meta.json` that sets its sidebar
+title and page order. Your job is to make those pages describe the
 repository as it is **now**, after the commits in the range you were given.
 
 ## Inputs
@@ -26,11 +27,12 @@ Ignore commits that only touch `docs/`, `.github/`, or `flake.lock`.
   "changed in", dates, or changelog sections. The commit history is the
   changelog.
 - When a commit adds a substantial module or feature with no page, add one in
-  the matching directory with `title`, `description`, and `sidebar.order`
-  frontmatter, and link it from the relevant profile page. Small single-file
-  modules go into `modules/home/small-modules.md` or the closest existing page.
+  the matching directory as `<name>.mdx` with `title` and `description`
+  frontmatter, add `<name>` to the `pages` list in that folder's `meta.json`,
+  and link it from the relevant profile page. Small single-file modules go into
+  `modules/home/small-modules.mdx` or the closest existing page.
 - When something is removed or renamed, remove or rename its documentation and
-  fix every link to it.
+  fix every link to it and every `meta.json` entry.
 - Keep composition graphs, output tables, key tables, and profile lists in sync
   with the source.
 - If nothing user-facing changed, leave the pages alone.
@@ -40,14 +42,19 @@ Ignore commits that only touch `docs/`, `.github/`, or `flake.lock`.
 - Write like the repository's commit bodies: plain, specific prose that says
   what something does, how it does it, and which constraints matter.
 - Use sentence-case headings, short paragraphs, and tables for reference data.
-- Internal links use the site base, for example `/nix/modules/home/neovim/`.
+- Pages are MDX: escape a literal `<` or `{` in prose, or put it in backticks.
+  Use `<Callout type="info">`, `"warn"`, or `"error"` for notes and warnings.
+- Internal links start at the site root without the `/nix` base path, which
+  Next.js adds itself, for example `/modules/home/neovim/`.
   Link to source files as `https://github.com/cbrst/nix/blob/main/<path>`.
 
 ## Rules
 
 - Only modify files under `docs/`. Do not touch `docs/package.json`,
-  `docs/package-lock.json`, or `docs/astro.config.mjs` unless a new top-level
-  sidebar section is genuinely needed.
+  `docs/package-lock.json`, or anything outside `docs/content/` (the app code
+  in `docs/app/`, `docs/components/`, `docs/lib/`, and the Next.js config).
+  Add a new top-level section only when it is genuinely needed, by creating a
+  folder with its own `meta.json` and listing it in `docs/content/docs/meta.json`.
 - Never copy secrets, password hashes, keys, filesystem UUIDs, email addresses,
   or tokens into the documentation.
 - Do not edit `docs/.last-sync`; the workflow updates it.
