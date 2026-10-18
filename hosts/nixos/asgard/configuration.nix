@@ -39,6 +39,11 @@
   # Set timezone
   time.timeZone = "Europe/Berlin";
 
+  # The onboard BCM43602 Wi-Fi is unused (wired eno1). brcmfmac fails to
+  # enter D3 (-EIO), which aborts suspend, and repeated aborted S3 cycles
+  # leave the Navi 31 GPU's SMU unable to resume.
+  boot.blacklistedKernelModules = [ "brcmfmac" ];
+
   # This defines the bootloader used by the system.
   # Since Secure Boot is required, import profiles/nixos/secure-boot.nix
   # for the required toolchain
