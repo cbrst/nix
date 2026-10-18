@@ -139,6 +139,85 @@
 }
 
 /* -------------------------------------------------------------------------- */
+/* Auto-hiding navigation bar                                                 */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * #nav-bar is taken out of the toolbox's layout, so the page always starts
+ * directly below the tab bar and never resizes. The bar is revealed as an
+ * overlay on top of the page instead.
+ *
+ * Customize mode, fullscreen (which has Firefox's own autohide), mini windows,
+ * and popup windows without a toolbar keep the stock layout.
+ */
+:root:not(
+    [customizing],
+    [inFullscreen],
+    [mini-window],
+    [chromehidden~="toolbar"]
+  ) {
+  --my-nav-bar-reveal-delay: 350ms;
+  --my-nav-bar-hide-delay: 250ms;
+  --my-nav-bar-duration: 120ms;
+
+  /*
+   * The toolbox normally sits below the tabbox. Raise it the same way Firefox
+   * does for its floating fullscreen toolbox so the overlay paints above the
+   * page. Nova also clips the toolbox, which would cut off the overlay since
+   * it extends below the toolbox's own box.
+   */
+  #navigator-toolbox {
+    position: relative;
+    z-index: var(--browser-area-z-index-toolbox-while-animating) !important;
+    overflow: visible !important;
+  }
+
+  /*
+   * Hide with clip-path and opacity, not visibility or display. Layout stays
+   * intact, so arrow panels and permission prompts still pass
+   * checkVisibility() and anchor to their buttons and URL bar icons. A clipped
+   * element is not hit-testable, so the hidden bar neither blocks clicks on
+   * the page nor reveals itself when the top of the page is hovered.
+   */
+  #nav-bar {
+    position: absolute !important;
+    inset: 100% 0 auto;
+    border-bottom: 1px solid var(--browser-border);
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    transition:
+      clip-path var(--my-nav-bar-duration) ease-out,
+      opacity var(--my-nav-bar-duration) ease-out;
+    transition-delay: var(--my-nav-bar-hide-delay);
+  }
+
+  /*
+   * Resting on empty tab-strip space or the new-tab button reveals the bar
+   * after a delay. Tabs and tab groups never do. :where() keeps this rule's
+   * specificity below the immediate rule that follows.
+   */
+  #navigator-toolbox:where(
+      :has(#TabsToolbar:hover):not(:has(:is(.tabbrowser-tab, tab-group):hover))
+    )
+    > #nav-bar {
+    clip-path: inset(0);
+    opacity: 1;
+    transition-delay: var(--my-nav-bar-reveal-delay);
+  }
+
+  /*
+   * Show immediately while the revealed bar is hovered, while it has keyboard
+   * focus, or while an anchored panel or menu is open. Arrow panels set
+   * [open] on their anchor before they are positioned.
+   */
+  #navigator-toolbox > #nav-bar:is(:hover, :focus-within, :has([open])) {
+    clip-path: inset(0);
+    opacity: 1;
+    transition-delay: 0s;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Tab groups                                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -216,6 +295,15 @@ tab-group {
       1px solid
       rgb(from var(--tab-group-color-invert) r g b / 0.3);
     border-radius: var(--tab-border-radius);
+
+    /*
+     * Nova gives .tab-group-label a sharper bottom-start corner. Echo it,
+     * widened by the 6px label inset (group padding plus label margin), so the
+     * corners stay concentric.
+     */
+    @media -moz-pref("browser.nova.enabled") {
+      border-end-start-radius: calc(var(--tab-group-label-size) / 8 + 6px);
+    }
   }
 
   /*
