@@ -40,7 +40,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           })}
         />
       </DocsBody>
-      {page.data.lastModified && <PageLastUpdate date={page.data.lastModified} />}
+      <div className="border rounded-lg p-4">
+        {page.data.lastModified && <PageLastUpdate date={page.data.lastModified} />}
+      </div>
     </DocsPage>
   );
 }
