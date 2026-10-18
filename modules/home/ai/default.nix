@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   settings,
   ...
@@ -13,9 +14,55 @@ let
 
   serena = inputs.serena.packages.${pkgs.stdenv.hostPlatform.system}.serena;
 
+  # Shared configuration
+  # agents and rules are shared between Claude Code and OpenCode,
+  # so they get defined here and reused in their respective configurations
+  # to avoid duplication and create a single source of truth
   agentPrompts = {
     dennis = builtins.readFile ./agents/dennis.md;
     writeCommitMessage = builtins.readFile ./agents/write-commit-msg.md;
+  };
+
+  agentRules = {
+    code-style = ''
+      ## Code style guidelines
+
+      - Use consistent formatting
+      - Follow language conventions
+      - When a project has an .editorconfig or some other defined coding
+        standard, use it
+    '';
+    collaboration = ''
+      ## Critical collaboration
+
+      Act as a critical technical collaborator, not an order-taker.
+
+      Before implementing a nontrivial request:
+
+      - Identify material risks, tradeoffs, missing requirements, and better
+        alternatives.
+      - If a request is unsafe, irreversible, underspecified, or likely to
+        create maintenance debt, raise the concern before acting.
+      - Propose a concise plan and wait for approval before changing files
+        or running consequential commands.
+      - Separate facts, assumptions, and recommendations.
+      - Say “I don’t know” or ask for missing information rather than
+        guessing.
+
+      If I insist after a concern has been raised, proceed only after
+      restating the risk and confirming the approach.
+    '';
+    jj-first = ''
+      ## Version control: jj first
+
+      Many repos here are managed with Jujutsu (`jj`), often colocated with
+      Git (so `git status` can show a detached HEAD — that is expected, not
+      a problem to fix). Before running any git status/diff/commit/log
+      command, check whether the repo is jj-managed (e.g. a `.jj` directory,
+      or `jj status` succeeding) and prefer `jj` commands when it is. Load
+      the `idiomatic-jj` skill up front in that case rather than falling
+      back to git habits.
+    '';
   };
 
   themeColor = name: {
@@ -59,19 +106,9 @@ in
     };
     skills = ./skills;
 
-    context = ''
-      ## Version control: jj first
-
-      Many repos here are managed with Jujutsu (`jj`), often colocated with
-      Git (so `git status` can show a detached HEAD — that is expected, not
-      a problem to fix). Before running any git status/diff/commit/log
-      command, check whether the repo is jj-managed (e.g. a `.jj` directory,
-      or `jj status` succeeding) and prefer `jj` commands when it is. Load
-      the `idiomatic-jj` skill up front in that case rather than falling
-      back to git habits.
-    '';
-
     hooks.rtk-rewrite = inputs.rtk-src + "/hooks/claude/rtk-rewrite.sh";
+
+    rules = agentRules;
 
     settings = {
       effortLevel = "medium";
@@ -110,6 +147,31 @@ in
         reserved = 10000;
       };
     };
+
+    agents = {
+      dennis = ''
+        ---
+        description: Designs, implements, visually inspects, and iteratively improves polished web UIs
+        mode: primary
+        ---
+        ${agentPrompts.dennis}
+      '';
+      write-commit-msg = ''
+        ---
+        description: Writes a commit message for the currently staged files
+        mode: primary
+        hidden: true
+        model: openai/gpt-5.6-luna
+        permission:
+          edit: deny
+          bash: deny
+        ---
+        ${agentPrompts.writeCommitMessage}
+      '';
+    };
+    skills = ./skills;
+
+    context = lib.concatStringsSep "\n" (lib.attrValues agentRules);
 
     tui.theme = "config-theme";
     themes.config-theme.theme = {
@@ -167,29 +229,6 @@ in
       syntaxPunctuation = themeColor "syntaxPunctuation";
       thinkingOpacity = 0.6;
     };
-
-    agents = {
-      dennis = ''
-        ---
-        description: Designs, implements, visually inspects, and iteratively improves polished web UIs
-        mode: primary
-        ---
-        ${agentPrompts.dennis}
-      '';
-      write-commit-msg = ''
-        ---
-        description: Writes a commit message for the currently staged files
-        mode: primary
-        hidden: true
-        model: openai/gpt-5.6-luna
-        permission:
-          edit: deny
-          bash: deny
-        ---
-        ${agentPrompts.writeCommitMessage}
-      '';
-    };
-    skills = ./skills;
   };
 
   programs.mcp = {
