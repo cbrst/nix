@@ -16,9 +16,9 @@ layout {
 	default-column-width { proportion 0.5; }
 
 	focus-ring {
-		off
-		width 2
-		active-gradient from="@active-from@" to="@active-to@" angle=45
+		on
+		width 1
+		active-color "#000000ff"
 		inactive-color "@inactive@"
 	}
 
@@ -36,7 +36,7 @@ layout {
 		softness 24
 		spread 3
 		offset x=0 y=4
-		color "#00000080"
+		color "#000000d0"
 	}
 
 	tab-indicator {
@@ -189,6 +189,8 @@ binds {
 
 	Mod+I { focus-workspace-up; }
 	Mod+N { focus-workspace-down; }
+	Mod+Alt+I { move-column-to-workspace-up; }
+	Mod+Alt+N { move-column-to-workspace-down; }
 
 	Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
 	Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
@@ -201,7 +203,7 @@ binds {
 	XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up"; }
 	XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
 	XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
-	XF86AudioPrev allow-when-locked=true { spawn "noctalia" "msg" "media" "prev"; }
+	XF86AudioPrev allow-when-locked=true { spawn "noctalia" "msg" "media" "previous"; }
 	XF86AudioPlay allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
 	XF86AudioNext allow-when-locked=true { spawn "noctalia" "msg" "media" "next"; }
 
