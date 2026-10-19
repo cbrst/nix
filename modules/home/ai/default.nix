@@ -84,11 +84,15 @@ let
 in
 {
   home.packages = [
+    pkgs.agent-browser
     pkgs.playwright
     pkgs.playwright-test
     rtk
     serena
   ];
+
+  # Claude likes to thave the GitHub CLI
+  programs.gh.enable = true;
 
   programs.claude-code = {
     enable = true;
