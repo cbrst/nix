@@ -44,6 +44,20 @@
   # leave the Navi 31 GPU's SMU unable to resume.
   boot.blacklistedKernelModules = [ "brcmfmac" ];
 
+  # Let the logged-in user open the VIA keyboard's hidraw node, which
+  # WebHID (usevia.app) needs to configure it from the browser. This must
+  # sort before 73-seat-late.rules, which turns the uaccess tag into an ACL;
+  # services.udev.extraRules lands in 99-local.rules, which is too late.
+  services.udev.packages = [
+    (pkgs.writeTextFile {
+      name = "via-keyboard-udev-rules";
+      destination = "/etc/udev/rules.d/60-via-keyboard.rules";
+      text = ''
+        KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="320f", TAG+="uaccess"
+      '';
+    })
+  ];
+
   # This defines the bootloader used by the system.
   # Since Secure Boot is required, import profiles/nixos/secure-boot.nix
   # for the required toolchain
