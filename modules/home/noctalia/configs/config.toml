@@ -51,7 +51,7 @@ order = [ "main" ]
         radius = 6.0
 
 [control_center]
-hidden_tabs = [ "power" ]
+hidden_tabs = []
 show_shortcut_labels = false
 sidebar = "full"
 sidebar_section = "none"
@@ -176,17 +176,11 @@ send_open_near_click = true
 send_position = "auto"
 
 [plugin_settings."davemhammer/tailscale"]
-manager_position = "top_right"
+manager_position = "auto"
 notify_on_peer_change = false
 
 [plugins]
-enabled = [
-    "liamwh/emoji-picker",
-    "autumn/network-toolkit",
-    "cleboost/ssh-launcher",
-    "davemhammer/tailscale",
-    "carlocamacho/taildrop"
-]
+enabled = [ "liamwh/emoji-picker", "cleboost/ssh-launcher", "carlocamacho/taildrop" ]
 
 [shell]
 avatar_path = "/home/cbrst/.face.png"
@@ -218,10 +212,11 @@ time_format = "{:%H:%M}"
     [shell.panel]
     borders = false
     clipboard_placement = "floating"
-    clipboard_position = "top_right"
+    clipboard_position = "auto"
     control_center_placement = "floating"
     launcher_placement = "floating"
     launcher_position = "center"
+    open_near_click_clipboard = true
     open_near_click_control_center = true
     open_near_click_session = true
     open_near_click_wallpaper = true
@@ -249,15 +244,17 @@ custom_palette = "palette"
 mode = "dark"
 pure_black_dark = false
 source = "custom"
+wallpaper_scheme = "m3-content"
 
     [theme.templates]
     builtin_ids = [ "niri" ]
 
 [wallpaper]
-directory = "~/Pictures/Wallpapers"
+directory = "/home/cbrst/Pictures"
+edge_smoothness = 0.99999997764825821
 enabled = true
 fill_mode = "crop"
-transition = [ "fade", "zoom" ]
+transition = [ "fade" ]
 transition_duration = 400
 transition_on_startup = true
 
@@ -265,13 +262,13 @@ transition_on_startup = true
     enabled = false
 
     [wallpaper.default]
-    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-gpmv73.png"
+    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-8o3o7k.jpg"
 
     [wallpaper.last]
-    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-gpmv73.png"
+    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-8o3o7k.jpg"
 
     [wallpaper.monitors.DP-1]
-    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-gpmv73.png"
+    path = "/home/cbrst/Pictures/Wallpapers/wallhaven-8o3o7k.jpg"
 
 [widget.active_window]
 display = "text_only"
