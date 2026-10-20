@@ -24,8 +24,8 @@ GTK, and X11 applications.
 
 - Columns default to half the screen, with ⅓, ½, and ⅔ presets. A single column
   is centred, and the focused column is centred when it would overflow.
-- 12 px gaps, a 2 px gradient border instead of a focus ring, rounded 8 px
-  corners that also clip window content, and soft shadows. Applications are
+- 12 px gaps, a 1 px focus ring (black when active, themed when inactive),
+  rounded 8 px corners that also clip window content, and soft shadows. Applications are
   asked not to draw their own decorations so the rounded geometry stays clean.
 - Tabbed columns show a gradient indicator on the left.
 - Animations run slightly faster than default.
@@ -68,6 +68,7 @@ the environment for other applications.
 | `Mod+1`…`Mod+8` | Focus workspace |
 | `Mod+Alt+1`…`Mod+Alt+8` | Move the column to a workspace |
 | `Mod+I` / `Mod+N`, `Mod`+wheel | Previous or next workspace |
+| `Mod+Alt+I` / `Mod+Alt+N` | Move the column to the previous or next workspace |
 | Media keys | Volume and playback through Noctalia, also while locked |
 | `Print`, `Ctrl+Print` | Screenshot the screen or the window |
 | `Mod+Shift+E` | Quit Niri |
