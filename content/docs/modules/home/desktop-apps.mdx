@@ -34,6 +34,27 @@ by path, it first shows a staged copy and then the final file.
 - **mpv** is the video player, with the [uosc](https://github.com/tomasklaen/uosc)
   interface.
 
+## Helium
+
+[`modules/home/helium/`](https://github.com/cbrst/nix/tree/main/modules/home/helium)
+installs the Helium browser from the NUR package and generates a Vimium-C
+settings backup at `~/.config/vimium-c/settings.json`.
+
+Vimium-C cannot read a configuration file, so the JSON is a backup to import by
+hand through its options page (Backup/Restore). It carries:
+
+- key mappings and search engines, from plain text files with one entry per
+  line that Nix splits into arrays;
+- a user CSS theme rendered from the light and dark palettes of the selected
+  [theme family](/architecture/settings-and-themes/);
+- smooth scrolling, next/previous link patterns, and an exclusion rule for
+  Monkeytype.
+
+The backup's `time` field is set above 10000 because Vimium-C rejects files
+whose modification time looks like the Nix store epoch of 1. `mappings.txt`
+records the Tridactyl bindings that were not ported, such as the yt-dlp and
+wallhaven features, which need capabilities Vimium-C lacks.
+
 ## Other applications
 
 | Module | Provides |
