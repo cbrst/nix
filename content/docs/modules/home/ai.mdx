@@ -40,6 +40,15 @@ Everything in `skills/` is installed as Claude Code skills, including:
 - A set of front-end design skills (brand kits, image-to-code, minimalist,
   brutalist, motion, and web interface guidelines) used together with `dennis`.
 
+### Plugins
+
+Claude Code plugins (mods) are pinned as non-flake inputs: savvy-progress,
+cache-tax, blast-radius, replay-theater, and filetree. Each is copied into a
+real directory and linked into `~/.claude/skills/` with `home.file`, not
+`programs.claude-code.plugins`, because that option wraps plugins in symlinks
+that Claude Code rejects ("hooks path escapes plugin directory"). Update them with
+`nix flake update <input>`.
+
 ## Shared rules
 
 `agentRules` is a single attribute set of instruction sections. Claude Code
