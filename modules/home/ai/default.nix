@@ -77,6 +77,21 @@ let
     '';
   };
 
+  # Claude Code plugins. These bypass `programs.claude-code.plugins`, which
+  # wraps each plugin in a farm of per-directory symlinks that Claude Code
+  # rejects ("hooks path escapes plugin directory"). Each is instead copied
+  # into a real directory and linked into skills/ as a personal plugin.
+  plugins = {
+    savvy-progress = "${inputs.claude-kit}/plugins/savvy-progress";
+    cache-tax = inputs.cache-tax;
+    blast-radius = "${inputs.claude-code-playground}/claude-code/mods/blast-radius";
+    replay-theater = "${inputs.claude-code-playground}/claude-code/mods/replay-theater";
+    filetree = inputs.claude-code-filetree;
+  };
+
+  pluginDir =
+    name: src: pkgs.runCommand "claude-plugin-${name}" { } "cp -rL --no-preserve=mode ${src} $out";
+
   themeColor = name: {
     dark = settings.theme.dark.${name};
     light = settings.theme.light.${name};
@@ -90,6 +105,13 @@ in
     rtk
     serena
   ];
+
+  home.file = lib.mapAttrs' (
+    name: src:
+    lib.nameValuePair "${config.programs.claude-code.configDir}/skills/${name}" {
+      source = pluginDir name src;
+    }
+  ) plugins;
 
   # Claude likes to thave the GitHub CLI
   programs.gh.enable = true;

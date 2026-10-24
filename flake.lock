@@ -49,6 +49,70 @@
         "type": "github"
       }
     },
+    "cache-tax": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792647102,
+        "narHash": "sha256-XizQA4ijhcLThwjWbByvwTx88pivf2M7gnYWokukK7I=",
+        "owner": "karanb192",
+        "repo": "cache-tax",
+        "rev": "e4940afcc62c109bd667bae1b996bee765021759",
+        "type": "github"
+      },
+      "original": {
+        "owner": "karanb192",
+        "repo": "cache-tax",
+        "type": "github"
+      }
+    },
+    "claude-code-filetree": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792775680,
+        "narHash": "sha256-2mUbOC2O2yM9RZpu76Ce74lsoZE/c82FrwHJWdFMv90=",
+        "owner": "data-goblin",
+        "repo": "claude-code-filetree",
+        "rev": "2489b4e4e7ffc3f5fac39aff108071380cae1f09",
+        "type": "github"
+      },
+      "original": {
+        "owner": "data-goblin",
+        "repo": "claude-code-filetree",
+        "type": "github"
+      }
+    },
+    "claude-code-playground": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790871117,
+        "narHash": "sha256-rOT2rtXNPayZQEkd2Gbr+9dxClaloxAOoOlDcZp3VQY=",
+        "owner": "anthropics",
+        "repo": "claude-code-playground",
+        "rev": "569c5283d9a0a7ee7938df85bb32e4f48cbb8c86",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anthropics",
+        "repo": "claude-code-playground",
+        "type": "github"
+      }
+    },
+    "claude-kit": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791840518,
+        "narHash": "sha256-JbCloQU/u0hm9QtUVCQwOFBy0NDbtXMYO9yNPhPMgBw=",
+        "owner": "JohnnyVizz",
+        "repo": "claude-kit",
+        "rev": "c871c153ead54ad9547cc717d0f3e5a676c73986",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JohnnyVizz",
+        "repo": "claude-kit",
+        "type": "github"
+      }
+    },
     "corefonts": {
       "flake": false,
       "locked": {
@@ -515,6 +579,10 @@
       "inputs": {
         "affinity-nix": "affinity-nix",
         "brave-origin": "brave-origin",
+        "cache-tax": "cache-tax",
+        "claude-code-filetree": "claude-code-filetree",
+        "claude-code-playground": "claude-code-playground",
+        "claude-kit": "claude-kit",
         "home-manager": "home-manager",
         "kanagawa": "kanagawa",
         "meowsoot": "meowsoot",

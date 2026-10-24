@@ -51,6 +51,27 @@
       flake = false;
     };
 
+    # Claude Code plugins (linked via programs.claude-code.plugins)
+    claude-kit = {
+      url = "github:JohnnyVizz/claude-kit";
+      flake = false;
+    };
+
+    cache-tax = {
+      url = "github:karanb192/cache-tax";
+      flake = false;
+    };
+
+    claude-code-playground = {
+      url = "github:anthropics/claude-code-playground";
+      flake = false;
+    };
+
+    claude-code-filetree = {
+      url = "github:data-goblin/claude-code-filetree";
+      flake = false;
+    };
+
     # Add meowsoot as input to get the ghostty theme
     meowsoot = {
       url = "github:marekh19/meowsoot.nvim";
