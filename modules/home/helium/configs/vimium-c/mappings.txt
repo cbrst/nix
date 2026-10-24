@@ -1,0 +1,11 @@
+# Ported from tridactylrc
+# yf: copy a link's URL via hints
+map yf LinkHints.activateCopyLinkUrl
+
+# <C-e>/<C-y> duplicate j/k
+unmap <c-e>
+unmap <c-y>
+
+# Not ported (no Vimium-C equivalent): dlvid/yt-dlp (needs native messaging),
+# wallhaven autocmds and filter toggles, git clone yank (,g / ,G),
+# DuckDuckGo/YouTube per-site hint binds.

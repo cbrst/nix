@@ -1,0 +1,13 @@
+amazon: https://www.amazon.de/s?k=%s
+duck: https://duckduckgo.com/?q=%s
+modrinth: https://modrinth.com/mods?q=%s
+nzb: https://nzbfinder.ws/search?search=%s
+wayback: https://web.archive.org/web/*/%s
+perplexity: https://www.perplexity.ai/?q=%s
+ciu: https://caniuse.com/?search=%s
+github: https://github.com/search?q=%s
+mdn: https://developer.mozilla.org/en-US/search?q=%s
+nixpkgs: https://search.nixos.org/packages?query=%s
+nixopts: https://search.nixos.org/options?query=%s
+nixhm: https://home-manager-options.extranix.com/?query=%s
+nixnur: https://nur.nix-community.org/?query=%s

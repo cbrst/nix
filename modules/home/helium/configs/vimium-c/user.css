@@ -1,0 +1,19 @@
+/* Generated from the selected declarative theme family. */
+.LH {
+  background: @dark-accent@;
+  color: @dark-accent-foreground@;
+  border: 1px solid @dark-border@;
+}
+.LH .MC {
+  color: @dark-foreground@;
+}
+@media (prefers-color-scheme: light) {
+  .LH {
+    background: @light-accent@;
+    color: @light-accent-foreground@;
+    border-color: @light-border@;
+  }
+  .LH .MC {
+    color: @light-foreground@;
+  }
+}

@@ -5,6 +5,7 @@
     ../../modules/home/affinity
     ../../modules/home/brave-origin
     ../../modules/home/firefox
+    ../../modules/home/helium
     ../../modules/home/imv
     ../../modules/home/mpv
     ../../modules/home/nautilus
