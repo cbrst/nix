@@ -1,6 +1,6 @@
 ---
 title: AI tooling
-description: Claude Code, its agents and skills, Serena, RTK, and the inactive OpenCode setup.
+description: Claude Code, its agents, skills and plugins, Serena, RTK, and the inactive OpenCode setup.
 ---
 
 [`modules/home/ai/`](https://github.com/cbrst/nix/tree/main/modules/home/ai)
@@ -42,12 +42,201 @@ Everything in `skills/` is installed as Claude Code skills, including:
 
 ### Plugins
 
-Claude Code plugins (mods) are pinned as non-flake inputs: savvy-progress,
-cache-tax, blast-radius, replay-theater, and filetree. Each is copied into a
-real directory and linked into `~/.claude/skills/` with `home.file`, not
-`programs.claude-code.plugins`, because that option wraps plugins in symlinks
-that Claude Code rejects ("hooks path escapes plugin directory"). Update them with
-`nix flake update <input>`.
+Five third-party Claude Code plugins add interface features, called mods. They
+need Claude Code 2.1.287 or later, where mods load by default. Local settings,
+safe mode, or organization policy can still prevent them from loading.
+
+| Plugin | Adds | Source |
+| --- | --- | --- |
+| [savvy-progress](#savvy-progress) | Progress bar and subagent panel | [JohnnyVizz/claude-kit](https://github.com/JohnnyVizz/claude-kit) (`plugins/savvy-progress`) |
+| [cache-tax](#cache-tax) | Prompt-cache keep-warm and cold-send guard | [karanb192/cache-tax](https://github.com/karanb192/cache-tax) |
+| [blast-radius](#blast-radius) | Confirmation pane for destructive shell commands | [anthropics/claude-code-playground](https://github.com/anthropics/claude-code-playground) (`claude-code/mods/blast-radius`) |
+| [replay-theater](#replay-theater) | Step-by-step review of the last turn's edits | [anthropics/claude-code-playground](https://github.com/anthropics/claude-code-playground) (`claude-code/mods/replay-theater`) |
+| [filetree](#filetree) | IDE-style file tree sidebar | [data-goblin/claude-code-filetree](https://github.com/data-goblin/claude-code-filetree) |
+
+#### How they are installed
+
+Each plugin is a non-flake input in `flake.nix` (`claude-kit`, `cache-tax`,
+`claude-code-playground`, `claude-code-filetree`), so its revision is pinned in
+`flake.lock`. `modules/home/ai/default.nix` copies each one into a real store
+directory and links it into `~/.claude/skills/<name>` with `home.file`. Claude
+Code loads it as a personal plugin, with no `claude plugin install` or
+marketplace step.
+
+The `programs.claude-code.plugins` option is not used. It wraps every plugin in a
+farm of per-directory symlinks, and Claude Code rejects those with "hooks path
+escapes plugin directory". To update plugins, run `nix flake update <input>`.
+After a rebuild, restart Claude Code or run `/reload-plugins`.
+
+#### savvy-progress
+
+A progress bar above the prompt and a live panel of subagents. It was written for
+the `savvy-flow` skill, which is not installed here, but it also tracks any
+other subagents.
+
+- **Progress bar.** Shows a flow's title, phase, and accepted tasks out of
+  planned, plus a button with the crew size that opens the panel. It appears
+  only once something reports progress or a `savvy-*` worker starts, so it stays
+  hidden in ordinary sessions.
+- **Agents panel.** Lists running, finished, and planned subagents with model,
+  effort, task progress, context use, estimated cost, and elapsed time. Each
+  worker tier has an animated figure; `prefers-reduced-motion` stops the
+  animation.
+- **Commands.** `/agents-info` toggles the panel and `/agents-info open` opens
+  it or brings it forward without toggling.
+- **Tools.** It registers two MCP tools: `progress`, which only the main session
+  may call to report the plan, phase, and accepted tasks (calls from subagents
+  are ignored), and `step`, which workers use to report their own steps. These
+  appear in Claude's tool list as `mcp__savvy-progress__*`.
+- **Cost.** An estimate from token counts and a built-in price table (list prices
+  as of 2026-10-10), not a bill. Cache writes are priced at the 1-hour rate, so
+  a session that writes 5-minute cache entries is overestimated.
+- **Settings** (in `/config`). `language` is `auto` (default), `en`, `ru`, or
+  `he`; Hebrew draws right to left. `autoOpen` is `savvy` (default), which opens
+  the panel when a `savvy-*` worker starts or a plan is reported, or `any`,
+  which also opens it once per session for any other subagent.
+
+#### cache-tax
+
+Keeps Claude Code's prompt cache warm during breaks and stops expensive cold
+sends. When the cached prefix expires, even a short message makes Claude Code
+rewrite the whole context at the cache-write price, which can cost several
+dollars on a large session.
+
+- **Keep-warm.** `/keepwarm` arms a bounded window. After 50 idle minutes, a
+  timer inside Claude Code sends one tool-less fork over the session transcript,
+  which reads the cache and resets its lifetime. After each ping it checks the
+  usage numbers and stops if the cache read nothing or wrote at least 10% of what
+  it read. A busy API (429, 529, 5xx) is retried after 1, 2, and 4 minutes while
+  the retry can still land before the cache goes cold.
+- **Cold-send guard.** For a context of at least 50,000 tokens, if its one-hour
+  clock says the cache is cold, the guard drops your message once and shows the
+  estimated rewrite cost. Send it again to pay, or `/clear` and start from a
+  note. Prompts nobody typed, such as a background task notification, go
+  through and the price is logged. After a detected cold write it arms keepwarm
+  for at least three hours.
+- **Status row.** While keepwarm is armed, a row above the prompt shows a cube
+  that is green when warm, orange when cold, and grey before the first turn or
+  after compaction. The row also says `warm`, `cold`, or `unknown`, plus the
+  window, next ping, and last readback. These are estimates from the one-hour
+  clock, not a server-side check. Set `NO_COLOR` before starting the session for
+  a text-only icon.
+- **Commands.** `/keepwarm` (six hours), `/keepwarm 90m` (your own window),
+  `/keepwarm always` (every session until six hours after its last turn,
+  remembered across sessions), `/keepwarm status`, `/keepwarm off` (stop and turn
+  `always` off), `/cache-tax` (the cache estimate and this session's cold-write
+  tally), and `/cache-tax guard warn|refuse` (show the price and send, or drop a
+  cold send once).
+- **Requirements and costs.** It needs a one-hour main cache. Included
+  subscription usage has that by default; API-key, usage-credit, and
+  cloud-provider sessions default to five minutes and need `promptCacheTtl` set
+  to `"1h"`. Pings are paid tokens, including uncapped output. On a subscription
+  the dollar figures are a yardstick, and how cache reads count against the
+  5-hour and weekly limits is undocumented, so watch your rate-limit display
+  during the first window.
+- **Reach.** The README classifies it as able to drive Claude. It sees each
+  prompt's first character to detect slash commands, but never stores or logs
+  prompt text. The only thing that leaves the machine is the fork request, with a
+  fixed one-line prompt.
+- **Do not combine it** with the separate settings-hook version of cache-tax, or
+  every cold send is guarded twice.
+
+#### blast-radius
+
+Holds a risky Bash command and shows what it would change before it runs. Claude
+Code pauses the call and opens a pane with **Proceed** and **Cancel** buttons. If
+you cancel, Claude receives the refusal and the reason.
+
+| Command | What the pane shows |
+| --- | --- |
+| `rm -r`, `rm -f`, `rm -rf` | Files that would be deleted, with the count and total size; globs and `~` are expanded |
+| `git reset --hard` | Files with uncommitted changes |
+| `git checkout -- .`, `git restore .` | Files with unstaged changes |
+| `git clean` | Untracked paths it would remove (from `git clean -n`) |
+| `git push --force` and variants | Remote commits your HEAD lacks, which the push would drop |
+| `manage.py migrate`, `db:migrate`, `alembic upgrade`, `prisma migrate` | Pending migrations, from the tool's own status command |
+
+Other commands run unchanged. The mod follows `cd`, `pushd`/`popd`, and `git -C`
+earlier on the same line and measures in that folder.
+
+- **Using it.** Press `1` to proceed or `2` to cancel, click a button, or Tab to
+  one and press Enter. Cancel has focus when the pane opens, so Enter alone
+  refuses the command. No answer for 10 minutes, or Esc, also refuses it.
+- **Layout.** In a terminal about 144 columns wide or more the report is a side
+  pane. In a narrower one it appears in the band above the prompt, which only one
+  mod can use at a time. If another mod holds the band, the buttons may not
+  show and the command is refused after 10 minutes.
+- **Requires** `bash`, `git`, `find`, and `du` on `PATH`, plus the project's own
+  tool for migration previews.
+- **Limits.** It reads the command text and does not fully parse the shell.
+  `$(...)`, aliases, `eval`, `bash -c "…"`, `xargs rm`, `find -delete`, scripts
+  that call `rm`, and wrappers like `timeout 5 rm` are not caught. It only watches
+  the Bash tool, holds one command at a time, and does not sandbox: after Proceed
+  the whole line runs as written. It is a safety net, not a permission system; use
+  Claude Code permission rules for a hard block.
+- **RTK interaction.** The [RTK hook](#claude-code) rewrites Bash commands on
+  `PreToolUse`. Whether blast-radius sees the original or the rewritten command
+  depends on hook order, and this has not been tested here. If a destructive
+  command passes without a pane, that is the first thing to check.
+
+#### replay-theater
+
+Records the file edits Claude makes during a turn and lets you review them one
+diff at a time afterwards. It only observes: it never blocks, changes, or delays
+an edit.
+
+- **Recording.** Each Edit, Write, and MultiEdit call is captured with its file
+  and the text before and after. Edits made by subagents are included in the main
+  turn's replay.
+- **Opening it.** When a turn that edited files ends, a hint appears above the
+  prompt, such as `▶ Replay: 5 edits (press r)`. Type `/replay`, or press
+  `ctrl+x` then `Tab` to focus the band and press `r`.
+- **In the pane.** It shows the file, the tool, added and removed line counts, and
+  a red and green diff, with a strip of numbered steps. `n` goes to the next step,
+  `p` to the previous, and `c` or Esc closes it. The Prev, Next, and Close buttons
+  also respond to the mouse.
+- **Limits.** Each step shows at most 12 lines with one line of context around
+  each change, and no file line numbers. An Edit diff compares `old_string` with
+  `new_string`, not the whole file. A Write that replaces a file over 400 lines is
+  shown as all removed then all added. An edit you deny or that fails still
+  appears. The replay lives in memory, so it is lost when Claude Code restarts or
+  the plugin reloads, and a turn with no edits keeps the previous replay.
+- **Shared band.** The hint uses the same band above the prompt as blast-radius
+  and cache-tax. If several mods draw there, only one shows.
+
+#### filetree
+
+An IDE-style file tree in the right sidebar that shows what Claude is doing.
+
+- **Tree.** Follows the working directory, or `/filetree <path>` pins another
+  folder. Search, including unopened folders, with `s`. Move with the arrow keys
+  or `j`/`k`/`h`/`l`; `o` or Enter opens a file or toggles a folder.
+- **Git.** Files and folders are colored by status, modified files show `+N -N`
+  line counts, folders show `?:N M:N D:N` totals, and the header shows the branch,
+  upstream, and ahead/behind. Operations run through `git` and `gh` (commit, push,
+  pull, checkout, merge, PR) appear as a status line at the bottom. `d` on a
+  changed file or folder shows its diff, in the pane or in a diff tool set under
+  **Diff with**.
+- **Claude activity.** Files Claude reads or searches shimmer purple, writes
+  orange, and commits green, and collapsed folders open to show the file. **Follow
+  Claude** scrolls the tree to them.
+- **Context.** The selected file is passed to Claude through a `prompt.submit`
+  hook, and `@path` mentions in a prompt reveal that file in the tree.
+- **Other.** Folder and file sizes (the `Σ` header button), a preview pane with
+  rendered Markdown and highlighted code, Nerd Font icons with a Unicode
+  fallback, a light palette in light terminals, and your own colors through the
+  **Palette** setting.
+- **Commands.** `/filetree` shows or hides the pane and `/filetree open` opens it
+  or brings it forward without hiding it.
+- **Settings** (in `/config` under filetree): Claude activity, Follow Claude,
+  Open at start, Right column (`date`, `age`, or `size`), Hints, Search spacing,
+  Shortcut row, Open with, Binary files, Edit with, Diff with, Ignore, Palette,
+  and Glyphs.
+- **Requirements.** In a terminal the pane needs the fullscreen layout
+  (`/tui fullscreen`) and a window at least 110 columns wide. Without the
+  fullscreen layout it does not show. `git` is needed for status, `gh` for GitHub
+  operations, and `du` for folder sizes. Terminal editors need tmux or herdr, and
+  mouse row clicks in herdr need 0.9.1 or later.
 
 ## Shared rules
 
