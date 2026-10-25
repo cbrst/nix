@@ -46,8 +46,9 @@ local function wrap(text, width)
 end
 
 -- Drawn once per session: the Pokémon pane measures this pane by resolving it
--- again, and a resize should not reshuffle the quote either.
-local quote = fortunes[math.random(#fortunes)]
+-- again, and a resize should not reshuffle the quote either. LuaJIT's
+-- math.random starts from a fixed seed, so pick by the clock instead.
+local quote = fortunes[vim.uv.hrtime() % #fortunes + 1]
 
 local function fortune()
 	return {
