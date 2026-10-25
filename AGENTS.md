@@ -253,11 +253,11 @@ Unknown names and wrong types fail evaluation; `spec.nix` also rejects grammar
 names missing from `builtGrammars` and language lists that differ between
 `options.nix` and `tools.nix`.
 
-The Lua configuration learns the result from a generated `flake_features` module
-(built like `flake_palette`), read through `config/features.lua`. That module
-falls back to "everything enabled" when `flake_features` is absent, as it is in
-an older installed generation. Lua that sets up a feature-specific plugin or
-tool must check it first:
+The Lua configuration learns the result from a generated
+`init6.generated.features` module (built like `init6.generated.palette`), read
+through `init6.config.features`. That module falls back to "everything enabled"
+when the generated module is absent, as it is in an older installed generation.
+Lua that sets up a feature-specific plugin or tool must check it first:
 
 - `features.ai`: claudecode setup, the Heirline Claude segment, the dashboard
   key, and the Snacks `<a-o>` picker action.
@@ -277,8 +277,8 @@ Two consumers wrap it:
 
 `package.nix` mirrors Home Manager's wrapping (`extraPackages` appended with
 `--suffix PATH`, Python and Ruby providers off). It also sets `NVIM_APPNAME` to
-`nvim-flake` as a default, so shada, undo, swap and state stay separate from any
-other Neovim on the machine. It sets `vim.g.flake_config_dir` to the bundled
+`init6` as a default, so shada, undo, swap and state stay separate from any
+other Neovim on the machine. It sets `vim.g.init6_config_dir` to the bundled
 configuration (the Telescope "find file in Neovim config" mapping uses it), and
 it creates `stdpath("data")` on start because a fresh machine lacks it. Rules:
 
@@ -286,7 +286,7 @@ it creates `stdpath("data")` on start because a fresh machine lacks it. Rules:
   `spec.nix`, not in `default.nix` or `package.nix`. A change there must keep
   both consumers working.
 - Lua must not assume `~/.config/nvim`. Use
-  `vim.g.flake_config_dir or vim.fn.stdpath("config")` when the configuration
+  `vim.g.init6_config_dir or vim.fn.stdpath("config")` when the configuration
   directory itself is needed.
 - Home Manager-only files (`xdg.configFile`, such as the Mago and rumdl
   fallbacks in `default.nix`) are absent from the standalone package.
@@ -319,12 +319,12 @@ Nix owns the Neovim runtime surface:
   source under `modules/home/neovim/configs/` into `~/.config/nvim` through
   immutable store-backed links. `default.nix` also writes the Mago and rumdl
   fallback configurations (project-local configuration wins).
-- The generated `flake-palette` plugin exposes the shared theme palette from
-  `lib/themes.nix` as the `flake_palette` Lua module. The `flake` colorscheme
-  (`configs/colors/flake.lua`, implemented in `plugins/theme/flake/`) builds
-  every highlight group from it; there are no third-party colorscheme plugins.
-  New plugins with their own highlight groups get entries in
-  `plugins/theme/flake/groups/`.
+- The generated `init6-palette` plugin exposes the shared theme palette from
+  `lib/themes.nix` as the `init6.generated.palette` Lua module. The `init6`
+  colorscheme (`configs/colors/init6.lua`, implemented in
+  `plugins/theme/colorscheme/`) builds every highlight group from it; there are
+  no third-party colorscheme plugins. New plugins with their own highlight
+  groups get entries in `plugins/theme/colorscheme/groups/`.
 - Python and Ruby providers are intentionally disabled.
 
 When adding a plugin or parser, update `spec.nix`; for an LSP server, formatter,
@@ -342,38 +342,38 @@ The entry point is `modules/home/neovim/configs/init.lua`. Startup is eager and
 ordered:
 
 ```text
-config.globals.setup()
-options
-keymap
-autocmds
-languages.setup()
-plugins.setup()
-config.theme.set_colorscheme()
+init6.config.globals.setup()
+init6.options
+init6.keymap
+init6.autocmds
+init6.languages.setup()
+init6.plugins.setup()
+init6.config.theme.set_colorscheme()
 ```
 
 The theme is applied last because colorschemes clear generated Heirline and UI
 highlight groups.
 
-`configs/lua/plugins/init.lua` then loads:
+`configs/lua/init6/plugins/init.lua` then loads:
 
 ```text
 todo-comments
-plugins.theme
-plugins.ui
-plugins.ui.mini
-plugins.ui.neo-tree
-plugins.ui.vcs
-plugins.ui.heirline
-plugins.ui.telescope
-plugins.ui.which-key
-plugins.ui.snacks
-plugins.ui.outline
-plugins.ui.nvim-highlight-colors
-plugins.ui.gitsigns
-plugins.debug
-plugins.smart
-plugins.lsp
-plugins.integrations
+init6.plugins.theme
+init6.plugins.ui
+init6.plugins.ui.mini
+init6.plugins.ui.neo-tree
+init6.plugins.ui.vcs
+init6.plugins.ui.heirline
+init6.plugins.ui.telescope
+init6.plugins.ui.which-key
+init6.plugins.ui.snacks
+init6.plugins.ui.outline
+init6.plugins.ui.nvim-highlight-colors
+init6.plugins.ui.gitsigns
+init6.plugins.debug
+init6.plugins.smart
+init6.plugins.lsp
+init6.plugins.integrations
 ```
 
 Preserve meaningful ordering:
@@ -391,24 +391,33 @@ Preserve meaningful ordering:
 
 | Path | Responsibility |
 | --- | --- |
-| `configs/lua/options.lua` | Editor options, clipboard scheduling, folds, indentation defaults |
-| `configs/lua/keymap.lua` | Global mappings and navigation |
-| `configs/lua/autocmds.lua` | Yank highlighting and editing-buffer status column |
-| `configs/lua/languages/` | Filetype-specific behavior; register new modules in `languages/init.lua` |
-| `configs/lua/config/globals.lua` | Leaders and global capability flags |
-| `configs/lua/config/features.lua` | Nix-selected features from the generated `flake_features` module |
-| `configs/lua/config/lsp_servers.lua` | Declarative LSP server table |
-| `configs/lua/config/lsp_keymaps.lua` | `LspAttach` mappings, highlights, and inlay hints |
-| `configs/lua/config/theme.lua` | Light/dark variant selection and colorscheme application |
-| `configs/lua/config/ui_colors.lua` | Shared StatusLine, WinBar, Dropbar, and message colors |
-| `configs/lua/config/util.lua` | Generic command/visual-selection helpers |
-| `configs/lua/utils/icons.lua` | Shared icons |
-| `configs/lua/plugins/theme/` | The `flake` colorscheme (palette roles, highlight groups) and Auto Dark Mode setup |
-| `configs/lua/plugins/ui/` | Statusline, navigation, pickers, VCS, terminals, symbols, and visual UI |
-| `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and AI integrations |
-| `configs/lua/plugins/debug/` | DAP adapters, debugger UI, and debug keymaps |
-| `configs/lua/plugins/lsp/` | LSP capability merge, executable checks, and server enablement |
-| `configs/lua/plugins/integrations/` | Overseer and cross-plugin workflows |
+| `configs/lua/init6/health.lua` | `:checkhealth init6`: generated modules, enabled features, and the tools they need |
+| `configs/lua/init6/options.lua` | Editor options, clipboard scheduling, folds, indentation defaults |
+| `configs/lua/init6/keymap.lua` | Global mappings and navigation |
+| `configs/lua/init6/autocmds.lua` | Yank highlighting and editing-buffer status column |
+| `configs/lua/init6/languages/` | Filetype-specific behavior; register new modules in `languages/init.lua` |
+| `configs/lua/init6/config/globals.lua` | Leaders and global capability flags |
+| `configs/lua/init6/config/features.lua` | Nix-selected features from the generated `init6.generated.features` module |
+| `configs/lua/init6/config/lsp_servers.lua` | Declarative LSP server table |
+| `configs/lua/init6/config/lsp_keymaps.lua` | `LspAttach` mappings, highlights, and inlay hints |
+| `configs/lua/init6/config/theme.lua` | Light/dark variant selection and colorscheme application |
+| `configs/lua/init6/config/ui_colors.lua` | Shared StatusLine, WinBar, Dropbar, and message colors |
+| `configs/lua/init6/config/util.lua` | Generic command/visual-selection helpers |
+| `configs/lua/init6/utils/icons.lua` | Shared icons |
+| `configs/lua/init6/plugins/theme/` | The `init6` colorscheme (palette roles, highlight groups) and Auto Dark Mode setup |
+| `configs/lua/init6/plugins/ui/` | Statusline, navigation, pickers, VCS, terminals, symbols, and visual UI |
+| `configs/lua/init6/plugins/smart/` | Completion, Treesitter, formatting, and AI integrations |
+| `configs/lua/init6/plugins/debug/` | DAP adapters, debugger UI, and debug keymaps |
+| `configs/lua/init6/plugins/lsp/` | LSP capability merge, executable checks, and server enablement |
+| `configs/lua/init6/plugins/integrations/` | Overseer and cross-plugin workflows |
+
+All custom Lua lives in the `init6` namespace (`configs/lua/init6/`, required as
+`init6.*`); only `init.lua` and `colors/init6.lua` sit outside it. Do not add
+top-level Lua modules: generic names like `config` or `utils` collide with
+plugin modules on the runtimepath. Nix-generated modules use
+`init6.generated.*`, and autocommand groups are named `init6-<purpose>`. Short
+paths in the rest of this guide, such as `plugins/ui/vcs.lua`, are relative to
+`configs/lua/init6/`.
 
 Plugin aggregators expose `M.setup()` and use explicit ordered `require` calls.
 Keep plugin-specific state and orchestration under `plugins/<group>/`; use
@@ -487,10 +496,12 @@ nvim -n --headless \
   '+qa'
 ```
 
-This uses the installed generation's plugins, including its `flake_palette`.
-When that generation predates the palette plugin, the `flake` colorscheme warns
-and falls back to `default`. Theme or palette changes therefore need the
-generation pack directory below.
+This uses the installed generation's plugins, including its generated palette
+module. When that generation predates `init6.generated.palette` (anything built
+before the init6 namespace), the `init6` colorscheme warns and falls back to
+`default`. Theme or palette changes therefore need the standalone package or the
+generation pack directory below. `:checkhealth init6` reports which generated
+modules and tools the running editor has.
 
 If plugin or executable declarations changed, or the change touches theme
 values, run the standalone package. It is built entirely from the checkout

@@ -13,7 +13,7 @@ together.
 | `default.nix` | Home Manager module: imports `options.nix`, feeds `spec.nix` into `programs.neovim`, links the configuration into `~/.config/nvim`, and writes the Mago/rumdl fallback configuration |
 | `package.nix` | Standalone wrapper published as `packages.<system>.nvim` and `nvim-lite` |
 | `lite.nix` | Feature overrides for `nvim-lite` |
-| `configs/` | `init.lua`, `lua/` and `colors/`; plain Lua, testable straight from the checkout |
+| `configs/` | `init.lua`, `colors/init6.lua`, and the `init6` Lua namespace under `lua/init6/`; plain Lua, testable straight from the checkout |
 | `scripts/` | Helper scripts packaged by `spec.nix`, such as the dashboard Pokémon |
 | `patches/` | Source patches for packaged dependencies (the SCSS grammar) |
 
@@ -47,12 +47,31 @@ To add something:
   block of `spec.nix`, then list it in `plugins`;
 - an LSP server, formatter, or debug adapter: add it to the matching group in
   `tools.nix`; for a server or formatted filetype, also map it to its language
-  in `plugins/lsp/init.lua` (`server_languages`) or
-  `plugins/smart/autoformat.lua` (`filetype_languages`);
+  in `lua/init6/plugins/lsp/init.lua` (`server_languages`) or
+  `lua/init6/plugins/smart/autoformat.lua` (`filetype_languages`);
 - a language family: add a list under `languages` in `tools.nix` and an entry in
   `languages` in `options.nix`; evaluation fails if the two differ;
 - a Home Manager-only value: add an argument to `spec.nix` and pass it from both
   `default.nix` and `package.nix`.
+
+## The init6 namespace
+
+The configuration is branded *init6*, which is also what the dashboard logo
+spells. All custom Lua lives in that namespace, so nothing collides with plugin
+modules that use generic names such as `config` or `utils`:
+
+| Name | What it is |
+| --- | --- |
+| `lua/init6/…`, required as `init6.*` | Every hand-written module: `options`, `keymap`, `autocmds`, `config`, `languages`, `plugins`, `utils` |
+| `init6.generated.palette`, `init6.generated.features` | Lua modules that `spec.nix` generates from Nix, shipped as separate plugins |
+| `:colorscheme init6` | The theme built from `lib/themes.nix`, implemented in `init6.plugins.theme.colorscheme` |
+| `init6-<purpose>` | Every autocommand group the configuration creates |
+| `vim.g.init6_config_dir` | The bundled configuration path in the standalone packages |
+| `:checkhealth init6` | Generated modules, enabled features, and whether the tools they need are on `PATH` |
+
+Only `init.lua` (the entry point) and `colors/init6.lua` sit outside
+`lua/init6/`, because Neovim looks for them by fixed paths. New modules go under
+`lua/init6/` too.
 
 ## Features
 
@@ -85,16 +104,17 @@ between `options.nix` and `tools.nix`.
 
 ### How the Lua side follows
 
-`spec.nix` generates a `flake_features` Lua module from the resolved values,
-packaged like `flake_palette`. `config/features.lua` reads it and exposes
-`features.ai`, `features.debug`, and `features.language(name)`; every setup that
-needs a feature-specific plugin or executable checks it first. Without the
-generated module (for example, when the checkout is tested against an older
-installed generation), everything counts as enabled.
+`spec.nix` generates an `init6.generated.features` Lua module from the resolved
+values, packaged like `init6.generated.palette`. `init6.config.features` reads
+it and exposes `features.ai`, `features.debug`, and `features.language(name)`;
+every setup that needs a feature-specific plugin or executable checks it first.
+Without the generated module (for example, when the checkout is tested against
+an older installed generation), everything counts as enabled.
 
 Servers and formatters of a disabled language are skipped quietly. Only an
 *enabled* language whose server is missing from `PATH` produces the "Missing
-Home Manager LSP tools" warning, which then points at a real packaging problem.
+Home Manager LSP tools" warning, which then points at a real packaging problem
+and refers to `:checkhealth init6`.
 
 Grammars need no Lua changes: Treesitter start-up already tolerates a missing
 parser, and those filetypes fall back to regex syntax highlighting.
@@ -149,12 +169,12 @@ How the standalone packages differ from the Home Manager editor:
 
 - **Configuration** is bundled in the store and loaded through the wrapper's
   `-u` init file. `~/.config/nvim` is never read, so a machine's own Neovim
-  configuration is unaffected. `vim.g.flake_config_dir` holds the bundled path;
+  configuration is unaffected. `vim.g.init6_config_dir` holds the bundled path;
   `<leader>fp` searches it.
-- **State** lives under `NVIM_APPNAME=nvim-flake`, e.g.
-  `~/.local/state/nvim-flake` and `~/.local/share/nvim-flake`, separate from any
-  other Neovim; `nvim` and `nvim-lite` share it. The wrapper only sets a
-  default, so `NVIM_APPNAME=other nix run .#nvim` overrides it.
+- **State** lives under `NVIM_APPNAME=init6`, e.g. `~/.local/state/init6` and
+  `~/.local/share/init6`, separate from any other Neovim; `nvim` and `nvim-lite`
+  share it. The wrapper only sets a default, so
+  `NVIM_APPNAME=other nix run .#nvim` overrides it.
 - **Theme and fonts** come from the flake's `defaultSettings`, not a host's
   overrides. The terminal must still provide a Nerd Font.
 - **Claude Code** (full `nvim` only) is plain `pkgs.claude-code`, without the

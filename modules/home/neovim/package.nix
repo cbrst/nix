@@ -56,7 +56,7 @@ pkgs.wrapNeovimUnstable spec.package {
     # machine. `--set-default` lets the caller override it.
     "--set-default"
     "NVIM_APPNAME"
-    "nvim-flake"
+    "init6"
   ];
 
   # `wrapRc` (the default) starts Neovim with `-u` pointing at this content.
@@ -65,8 +65,8 @@ pkgs.wrapNeovimUnstable spec.package {
   # open their log files there.
   luaRcContent = ''
     vim.fn.mkdir(vim.fn.stdpath("data"), "p")
-    vim.g.flake_config_dir = "${configDir}"
-    vim.opt.runtimepath:prepend(vim.g.flake_config_dir)
-    dofile(vim.g.flake_config_dir .. "/init.lua")
+    vim.g.init6_config_dir = "${configDir}"
+    vim.opt.runtimepath:prepend(vim.g.init6_config_dir)
+    dofile(vim.g.init6_config_dir .. "/init.lua")
   '';
 }

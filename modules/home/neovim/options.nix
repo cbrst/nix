@@ -5,7 +5,8 @@
 # `editor.neovim.features.*`; `package.nix` evaluates it on its own with
 # `lib.evalModules`, so standalone packages get the same defaults and type
 # checks. `spec.nix` turns the resolved values into plugins and tools, and a
-# generated `flake_features` Lua module tells the configuration what is present.
+# generated `init6.generated.features` Lua module tells the configuration what
+# is present.
 { lib, ... }:
 let
   # Must match the attribute names of `languages` in `tools.nix`; `spec.nix`

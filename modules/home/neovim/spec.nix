@@ -36,11 +36,11 @@ let
       "neovim: options.nix languages (${toString declared}) differ from tools.nix languages (${toString provided})"
       enabledLanguages;
 
-  # Feature flags for the Lua configuration, read through `config.features`.
-  flakeFeatures = pkgs.vimUtils.buildVimPlugin {
-    pname = "flake-features";
+  # Feature flags for the Lua configuration, read through `init6.config.features`.
+  init6Features = pkgs.vimUtils.buildVimPlugin {
+    pname = "init6-features";
     version = "0";
-    src = pkgs.writeTextDir "lua/flake_features.lua" ''
+    src = pkgs.writeTextDir "lua/init6/generated/features.lua" ''
       return ${
         lib.generators.toLua { } {
           ai = features.ai.enable;
@@ -68,11 +68,11 @@ let
       stripRoot = true;
     };
   };
-  # The shared flake palette as a Lua module for the `flake` colorscheme.
-  flakePalette = pkgs.vimUtils.buildVimPlugin {
-    pname = "flake-palette";
+  # The shared flake palette as a Lua module for the `init6` colorscheme.
+  init6Palette = pkgs.vimUtils.buildVimPlugin {
+    pname = "init6-palette";
     version = "0";
-    src = pkgs.writeTextDir "lua/flake_palette.lua" ''
+    src = pkgs.writeTextDir "lua/init6/generated/palette.lua" ''
       return ${
         lib.generators.toLua { } {
           inherit (settings.theme) light dark terminal;
@@ -166,8 +166,8 @@ in
       diffs-nvim
       dropbar-nvim
       fidget-nvim
-      flakeFeatures
-      flakePalette
+      init6Features
+      init6Palette
       gitsigns-nvim
       heirline-nvim
       lazydev-nvim

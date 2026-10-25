@@ -3,5 +3,5 @@
 - Nix declares every plugin/grammar and wrapped executable. `xdg.configFile` links checkout source into generated configuration.
 - Startup order: globals -> options -> keymap -> autocmds -> languages -> plugins -> final colorscheme. Preserve ordering dependencies: Mini Icons before consumers; VCS before Heirline/Snacks; Blink/LazyDev before LSP.
 - Plugin declarations changed: build `'.#homeConfigurations.\"example-user@generic-linux\".config.programs.neovim.finalPackage'`, then run that package with checkout runtime/init; do not test installed Neovim first.
-- LSP uses `vim.lsp.config`/`vim.lsp.enable`; server policy in `config/lsp_servers.lua`, mappings in `config/lsp_keymaps.lua`, orchestration in `plugins/lsp/init.lua`.
+- LSP uses `vim.lsp.config`/`vim.lsp.enable`; server policy in `init6/config/lsp_servers.lua`, mappings in `init6/config/lsp_keymaps.lua`, orchestration in `init6/plugins/lsp/init.lua`. All custom Lua is in the `init6` namespace (`configs/lua/init6/`); generated modules are `init6.generated.{palette,features}`; `:checkhealth init6` reports generated modules, features and tools.
 - Treesitter grammars and all tools remain Nix-owned; no Lazy/Mason/runtime downloads.
