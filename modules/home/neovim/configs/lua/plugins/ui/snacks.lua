@@ -2,6 +2,7 @@ local M = {}
 
 function M.setup()
 	require("snacks").setup({
+		dim = {},
 		-- Keep the general shell-terminal workflow available independently of AI chat.
 		input = { enabled = true },
 		picker = {
@@ -30,6 +31,9 @@ function M.setup()
 		},
 		terminal = { enabled = true },
 	})
+	-- Dimming has no `enabled` option; it only starts through enable().
+	require("snacks").dim.enable()
+	require("snacks").toggle.dim():map("<leader>td")
 	-- Normal mode only: a "t" (terminal-mode) binding here would eat the
 	-- literal "<space>t"/"<space>f" keystrokes typed into any terminal buffer
 	-- (e.g. Claude Code's prompt), firing this instead of sending them through.

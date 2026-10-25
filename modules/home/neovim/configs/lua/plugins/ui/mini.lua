@@ -21,14 +21,13 @@ function M.setup()
 	})
 	MiniIcons.mock_nvim_web_devicons()
 
-	-- Restrict animation to cursor movement so opening and resizing windows stay immediate.
+	-- Animations
 	require("mini.animate").setup({
-		scroll = { enable = false },
-		resize = { enable = false },
-		open = { enable = false },
-		close = { enable = false },
+		scroll = { enable = true },
+		resize = { enable = true },
+		open = { enable = true },
+		close = { enable = true },
 	})
-
 end
 
 return M
