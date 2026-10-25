@@ -61,6 +61,11 @@ belong to one person on every machine. Currently that is the Home Manager
   applies the NUR overlay and the local overlays, sets the username and home
   directory, and passes the shared arguments through `extraSpecialArgs`.
 
+- `packages.<system>.nvim` and `packages.<system>.nvim-lite` (for
+  `x86_64-linux` and `aarch64-darwin`) publish the editor on its own, built
+  from `modules/home/neovim/package.nix` with the same nixpkgs import
+  (`configLib.mkPkgs`) as `mkHome`. See [Neovim](/modules/home/neovim/#standalone-editor).
+
 Every module can receive `inputs` (the flake inputs), `configLib` (the helper
 library), and `settings` (the host's resolved settings) as arguments.
 

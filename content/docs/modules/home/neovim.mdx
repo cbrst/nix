@@ -13,50 +13,165 @@ so Asgard, Niflheim, and the templates all get the same setup.
 There is no plugin manager such as Lazy.nvim, packer, or Mason, and nothing is
 downloaded when Neovim starts.
 
-- **Nix** (`default.nix`) owns the runtime surface. `programs.neovim.plugins`
-  declares every plugin and every Tree-sitter grammar.
-  `programs.neovim.extraPackages` puts language servers, formatters, debuggers,
-  search tools, and the Claude Code CLI on Neovim's `PATH`. Most of these come
-  from the shared [editor tools](/modules/home/editor-tools/) list.
-- **Lua** (`configs/init.lua` and `configs/lua/`) configures what Nix
-  installed. Home Manager links both into `~/.config/nvim` as read-only store
-  paths.
+- **Nix** owns the runtime surface. `spec.nix` is a plain function of `pkgs`,
+  `lib`, `inputs`, the host's `settings`, the selected features, and a Claude
+  Code package. It returns the unwrapped Neovim, every plugin and Tree-sitter
+  grammar, the executables for Neovim's `PATH` (language servers, formatters,
+  debuggers, search tools, and the Claude Code CLI), and the Lua configuration
+  directory. The executables come from `tools.nix`, in named groups.
+- **Lua** (`configs/init.lua` and `configs/lua/init6/`) configures what Nix
+  installed.
+
+Two wrappers consume the same definition, so neither redefines plugins or
+tools:
+
+| Wrapper | Output | Configuration |
+| --- | --- | --- |
+| `default.nix` | `programs.neovim` in Home Manager | Linked into `~/.config/nvim` as read-only store paths |
+| `package.nix` | `packages.<system>.nvim` and `nvim-lite` | Bundled in the store and loaded through the wrapper's `-u` init file |
 
 Adding a Lua `require` for a plugin that is not declared in Nix makes start-up
 fail, so a new plugin, parser, server, or formatter is always added to
-`default.nix` first. Plugins missing from the pinned nixpkgs (NeoJJ, codedocs,
-neo-tree file-nesting rules, and the generated palette plugin) are built
-locally from pinned sources.
+`spec.nix` or `tools.nix` first. Plugins missing from the pinned nixpkgs (NeoJJ,
+codedocs, neo-tree file-nesting rules, and the generated palette and feature
+plugins) are built locally from pinned sources. Lua must not assume
+`~/.config/nvim`; it uses `vim.g.init6_config_dir or vim.fn.stdpath("config")`
+when it needs the configuration directory.
 
 The Python and Ruby providers are disabled.
 
+### The init6 namespace
+
+All hand-written Lua lives under `configs/lua/init6/` and is required as
+`init6.*`, so it cannot collide with plugin modules that use generic names such
+as `config` or `utils`. Only `init.lua` and `colors/init6.lua` sit outside it,
+because Neovim looks them up by fixed paths.
+
+| Name | What it is |
+| --- | --- |
+| `init6.generated.palette`, `init6.generated.features` | Lua modules that Nix generates, shipped as the `init6-palette` and `init6-features` plugins |
+| `:colorscheme init6` | The theme, implemented in `init6.plugins.theme.colorscheme` |
+| `init6-<purpose>` | Every autocommand group the configuration creates |
+| `vim.g.init6_config_dir` | The bundled configuration path in the standalone packages |
+| `:checkhealth init6` | The generated modules, the enabled features and languages, and whether the tools they need are on `PATH`; disabled features show as info |
+
+## Features
+
+`editor.neovim.features`, declared in `options.nix`, trims the editor per host.
+Everything is on by default.
+
+| Option | When disabled |
+| --- | --- |
+| `ai.enable` | No claudecode.nvim or Claude CLI, and no Claude statusline segment, dashboard key, or `<a-o>` picker action |
+| `debug.enable` | No nvim-dap, DAP UI, virtual text, nvim-nio, one-small-step-for-vimkind, or debug adapters |
+| `grammars` | `"all"` installs every grammar; a list of names from `vimPlugins.nvim-treesitter.builtGrammars` installs only those |
+| `languages.<name>.enable` | No tools from that language group and no LSP or Conform setup for it; `web` also drops typescript-tools.nvim |
+
+The languages are `lua`, `markdown`, `nix`, `php`, `python`, `shell`, `web`, and
+`yaml`. A host sets them like any Home Manager option, for example
+`editor.neovim.features.languages.php.enable = false;`. Unknown names, wrong
+types, grammar names missing from nixpkgs, and language lists that differ
+between `options.nix` and `tools.nix` fail evaluation.
+
+Nix passes the resolved values to Lua through the generated
+`init6.generated.features` module, which `init6.config.features` reads as
+`features.ai`, `features.debug`, and `features.language(name)`. Without the
+module, as in an older installed generation, everything counts as enabled.
+Servers and formatters of a disabled language are skipped without the "missing
+tools" warning; only an enabled language whose server is not on `PATH` warns,
+and the warning points at `:checkhealth init6`.
+
+### Tool groups
+
+`tools.nix` returns named package lists. `core` (`file`, `man-db`, `ripgrep`,
+`tree-sitter`) and `runtimes` (Bash, Lua, Node.js, Python 3, Zsh) are always
+installed. Interpreters sit in `runtimes` because debug launches, Overseer
+tasks, terminals, and language tooling all use them.
+
+| Group | Contents |
+| --- | --- |
+| `debug` | debugpy, js-debug, bashdb with the Bash Debug adapter, and the local Lua debugger |
+| `languages.lua` | lua-language-server, StyLua |
+| `languages.markdown` | mdsf, rumdl |
+| `languages.nix` | nil, nixd |
+| `languages.php` | js-beautify (`html-beautify`), Mago, Phpactor |
+| `languages.python` | Ruff, Zuban |
+| `languages.shell` | bash-language-server, Shellharden, shfmt, zshcs |
+| `languages.web` | Emmet, js-beautify (`css-beautify`), Prettier, Some Sass, TypeScript, vscode-langservers-extracted |
+| `languages.yaml` | yaml-language-server |
+
+A package may appear in several groups (js-beautify); duplicates are removed. No
+two distinct packages ship a command with the same name, so group order never
+changes which executable a command resolves to. The Bash and Lua debug adapters
+are taken from their VS Code extensions and wrapped in small scripts that run
+them with Node.js.
+
+Under Home Manager, `default.nix` also writes two global fallback files. A
+project's own configuration always takes precedence.
+
+- `~/.config/mago.toml`: PHP formatting with two-space tabs and double quotes.
+- `~/.config/rumdl/rumdl.toml`: Markdown lines are reflowed to 80 characters,
+  except code blocks, tables, headings, and math.
+
+## Standalone editor
+
+The flake publishes the editor as two packages for `x86_64-linux` and
+`aarch64-darwin`. They run on any machine with Nix, without Home Manager.
+
+| Package | Features | Closure |
+| --- | --- | --- |
+| `nvim` | The defaults: everything | About 4.6 GiB |
+| `nvim-lite` | Overrides from `lite.nix`: no AI or debugging, no PHP, Python, or web tooling, and 24 grammars for configuration, scripting, and VCS files | About 2.1 GiB |
+
+```bash
+nix run .#nvim -- file.txt                      # from a checkout
+nix run github:cbrst/nix#nvim-lite -- file.txt  # from anywhere
+```
+
+`package.nix` wraps `spec.nix` with `wrapNeovimUnstable` the way Home Manager
+does (executables appended to `PATH`, no Python or Ruby providers) and
+evaluates `options.nix` with `lib.evalModules`, so the packages share the
+defaults and type checks. How they differ from the Home Manager editor:
+
+- The bundled configuration is loaded through `-u`; `~/.config/nvim` is never
+  read. `vim.g.init6_config_dir` holds its path, and the Telescope "find file in
+  Neovim config" mapping searches it.
+- `NVIM_APPNAME` defaults to `init6`, so shada, undo, swap, and state stay apart
+  from any other Neovim. Setting the variable overrides it. The wrapper creates
+  `stdpath("data")` on start because a fresh machine lacks it.
+- Theme and fonts come from the flake's `defaultSettings`, not a host's
+  overrides.
+- Claude Code is plain `pkgs.claude-code`, without the configuration from the
+  [AI module](/modules/home/ai/).
+- The Mago and rumdl fallback files are Home Manager files and are not written.
+
 ## Colour scheme
 
-There are no third-party colour scheme plugins. The `flake` colour scheme
-(`configs/colors/flake.lua`, implemented in `plugins/theme/flake/`) builds every
-highlight group from the palettes in `lib/themes.nix`. Nix generates a
-`flake-palette` plugin that exposes the active [theme family](/architecture/settings-and-themes/)
-to Lua as the `flake_palette` module, and installs the colour scheme file
-through `xdg.configFile."nvim/colors"`. The Lua side blends any shades the
-palette lacks from its slots, so every family gets the same highlight
-structure. The command line has its own background (`bg_command`), the darker
-of the palette's `shade0` and `shade2`, and the line number of the cursor line
-takes the cursor line background. New plugins with their own highlight groups
-get entries in `plugins/theme/flake/groups/`. The Lua configuration only
-chooses between the light and dark variant.
+There are no third-party colour scheme plugins. The `init6` colour scheme
+(`configs/colors/init6.lua`, implemented in `plugins/theme/colorscheme/`) builds
+every highlight group from the palettes in `lib/themes.nix`. Nix generates an
+`init6-palette` plugin that exposes the active [theme family](/architecture/settings-and-themes/)
+to Lua as the `init6.generated.palette` module, and Home Manager installs the
+colour scheme file through `xdg.configFile."nvim/colors"`. The Lua side blends
+any shades the palette lacks from its slots, so every family gets the same
+highlight structure. The command line has its own background (`bg_command`), the
+darker of the palette's `shade0` and `shade2`, and the line number of the cursor
+line takes the cursor line background. New plugins with their own highlight
+groups get entries in `plugins/theme/colorscheme/groups/`. The Lua
+configuration only chooses between the light and dark variant.
 
 ## Start-up order
 
 Start-up is eager and ordered:
 
 ```text
-config.globals.setup()      leaders and capability flags
-options
-keymap
-autocmds
-languages.setup()           filetype behaviour
-plugins.setup()             explicit, ordered plugin groups
-config.theme.set_colorscheme()
+init6.config.globals.setup()      leaders and capability flags
+init6.options
+init6.keymap
+init6.autocmds
+init6.languages.setup()           filetype behaviour
+init6.plugins.setup()             explicit, ordered plugin groups
+init6.config.theme.set_colorscheme()
 ```
 
 The colour scheme is applied last because applying one clears the highlight
@@ -100,7 +215,7 @@ configuration requests their capabilities.
   animation of the cursor, scrolling, window resizing, and window opening and
   closing. Cursor animation and the cursor line are disabled in terminal
   buffers because they made typing in TUIs lag.
-- **Which-key** shows the leader groups. Bindings follow Doom Emacs.
+- **Which-key** shows the leader groups. Bindings follow the Doom Emacs layout.
 - Dropbar, Outline, Trouble, todo-comments, render-markdown, and
   nvim-highlight-colors round out the UI.
 - **Auto Dark Mode** switches between the light and dark variant of the theme
@@ -209,8 +324,8 @@ is disabled.
 
 ## Validating changes
 
-The installed `nvim` runs the last activated configuration. To test edits in
-the checkout, load it explicitly:
+The installed `nvim` runs the last activated configuration. To test Lua edits
+in the checkout, load it explicitly:
 
 ```bash
 nvim -n --headless \
@@ -219,7 +334,22 @@ nvim -n --headless \
   '+qa'
 ```
 
-When plugins or executables changed, build a Home Manager generation first and
-add its pack directory with `--cmd "set packpath^=..."`; the exact command is in
+That run uses the installed generation's plugins, so a generation older than
+`init6.generated.palette` warns and falls back to the default colour scheme.
+When plugins, executables, or theme values changed, run the standalone package,
+which is built entirely from the checkout, against a scratch state directory.
+Also run `nvim-lite` after changing feature-specific Lua or `spec.nix`, and open
+files of the disabled languages; start-up and editing must stay free of errors
+and "missing tools" warnings.
+
+```bash
+scratch="$(mktemp -d)"
+env XDG_CONFIG_HOME="$scratch/config" XDG_DATA_HOME="$scratch/data" \
+  XDG_STATE_HOME="$scratch/state" XDG_CACHE_HOME="$scratch/cache" \
+  nix run '.#nvim' -- -n --headless path/to/real/file '+qa'
+```
+
+The Home Manager wrapper itself is tested with a built generation's pack
+directory; the exact command is in
 [`AGENTS.md`](https://github.com/cbrst/nix/blob/main/AGENTS.md#neovim-validation-before-activation).
 Format changed Lua with `stylua`.
