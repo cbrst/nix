@@ -67,6 +67,10 @@ function M.build(p, terminal)
 		changed = p.changed,
 	}
 
+	-- The command line sits below the editor: the darker neighbouring shade in
+	-- either variant (shade0 is darkest in dark palettes, lightest in light ones).
+	c.bg_command = color.darker(p.shade0, p.shade2)
+
 	-- Derived text tones for groups the palette has no slot for.
 	c.guide = blend(c.border, bg, 0.5)
 	c.whitespace = blend(c.border, bg, 0.35)

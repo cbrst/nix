@@ -26,6 +26,23 @@ function M.blend(fg, bg, alpha)
 	return hex(alpha * fr + (1 - alpha) * br, alpha * fg_ + (1 - alpha) * bg_, alpha * fb + (1 - alpha) * bb)
 end
 
+--- Relative luminance (0 black to 1 white).
+---@param color string
+---@return number
+function M.luminance(color)
+	local function linear(value)
+		value = value / 255
+		return value <= 0.03928 and value / 12.92 or ((value + 0.055) / 1.055) ^ 2.4
+	end
+	local r, g, b = rgb(color)
+	return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+end
+
+--- The darker of two colours.
+function M.darker(a, b)
+	return M.luminance(a) <= M.luminance(b) and a or b
+end
+
 function M.lighten(color, amount)
 	return M.blend("#ffffff", color, amount)
 end

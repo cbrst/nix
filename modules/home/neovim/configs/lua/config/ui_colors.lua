@@ -10,6 +10,8 @@ function M.get()
 	local statusline_nc = vim.api.nvim_get_hl(0, { name = "StatusLineNC", link = false })
 	local comment = vim.api.nvim_get_hl(0, { name = "Comment", link = false })
 	local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
+	-- The colorscheme owns the command-line surface; apply() only retints its text.
+	local msg_area = vim.api.nvim_get_hl(0, { name = "MsgArea", link = false })
 	return {
 		bar = statusline.bg or normal.bg,
 		inactive = statusline_nc.bg or normal_float.bg or normal.bg,
@@ -18,7 +20,7 @@ function M.get()
 		tab = normal.bg,
 		editor = normal.bg,
 		context = visual.fg or visual.bg or normal.fg,
-		command = normal_float.bg or normal.bg,
+		command = msg_area.bg or normal_float.bg or normal.bg,
 	}
 end
 
