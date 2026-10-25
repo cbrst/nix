@@ -275,6 +275,10 @@ in
     ];
   };
 
+  # Defaults live in shell aliases rather than RIPGREP_CONFIG_PATH, which
+  # editors and scripts would inherit alongside their own explicit flags.
+  programs.ripgrep.enable = true;
+
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;

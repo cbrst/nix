@@ -11,3 +11,14 @@
 (($+commands[doggo])) && () {
 	alias dig="doggo"
 }
+
+# Match the editors' pickers: honour ignore files even outside Git (non-colocated
+# jj repos), show dotfiles, and skip VCS metadata. Aliases built on `rg` inherit
+# these filters.
+(($+commands[rg])) && () {
+	alias rg='rg --smart-case --hidden --no-require-git --glob="!**/.git/*" --glob="!**/.jj/*"'
+	alias rgi='rg --no-ignore'
+	alias rgf='rg --files'
+	alias rgl='rg --files-with-matches'
+	alias grep='rg'
+}
