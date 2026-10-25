@@ -29,11 +29,15 @@ let
     "break"
     {
       type = "title";
-      format = "{#1}@{host-name}";
+      format = "{#1;2}@{#0;1;39}{host-name}";
+    }
+    {
+      type = "custom";
+      format = "{#0;90}├┬ {#0;1;39}Hardware";
     }
     {
       type = "host";
-      key = "{#0;90}├┬ {#0;32}{icon}";
+      key = "{#0;90}│├─ {#0;32}{icon}";
     }
     {
       type = "cpu";
@@ -53,32 +57,37 @@ let
       format = "{}×{}px {}hz";
     }
     {
+      type = "custom";
+      format = "{#0;90}├┬ {#0;1;39}Software";
+    }
+    {
       type = "os";
-      key = "{#0;90}╰┬┬ {#0;33}{icon}";
+      key = "{#0;90}│├┬ {#0;33}{icon}";
     }
     {
       type = "kernel";
-      key = "{#0;90} │╰─ {#0;33}{icon}";
+      key = "{#0;90}││╰─ {#0;33}{icon}";
     }
     {
       type = "wm";
-      key = "{#0;90} ├─ {#0;34}{icon}";
+      key = "{#0;90}│├─ {#0;34}{icon}";
     }
     {
       type = "terminal";
-      key = "{#0;90} ╰┬ {#0;35}{icon}";
+      key = "{#0;90}│╰┬ {#0;35}{icon}";
     }
     {
       type = "shell";
-      key = "{#0;90}  ├─ {#0;35}{icon}";
+      key = "{#0;90}│ ├─ {#0;35}{icon}";
     }
     {
       type = "terminalfont";
-      key = "{#0;90}  ╰─ {#0;35}{icon}";
+      key = "{#0;90}│ ╰─ {#0;35}{icon}";
     }
     {
       type = "colors";
-      paddingLeft = 2;
+      key = "{#0;90}╰─ {#0;35}";
+      paddingLeft = 0;
       symbol = "circle";
       block = {
         range = [
