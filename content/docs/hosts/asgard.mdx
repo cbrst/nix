@@ -33,6 +33,19 @@ source is
 | VIA keyboard access | A udev rule (`60-via-keyboard.rules`) tags `hidraw` nodes of vendor `320f` with `uaccess`, so the logged-in user can configure the keyboard from the browser through WebHID. It sorts before `73-seat-late.rules`, which turns the tag into an ACL |
 | Extra overlay and cache | Affinity overlay and the `cache.forall.systems` binary cache |
 
+## Peripheral batteries
+
+`peripheral-battery.nix` provides the `peripheral-battery` command that the
+[Noctalia bar widget](/modules/home/noctalia/#peripheral-battery-plugin) runs.
+It reads the Logitech mouse through `solaar show all` and the PRO X Wireless
+headset through `headsetcontrol --battery --output json`, then prints a JSON
+array of `{ name, icon, level, charging }` objects. Devices that are off or
+unreachable are omitted. The Womier SK75 keyboard is not included because it
+has no software battery report.
+
+The module also enables `programs.solaar`, adds `headsetcontrol`'s udev rules,
+and installs the command and `headsetcontrol` as system packages.
+
 ## Boot loader
 
 Asgard boots with **Limine**, with Secure Boot signing enabled and up to ten
