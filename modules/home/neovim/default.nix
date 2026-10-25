@@ -136,6 +136,7 @@ in
       render-markdown-nvim
       snacks-nvim
       telescope-fzf-native-nvim
+      telescope-live-grep-args-nvim
       telescope-nvim
       telescope-ui-select-nvim
       todo-comments-nvim

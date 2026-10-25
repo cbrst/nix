@@ -109,8 +109,22 @@ local function keys()
 	return {
 		gap = 0,
 		padding = 2,
-		{ icon = "\u{f002} ", key = "f", desc = "Find file", action = telescope("find_files") },
-		{ icon = "\u{f022} ", key = "g", desc = "Search project", action = telescope("live_grep", project_cwd) },
+		{
+			icon = "\u{f002} ",
+			key = "f",
+			desc = "Find file",
+			action = function()
+				require("plugins.ui.telescope").find_files()
+			end,
+		},
+		{
+			icon = "\u{f022} ",
+			key = "g",
+			desc = "Search project",
+			action = function()
+				require("plugins.ui.telescope").live_grep(project_cwd())
+			end,
+		},
 		{ icon = "\u{f0c5} ", key = "r", desc = "Recent files", action = telescope("oldfiles") },
 		{ icon = "\u{f15b} ", key = "n", desc = "New buffer", action = ":ene | startinsert" },
 		{
