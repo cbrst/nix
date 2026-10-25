@@ -1,0 +1,33 @@
+# Print a random Pokémon centred in a HEIGHT x WIDTH box for the
+# snacks.dashboard terminal pane, then stay alive: Neovim 0.12 would otherwise
+# leave "[Process exited 0]" under the sprite.
+#
+# Usage: dashboard-pokemon HEIGHT WIDTH
+height=${1:-0}
+width=${2:-0}
+sprite=$(pokemon-colorscripts -r --no-title)
+
+# Visible size: strip colour escapes and trailing blanks, then drop UTF-8
+# continuation bytes so byte counts in the C locale equal display columns
+# (the sprite is single-width characters only), whatever the inherited locale.
+export LC_ALL=C
+rows=0
+cols=0
+while IFS= read -r line; do
+	rows=$((rows + 1))
+	if ((${#line} > cols)); then
+		cols=${#line}
+	fi
+done < <(sed $'s/\e\\[[0-9;]*m//g; s/ *$//; s/[\x80-\xbf]//g' <<<"$sprite")
+
+top=$(((height - rows) / 2))
+left=$(((width - cols) / 2))
+for ((i = 0; i < top; i++)); do
+	echo
+done
+printf -v indent '%*s' "$((left > 0 ? left : 0))" ''
+while IFS= read -r line; do
+	printf '%s%s\n' "$indent" "$line"
+done <<<"$sprite"
+
+exec sleep 86400

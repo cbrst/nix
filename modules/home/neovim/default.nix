@@ -6,6 +6,14 @@
   ...
 }:
 let
+  dashboardPokemon = pkgs.writeShellApplication {
+    name = "dashboard-pokemon";
+    runtimeInputs = [
+      pkgs.gnused
+      pkgs.pokemon-colorscripts
+    ];
+    text = builtins.readFile ./scripts/dashboard-pokemon;
+  };
   codedocs = pkgs.vimUtils.buildVimPlugin {
     pname = "codedocs";
     version = "0.6.0";
@@ -84,6 +92,8 @@ in
 
     extraPackages = (import ../editor-tools/packages.nix { inherit inputs pkgs; }) ++ [
       config.programs.claude-code.finalPackage
+      # Random, centred sprite in the snacks.dashboard start screen.
+      dashboardPokemon
     ];
 
     plugins = with pkgs.vimPlugins; [

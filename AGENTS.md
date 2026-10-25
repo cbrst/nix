@@ -351,6 +351,9 @@ UI responsibilities:
   Git counters are unstaged tracked changes; jj counters cover working-copy
   commit `@`.
 - `plugins/ui/snacks.lua`: Snacks input, picker, and terminal mappings.
+- `plugins/ui/dashboard.lua`: Snacks start screen options (keys, cwd recent
+  files, fortunes, centred Pokémon pane via `scripts/dashboard-pokemon`),
+  passed in by `snacks.lua`.
 - `plugins/ui/gitsigns.lua`: current-buffer Git hunks and `<leader>gh` hunk
   actions.
 - diffs.nvim: syntax-aware and intra-line highlighting for Neogit, NeoJJ,

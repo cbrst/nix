@@ -1,7 +1,11 @@
 local M = {}
 
 function M.setup()
+	local dashboard = require("plugins.ui.dashboard")
+	dashboard.setup()
+
 	require("snacks").setup({
+		dashboard = dashboard.opts(),
 		dim = {},
 		-- Keep the general shell-terminal workflow available independently of AI chat.
 		input = { enabled = true },
