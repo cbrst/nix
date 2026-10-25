@@ -59,9 +59,18 @@ family name fails evaluation. Each family provides:
   foreground, muted, border, hover, selected, accents, link, status colours
   (error, warning, success, info), diff colours, syntax colours, and five
   surface shades (`shade0` to `shade4`).
+- `terminal`: a `light` and a `dark` set with the 16 ANSI colours (`palette`),
+  cursor, cursor text, and selection colours. It is derived from the semantic
+  palette with the hex helpers in
+  [`lib/colors.nix`](https://github.com/cbrst/nix/blob/main/lib/colors.nix),
+  exported as `configLib.colors`. Bright accents are mixed toward the
+  foreground.
 - `apps`: the theme names that applications use for their own built-in themes,
-  such as Ghostty, Neovim, VS Code, and the GTK theme and package.
+  such as VS Code, and the GTK theme and package.
 - `niri`: the window border gradient and inactive colour.
+
+A new family only needs palette entries. Neovim, Ghostty, Foot, Firefox,
+Noctalia, and the shell prompt all render from these palettes.
 
 Most applications follow the system's light or dark appearance and receive both
 palettes.
@@ -84,8 +93,10 @@ xdg.configFile."niri/config.kdl".text =
 
 The same mechanism themes the Oh My Posh prompt, the Firefox and Tridactyl CSS,
 Noctalia's palette and font, and Niri's borders. The OpenCode theme, imv
-background, GTK settings, and Neovim (`CONFIG_THEME_FAMILY`) read the palette
-values directly. Asgard's Limine boot menu uses the Meowsoot dark colours.
+background, and GTK settings read the palette values directly. Ghostty and Foot
+generate their colour sections from the palette and its `terminal` set, and
+Neovim receives the palette as the generated `flake_palette` Lua module (see
+[Neovim](/modules/home/neovim/#colour-scheme)). Asgard's Limine boot menu uses the Meowsoot dark colours.
 
 To switch the whole setup to Kanagawa, change `family` in `defaultSettings` (or
 override `theme` for one host) and rebuild.

@@ -25,12 +25,25 @@ downloaded when Neovim starts.
 Adding a Lua `require` for a plugin that is not declared in Nix makes start-up
 fail, so a new plugin, parser, server, or formatter is always added to
 `default.nix` first. Plugins missing from the pinned nixpkgs (NeoJJ, codedocs,
-neo-tree file-nesting rules, and the theme plugins) are built locally from
-pinned sources.
+neo-tree file-nesting rules, and the generated palette plugin) are built
+locally from pinned sources.
 
-The Python and Ruby providers are disabled. `CONFIG_THEME_FAMILY` is exported
-from the shared [theme settings](/architecture/settings-and-themes/) so the
-Lua side picks the matching colour scheme.
+The Python and Ruby providers are disabled.
+
+## Colour scheme
+
+There are no third-party colour scheme plugins. The `flake` colour scheme
+(`configs/colors/flake.lua`, implemented in `plugins/theme/flake/`) builds every
+highlight group from the palettes in `lib/themes.nix`. Nix generates a
+`flake-palette` plugin that exposes the active [theme family](/architecture/settings-and-themes/)
+to Lua as the `flake_palette` module, and installs the colour scheme file
+through `xdg.configFile."nvim/colors"`. The Lua side blends any shades the
+palette lacks from its slots, so every family gets the same highlight
+structure. The command line has its own background (`bg_command`), the darker
+of the palette's `shade0` and `shade2`, and the line number of the cursor line
+takes the cursor line background. New plugins with their own highlight groups
+get entries in `plugins/theme/flake/groups/`. The Lua configuration only
+chooses between the light and dark variant.
 
 ## Start-up order
 
@@ -68,7 +81,16 @@ configuration requests their capabilities.
 
 - **Heirline** draws the global statusline, including Git or jj diff counters.
 - **Telescope** (Ivy layout) handles files, search, buffers, and LSP pickers.
-  Its project root is the nearest `.jj` or `.git` directory.
+  Its project root is the nearest `.jj` or `.git` directory. Find file and
+  project search run ripgrep directly, so `.gitignore` rules apply even in
+  non-colocated jj repositories. Dotfiles are shown and `.git` and `.jj` are
+  always excluded. `<M-i>` in either picker reopens it with ignored files
+  included, keeping the typed prompt. Live grep uses `telescope-live-grep-args`,
+  so ripgrep flags can follow the quoted pattern (for example `"pattern" -t lua`
+  or `-g *.nix`); `<C-k>` quotes the prompt and `<C-t>` quotes it and adds
+  `--iglob`. Without the extension, live grep falls back to the stock picker,
+  where `<C-Space>` refines results fuzzily. The start screen and the leader
+  mappings use the same wrappers.
 - **Neo-tree** shows the file system, buffers, Git status, and symbols, with
   file nesting and current-file following.
 - **Snacks** provides input, picker, and terminal windows, the start screen
@@ -127,7 +149,7 @@ The leader is `Space`; the local leader is `,`.
 | `<leader>f` | Files: find (`ff`), recent (`fr`), configuration (`fp`) |
 | `<leader>g` | Version control |
 | `<leader>h` | Help |
-| `<leader>o` | Open: project sidebar (`op`), terminals (`ot`, `oT`, `of`), AI (`ol`) |
+| `<leader>o` | Open: project sidebar (`op`), symbol outline (`oo`), terminals (`ot`, `oT`, `of`), AI (`ol`) |
 | `<leader>s` | Search |
 | `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines, dimming (`td`) |
 | `<leader>w` | Window commands |
@@ -191,7 +213,6 @@ The installed `nvim` runs the last activated configuration. To test edits in
 the checkout, load it explicitly:
 
 ```bash
-CONFIG_THEME_FAMILY=meowsoot \
 nvim -n --headless \
   --cmd "set runtimepath^=$PWD/modules/home/neovim/configs" \
   -u "$PWD/modules/home/neovim/configs/init.lua" \
