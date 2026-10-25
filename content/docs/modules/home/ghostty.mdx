@@ -15,10 +15,10 @@ source-built `ghostty`.
   `fonts.terminalSize`, with the `ss01` stylistic set. Cell metrics use
   Ghostty's defaults; the earlier height and baseline adjustments are kept as
   comments for reference.
-- **Theme:** follows the system appearance, using the light and dark theme
-  names from the active [theme family](/architecture/settings-and-themes/).
-  The Meowsoot and Kanagawa Ghostty themes are linked from their pinned sources
-  into `~/.config/ghostty/themes`.
+- **Theme:** follows the system appearance with `flake-light` and `flake-dark`.
+  Both theme files in `~/.config/ghostty/themes` are generated from the active
+  [theme family](/architecture/settings-and-themes/): the 16 ANSI colours,
+  background, foreground, cursor, selection, and split divider colour.
 - **Window:** a 2 px balanced padding that extends the background colour,
   unfocused splits dimmed to 50%, a thicker cursor, and the mouse hidden while
   typing. The GTK title bar is hidden on Linux; on macOS the title bar is

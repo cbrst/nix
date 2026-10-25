@@ -40,6 +40,18 @@ Aliases are only defined when their target exists:
 | `<cmd> -h`, `<cmd> --help` | Pipes help output through `bat` with help highlighting |
 | `man` | `batman` |
 | `dig` | `doggo` |
+| `rg` | `rg` with `--smart-case --hidden --no-require-git` and globs excluding `.git` and `.jj` |
+| `rgi` | `rg --no-ignore` |
+| `rgf` | `rg --files` |
+| `rgl` | `rg --files-with-matches` |
+| `grep` | `rg` |
+
+The `rg` aliases give interactive shells the same file filters as the editors'
+pickers: ignore files are honoured even outside Git repositories (non-colocated
+jj repos), dotfiles are searched, and VCS metadata is skipped. They are zsh
+aliases, so scripts and programs that run `grep` or `rg` by name are unaffected.
+The filters live in the aliases rather than in `RIPGREP_CONFIG_PATH` so that
+callers passing their own flags do not inherit them.
 
 `mkcd <dir>` creates a directory and changes into it. `pay-respects` corrects
 the previous command and is bound to the alias `fuck`.
@@ -70,6 +82,7 @@ palettes with the desktop.
 | `eza` | Directories first, Git status, headers, and icons |
 | `fzf` | Reverse layout at half height with custom glyphs; `Ctrl-O` opens the selection in `$EDITOR`. A small `fzf-preview` script shows a tree for directories and `bat` for files |
 | `zoxide` | Frecency-based `cd` |
+| `ripgrep` | Enabled through `programs.ripgrep`; filters are set by the aliases above |
 | `fastfetch` | A tree-style system summary with a random Pokémon sprite as its logo (see below) |
 | `jq`, `doggo` | JSON processing and DNS lookups |
 
