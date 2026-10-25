@@ -93,7 +93,18 @@ palettes with the desktop.
 Fastfetch draws its logo with a `command-raw` source that runs the
 `fastfetch-pokemon` script. The script prints a random sprite from
 `pokemon-colorscripts` and pads it with blank lines so it is vertically centred
-against the information rows. The module list is a shared `fastfetchModules`
+against the information rows.
+
+The information is grouped into three tree sections, each labelled on its first
+row: **Host** (machine, CPU, memory, GPU, display), **OS** (OS, kernel, window
+manager) and **Term** (terminal, shell, terminal font), followed by the colour
+palette. Fastfetch cannot detect the Quickshell desktop shell, so when
+`programs.noctalia.enable` is set an extra Noctalia line shows the package
+version; configurations without the Noctalia module, such as Niflheim, omit it.
+The Term section also has an oh-my-posh line that shows the version of
+`programs.oh-my-posh.package`.
+
+The module list is a shared `fastfetchModules`
 binding, and its length is passed to the script, so adding a module such as a
 second GPU or display lengthens the list and the logo follows. Key colours are
 ANSI escape codes in the module definitions.

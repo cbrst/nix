@@ -25,7 +25,19 @@ in capsules:
 - **Centre:** clock and weather.
 - **End:** an accordion group holding the audio visualiser and media controls,
   then the system tray, a network toolkit widget, status, Taildrop, notifications,
-  clipboard, volume, and the session menu.
+  clipboard, volume, the session menu, and the `peripheral_battery` widget.
+
+### Peripheral battery plugin
+
+`plugins/peripheral-battery` is a local Noctalia plugin that is linked into
+`~/.local/share/noctalia/plugins` and enabled in `config.toml`. Its widget runs
+a `peripheral-battery` command every 60 seconds and on click. The command must
+print a JSON array of `{ name, icon, level, charging }` objects. Each device
+shows its icon and percentage, with a bolt while charging, and a discharging
+device at 20% or below is drawn in the error colour. The widget hides itself
+when the command is missing or reports no devices, so hosts that do not provide
+the command show nothing. [Asgard](/hosts/asgard/#peripheral-batteries)
+provides it.
 
 ## Panels
 
