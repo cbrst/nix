@@ -247,7 +247,7 @@ in
       logo = {
         type = "command-raw";
         source = "${lib.getExe fastfetchPokemon} ${toString (builtins.length fastfetchModules)}";
-        padding.left = 1;
+        padding.left = 3;
       };
       modules = fastfetchModules;
     };
