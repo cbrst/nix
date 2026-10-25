@@ -25,6 +25,79 @@ let
     '';
   };
 
+  fastfetchModules = [
+    "break"
+    {
+      type = "title";
+      format = "{#1}@{host-name}";
+    }
+    {
+      type = "host";
+      key = "{#0;90}├┬ {#0;32}{icon}";
+    }
+    {
+      type = "cpu";
+      key = "{#0;90}│├┬ {#0;32}{icon}";
+    }
+    {
+      type = "memory";
+      key = "{#0;90}││╰─ {#0;32}{icon}";
+    }
+    {
+      type = "gpu";
+      key = "{#0;90}│╰┬ {#0;32}{icon}";
+    }
+    {
+      type = "display";
+      key = "{#0;90}│ ╰─ {#0;32}{icon}";
+      format = "{}×{}px {}hz";
+    }
+    {
+      type = "os";
+      key = "{#0;90}╰┬┬ {#0;33}{icon}";
+    }
+    {
+      type = "kernel";
+      key = "{#0;90} │╰─ {#0;33}{icon}";
+    }
+    {
+      type = "wm";
+      key = "{#0;90} ├─ {#0;34}{icon}";
+    }
+    {
+      type = "terminal";
+      key = "{#0;90} ╰┬ {#0;35}{icon}";
+    }
+    {
+      type = "shell";
+      key = "{#0;90}  ├─ {#0;35}{icon}";
+    }
+    {
+      type = "terminalfont";
+      key = "{#0;90}  ╰─ {#0;35}{icon}";
+    }
+    {
+      type = "colors";
+      paddingLeft = 2;
+      symbol = "circle";
+      block = {
+        range = [
+          2
+          4
+        ];
+      };
+    }
+    "break"
+  ];
+
+  # Each module prints one line, so the list length is the info height the
+  # Pokémon logo is centred against. Extra GPUs or displays add lines.
+  fastfetchPokemon = pkgs.writeShellApplication {
+    name = "fastfetch-pokemon";
+    runtimeInputs = [ pkgs.pokemon-colorscripts ];
+    text = builtins.readFile ./scripts/fastfetch-pokemon;
+  };
+
   zshAutocomplete = pkgs.zsh-autocomplete.overrideAttrs (old: {
     installPhase = old.installPhase + ''
       install -D ${
@@ -82,6 +155,16 @@ in
       '')
       (lib.mkOrder 1002 (builtins.readFile ./configs/zsh/zstyle.zsh))
       (lib.mkOrder 1003 (builtins.readFile ./configs/zsh/aliases.zsh))
+      # Greet only the terminal's own shell. SHLVL cannot tell it apart, as
+      # terminals can inherit a raised SHLVL from the desktop session; the
+      # exported marker instead reaches nested shells and the Neovim
+      # terminals started below this one.
+      (lib.mkOrder 1500 ''
+        if [[ -z $FASTFETCH_SHOWN && -z $NVIM && -t 1 ]]; then
+          export FASTFETCH_SHOWN=1
+          ${lib.getExe config.programs.fastfetch.package}
+        fi
+      '')
     ];
     # macOS updates restore /etc/zshrc and drop the Nix installer's hook, so
     # load the daemon environment from the user's own startup files instead.
@@ -138,78 +221,11 @@ in
         separator = "  ";
       };
       logo = {
-        type = "auto";
-        source = "${./configs/logo.png}";
-        width = 25;
-        padding = {
-          top = 1;
-          left = 1;
-        };
+        type = "command-raw";
+        source = "${lib.getExe fastfetchPokemon} ${toString (builtins.length fastfetchModules)}";
+        padding.left = 1;
       };
-      modules = [
-        "break"
-        {
-          type = "title";
-          format = "{#1}@{host-name}";
-        }
-        {
-          type = "host";
-          key = "{#}├┬ {#32}{icon}";
-        }
-        {
-          type = "cpu";
-          key = "{#}│├┬ {#32}{icon}";
-        }
-        {
-          type = "memory";
-          key = "{#}││╰─ {#32}{icon}";
-        }
-        {
-          type = "gpu";
-          key = "{#}│╰┬ {#32}{icon}";
-        }
-        {
-          type = "display";
-          key = "{#}│ ╰─ {#32}{icon}";
-          format = "{}×{}px {}hz";
-        }
-        {
-          type = "os";
-          key = "{#}╰┬┬ {#33}{icon}";
-        }
-        {
-          type = "kernel";
-          key = "{#} │╰─ {#33}{icon}";
-        }
-        {
-          type = "wm";
-          key = "{#} ├─ {#34}{icon}";
-        }
-        {
-          type = "terminal";
-          key = "{#} ╰┬ {#35}{icon}";
-        }
-        {
-          type = "shell";
-          key = "{#}  ├─ {#35}{icon}";
-        }
-        {
-          type = "terminalfont";
-          key = "{#}  ╰─ {#35}{icon}";
-        }
-        {
-          type = "colors";
-          paddingLeft = 2;
-          symbol = "circle";
-          block = {
-            range = [
-              2
-              4
-            ];
-          };
-        }
-        "break"
-      ];
+      modules = fastfetchModules;
     };
 
   };

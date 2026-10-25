@@ -1,0 +1,16 @@
+# Print a random Pokémon vertically centred in HEIGHT rows, for use as a
+# fastfetch command-raw logo beside the system information.
+#
+# Usage: fastfetch-pokemon HEIGHT
+height=${1:-0}
+sprite=$(pokemon-colorscripts -r --no-title)
+
+rows=0
+while IFS= read -r _; do
+	rows=$((rows + 1))
+done <<<"$sprite"
+
+for ((i = 0; i < (height - rows) / 2; i++)); do
+	echo
+done
+printf '%s\n' "$sprite"
