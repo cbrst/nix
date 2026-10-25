@@ -14,6 +14,16 @@ let
 
   serena = inputs.serena.packages.${pkgs.stdenv.hostPlatform.system}.serena;
 
+  claudeStatusline = pkgs.writeShellApplication {
+    name = "claude-statusline";
+    runtimeInputs = [
+      pkgs.git
+      pkgs.jq
+      pkgs.jujutsu
+    ];
+    text = builtins.readFile ./statusline.sh;
+  };
+
   # Shared configuration
   # agents and rules are shared between Claude Code and OpenCode,
   # so they get defined here and reused in their respective configurations
@@ -150,6 +160,11 @@ in
 
     settings = {
       effortLevel = "medium";
+      statusLine = {
+        type = "command";
+        command = "${claudeStatusline}/bin/claude-statusline";
+        padding = 0;
+      };
       hooks.PreToolUse = [
         {
           matcher = "Bash";
