@@ -97,7 +97,7 @@ in
 
   # Executables placed on the wrapped editor's PATH: LSP servers, formatters,
   # debug adapters and the helpers the Lua configuration calls.
-  extraPackages = (import ../editor-tools/packages.nix { inherit inputs pkgs; }) ++ [
+  extraPackages = (import ./tools.nix { inherit inputs pkgs; }) ++ [
     claudeCode
     # Random, centred sprite in the snacks.dashboard start screen.
     dashboardPokemon

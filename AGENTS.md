@@ -249,11 +249,12 @@ Nix owns the Neovim runtime surface:
   Lazy.nvim, packer, Mason, or runtime plugin/parser installation.
 - `spec.extraPackages` supplies LSP servers, formatters, debug adapters, search
   tools, and other executables on Neovim's `PATH`. Most of them come from
-  `modules/home/editor-tools/packages.nix`.
+  `modules/home/neovim/tools.nix`.
 - `xdg.configFile."nvim/init.lua"`, `xdg.configFile."nvim/lua"`, and
   `xdg.configFile."nvim/colors"` install the source under
   `modules/home/neovim/configs/` into `~/.config/nvim` through immutable
-  store-backed links.
+  store-backed links. `default.nix` also writes the Mago and rumdl fallback
+  configurations (project-local configuration wins).
 - The generated `flake-palette` plugin exposes the shared theme palette from
   `lib/themes.nix` as the `flake_palette` Lua module. The `flake` colorscheme
   (`configs/colors/flake.lua`, implemented in `plugins/theme/flake/`) builds
@@ -262,13 +263,13 @@ Nix owns the Neovim runtime surface:
   `plugins/theme/flake/groups/`.
 - Python and Ruby providers are intentionally disabled.
 
-When adding a plugin or parser, update `spec.nix`; for an LSP server,
-formatter, debug adapter, or command, update `editor-tools/packages.nix`. Do not
-assume a host-global executable or runtime download. Adding a Lua `require`
-without declaring its plugin in Nix can make startup fail. NeoJJ is a pinned
-local Vim plugin derivation because it is not available in the pinned nixpkgs.
-`blazingjj` and `lazygit` remain supplied by `modules/home/vcs/default.nix` for
-shell use, not for the Neovim VCS UI.
+When adding a plugin or parser, update `spec.nix`; for an LSP server, formatter,
+debug adapter, or command, update `tools.nix`. Do not assume a host-global
+executable or runtime download. Adding a Lua `require` without declaring its
+plugin in Nix can make startup fail. NeoJJ is a pinned local Vim plugin
+derivation because it is not available in the pinned nixpkgs. `blazingjj` and
+`lazygit` remain supplied by `modules/home/vcs/default.nix` for shell use, not
+for the Neovim VCS UI.
 
 ## Neovim Startup Order
 
@@ -485,15 +486,6 @@ nix shell nixpkgs#nodejs -c npm run build
 Fetch before editing, since the bot advances `docs@origin`.
 
 ## Change Discipline
-
-### Editor Tools
-
-`modules/home/editor-tools/` holds editor support that lives outside the
-Neovim module. `default.nix` writes the Mago and rumdl fallback configurations
-(project-local configuration wins), and `packages.nix` is the list of LSP
-servers, formatters, debug adapters, and helpers that `spec.nix` puts on
-Neovim's `PATH`. Neovim is the only editor in this flake; Emacs was removed. Do
-not use runtime package, server, or parser downloads.
 
 ### General Rules
 

@@ -19,7 +19,6 @@ let
   };
 in
 {
-  imports = [ ../editor-tools ];
   # Install Neovim for the current Home Manager user.
   programs.neovim = {
     enable = true;
@@ -36,4 +35,21 @@ in
   xdg.configFile."nvim/init.lua".source = spec.configDir + "/init.lua";
   xdg.configFile."nvim/lua".source = spec.configDir + "/lua";
   xdg.configFile."nvim/colors".source = spec.configDir + "/colors";
+
+  # Fallback formatter settings; project-local configuration wins.
+  xdg.configFile."mago.toml".text = ''
+    [formatter]
+    tab-width = 2
+    single-quote = false
+  '';
+  xdg.configFile."rumdl/rumdl.toml".text = ''
+    [MD013]
+    line-length = 80
+    reflow = true
+    reflow-mode = "normalize"
+    code-blocks = false
+    tables = false
+    headings = false
+    math-blocks = false
+  '';
 }

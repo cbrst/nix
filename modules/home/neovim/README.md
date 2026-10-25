@@ -8,11 +8,11 @@ together.
 | Path | Role |
 | --- | --- |
 | `spec.nix` | The editor definition: unwrapped Neovim, every plugin and Treesitter grammar, the tools on `PATH`, and the Lua configuration directory |
-| `default.nix` | Home Manager module that feeds `spec.nix` into `programs.neovim` and links the configuration into `~/.config/nvim` |
+| `tools.nix` | External executables on the editor's `PATH`: LSP servers, formatters, debug adapters, and helpers |
+| `default.nix` | Home Manager module: feeds `spec.nix` into `programs.neovim`, links the configuration into `~/.config/nvim`, and writes the Mago/rumdl fallback configuration |
 | `configs/` | `init.lua`, `lua/` and `colors/`; plain Lua, testable straight from the checkout |
 | `scripts/` | Helper scripts packaged by `spec.nix`, such as the dashboard Pokémon |
 | `patches/` | Source patches for packaged dependencies (the SCSS grammar) |
-| `../editor-tools/` | External tool list (`packages.nix`) and Mago/rumdl fallback configuration |
 
 The development profile imports this module, so every host using that profile
 receives the same editor setup.
@@ -41,8 +41,7 @@ To add something:
   the Lua configuration;
 - a custom or pinned plugin: add a `buildVimPlugin` derivation in the `let`
   block of `spec.nix`, then list it in `plugins`;
-- an LSP server, formatter, or debug adapter: add it to
-  `../editor-tools/packages.nix`;
+- an LSP server, formatter, or debug adapter: add it to `tools.nix`;
 - a Home Manager-only value: add an argument to `spec.nix` and pass it from
   `default.nix`.
 
