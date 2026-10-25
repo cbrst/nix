@@ -1,5 +1,5 @@
 # Neovim
-- Editor definition (plugins, tools, custom derivations): `modules/home/neovim/spec.nix`, a plain function; Home Manager wiring: `modules/home/neovim/default.nix`; Lua source: `modules/home/neovim/configs/`; imported by `profiles/home/development.nix`.
+- Editor definition (plugins, custom derivations): `modules/home/neovim/spec.nix`, a plain function; tools on PATH: `modules/home/neovim/tools.nix`; wrappers: `default.nix` (Home Manager) and `package.nix` (standalone `packages.<system>.nvim`, `nix run .#nvim`); Lua source: `modules/home/neovim/configs/`; imported by `profiles/home/development.nix`.
 - Nix declares every plugin/grammar and wrapped executable. `xdg.configFile` links checkout source into generated configuration.
 - Startup order: globals -> options -> keymap -> autocmds -> languages -> plugins -> final colorscheme. Preserve ordering dependencies: Mini Icons before consumers; VCS before Heirline/Snacks; Blink/LazyDev before LSP.
 - Plugin declarations changed: build `'.#homeConfigurations.\"example-user@generic-linux\".config.programs.neovim.finalPackage'`, then run that package with checkout runtime/init; do not test installed Neovim first.

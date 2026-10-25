@@ -103,6 +103,28 @@
     {
       overlays.typescript-language-server-pnpm-hash-fix = import ./overlays/typescript-language-server-pnpm-hash-fix.nix;
 
+      # The Home Manager Neovim as a standalone package, built from the same
+      # definition. Run with: nix run .#nvim
+      packages =
+        nixpkgs.lib.genAttrs
+          [
+            "x86_64-linux"
+            "aarch64-darwin"
+          ]
+          (
+            system:
+            let
+              pkgs = configLib.mkPkgs system;
+            in
+            {
+              nvim = import ./modules/home/neovim/package.nix {
+                inherit pkgs inputs;
+                inherit (pkgs) lib;
+                settings = defaultSettings;
+              };
+            }
+          );
+
       # Apply with: sudo nixos-rebuild switch --flake .#example-nixos
       nixosConfigurations.example-nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";

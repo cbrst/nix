@@ -17,6 +17,22 @@ let
         builtins.readFile path
       );
 
+    # Import nixpkgs for the target CPU and operating system combination, as
+    # standalone Home Manager configurations and flake packages see it.
+    mkPkgs =
+      system:
+      import nixpkgs {
+        inherit system;
+
+        config.allowUnfree = true;
+
+        # Add NUR packages, including Firefox add-ons, to pkgs.
+        overlays = [
+          nur.overlays.default
+          inputs.self.overlays.typescript-language-server-pnpm-hash-fix
+        ];
+      };
+
     # Build a Home Manager configuration for a non-NixOS Linux or macOS user.
     mkHome =
       {
@@ -27,18 +43,7 @@ let
         defaultSettings,
       }:
       home-manager.lib.homeManagerConfiguration {
-        # Import nixpkgs for the target CPU and operating system combination.
-        pkgs = import nixpkgs {
-          inherit system;
-
-          config.allowUnfree = true;
-
-          # Add NUR packages, including Firefox add-ons, to pkgs.
-          overlays = [
-            nur.overlays.default
-            inputs.self.overlays.typescript-language-server-pnpm-hash-fix
-          ];
-        };
+        pkgs = mkPkgs system;
 
         # Hosts derive their final settings from these shared defaults.
         extraSpecialArgs = { inherit inputs defaultSettings configLib; };

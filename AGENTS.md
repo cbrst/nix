@@ -42,6 +42,8 @@ nix build --no-link '.#nixosConfigurations.example-nixos.config.system.build.top
 nix build --no-link '.#homeConfigurations."example-user@generic-linux".activationPackage'
 nix eval '.#homeConfigurations."example-user@macbook".activationPackage.drvPath'
 nix eval '.#homeConfigurations."cbrst@niflheim".activationPackage.drvPath'
+nix build --no-link '.#nvim'
+nix eval '.#packages.aarch64-darwin.nvim.drvPath'
 ```
 
 For Asgard's embedded Home Manager configuration:
@@ -87,7 +89,9 @@ family. Each host publishes its resolved `settings` through `_module.args`,
 which lets the host apply machine-specific overrides before dependent modules
 are evaluated.
 `configLib` comes from `lib/default.nix`; flake inputs and shared defaults are
-passed through `specialArgs` or `extraSpecialArgs`.
+passed through `specialArgs` or `extraSpecialArgs`. `configLib.mkPkgs system`
+imports nixpkgs with `allowUnfree`, NUR, and the local overlays; `mkHome` and the
+flake `packages` both use it, so standalone outputs see the same package set.
 
 Exported outputs:
 
@@ -98,6 +102,7 @@ Exported outputs:
 | `homeConfigurations."example-user@generic-linux"` | `x86_64-linux` | Standalone Home Manager development environment |
 | `homeConfigurations."example-user@macbook"` | `aarch64-darwin` | Standalone Home Manager development environment plus macOS additions |
 | `homeConfigurations."cbrst@niflheim"` | `aarch64-darwin` | Real Niflheim Home Manager environment for `cbrst` |
+| `packages.<system>.nvim` | `x86_64-linux`, `aarch64-darwin` | Standalone Neovim from `modules/home/neovim/package.nix`, using `defaultSettings`; `nix run .#nvim` |
 
 The normal composition flow is:
 
@@ -228,33 +233,49 @@ spec.nix { pkgs, lib, inputs, settings, claudeCode }
   -> { package, extraPackages, plugins, configDir }
 ```
 
-`default.nix` only feeds those attributes into `programs.neovim` and links
-`configDir` into `~/.config/nvim`. Keeping the definition outside the module
-lets a standalone wrapper (a planned `packages.<system>.nvim` flake output)
-reuse it without duplicating the plugin or tool lists. Rules:
+Two consumers wrap it:
+
+| Consumer | Wrapper | Config location | `claudeCode` |
+| --- | --- | --- | --- |
+| `default.nix` (Home Manager) | `programs.neovim` | Linked into `~/.config/nvim` | `programs.claude-code.finalPackage` |
+| `package.nix` (`packages.<system>.nvim`) | `pkgs.wrapNeovimUnstable` | Bundled in the store, loaded through the wrapper's `-u` init | `pkgs.claude-code` |
+
+`package.nix` mirrors Home Manager's wrapping (`extraPackages` appended with
+`--suffix PATH`, Python and Ruby providers off). It also sets `NVIM_APPNAME` to
+`nvim-flake` as a default, so shada, undo, swap and state stay separate from any
+other Neovim on the machine. It sets `vim.g.flake_config_dir` to the bundled
+configuration (the Telescope "find file in Neovim config" mapping uses it), and
+it creates `stdpath("data")` on start because a fresh machine lacks it. Rules:
 
 - Declare plugins, grammars, custom plugin derivations, and helper scripts in
-  `spec.nix`, not in `default.nix`.
+  `spec.nix`, not in `default.nix` or `package.nix`. A change there must keep
+  both consumers working.
+- Lua must not assume `~/.config/nvim`. Use
+  `vim.g.flake_config_dir or vim.fn.stdpath("config")` when the configuration
+  directory itself is needed.
+- Home Manager-only files (`xdg.configFile`, such as the Mago and rumdl
+  fallbacks in `default.nix`) are absent from the standalone package.
 - Do not read Home Manager `config` inside `spec.nix`. Pass such values in as
   arguments, as `default.nix` does with `programs.claude-code.finalPackage`.
-- Return paths (`configDir`) as Nix paths and join with `+`, not string
-  interpolation; interpolating copies the whole directory into the store and
-  changes every derivation that uses it.
+- `spec.nix` returns `configDir` as a Nix path. `default.nix` joins it with `+`
+  so each linked file keeps its own store path; interpolating there would copy
+  the whole directory and change the Home Manager outputs. `package.nix`
+  interpolates on purpose, because it needs the directory as one store path.
 
 Nix owns the Neovim runtime surface:
 
-- `spec.package` is `neovim-unwrapped`; Home Manager creates the final wrapped
+- `spec.package` is `neovim-unwrapped`; each consumer creates the final wrapped
   package.
 - `spec.plugins` declares every plugin and Treesitter grammar. There is no
   Lazy.nvim, packer, Mason, or runtime plugin/parser installation.
 - `spec.extraPackages` supplies LSP servers, formatters, debug adapters, search
   tools, and other executables on Neovim's `PATH`. Most of them come from
   `modules/home/neovim/tools.nix`.
-- `xdg.configFile."nvim/init.lua"`, `xdg.configFile."nvim/lua"`, and
-  `xdg.configFile."nvim/colors"` install the source under
-  `modules/home/neovim/configs/` into `~/.config/nvim` through immutable
-  store-backed links. `default.nix` also writes the Mago and rumdl fallback
-  configurations (project-local configuration wins).
+- Under Home Manager, `xdg.configFile."nvim/init.lua"`,
+  `xdg.configFile."nvim/lua"`, and `xdg.configFile."nvim/colors"` install the
+  source under `modules/home/neovim/configs/` into `~/.config/nvim` through
+  immutable store-backed links. `default.nix` also writes the Mago and rumdl
+  fallback configurations (project-local configuration wins).
 - The generated `flake-palette` plugin exposes the shared theme palette from
   `lib/themes.nix` as the `flake_palette` Lua module. The `flake` colorscheme
   (`configs/colors/flake.lua`, implemented in `plugins/theme/flake/`) builds
@@ -425,9 +446,22 @@ When that generation predates the palette plugin, the `flake` colorscheme warns
 and falls back to `default`. Theme or palette changes therefore need the
 generation pack directory below.
 
-If plugin or executable declarations changed, build the Home Manager generation
-so its generated pack directory and wrapped package are both available. Add that
-pack directory before loading the checkout configuration:
+If plugin or executable declarations changed, or the change touches theme
+values, run the standalone package. It is built entirely from the checkout
+(plugins, tools, palette, and Lua), so it needs no installed generation. Point
+the XDG directories at a scratch location so the run leaves no state behind:
+
+```bash
+scratch="$(mktemp -d)"
+env XDG_CONFIG_HOME="$scratch/config" XDG_DATA_HOME="$scratch/data" \
+  XDG_STATE_HOME="$scratch/state" XDG_CACHE_HOME="$scratch/cache" \
+  nix run '.#nvim' -- -n --headless path/to/real/file '+qa'
+```
+
+To test the Home Manager wrapper itself rather than the standalone one, build
+the Home Manager generation so its generated pack directory and wrapped package
+are both available. Add that pack directory before loading the checkout
+configuration:
 
 ```bash
 generation="$(nix build --no-link --print-out-paths \

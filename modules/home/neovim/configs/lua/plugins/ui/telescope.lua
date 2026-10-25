@@ -152,7 +152,8 @@ function M.setup()
 		})
 	end, { desc = "Search open buffers" })
 	vim.keymap.set("n", "<leader>fp", function()
-		find_files({ cwd = vim.fn.stdpath("config") })
+		-- The standalone flake package bundles the configuration outside stdpath.
+		find_files({ cwd = vim.g.flake_config_dir or vim.fn.stdpath("config") })
 	end, { desc = "Find file in Neovim config" })
 end
 
