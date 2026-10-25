@@ -71,15 +71,49 @@ configuration requests their capabilities.
   Its project root is the nearest `.jj` or `.git` directory.
 - **Neo-tree** shows the file system, buffers, Git status, and symbols, with
   file nesting and current-file following.
-- **Snacks** provides input, picker, and terminal windows.
+- **Snacks** provides input, picker, and terminal windows, the start screen
+  (see below), and window dimming. Dimming is enabled at start-up and
+  `<leader>td` toggles it.
 - **Mini** adds text objects, surrounds, pairs, indent scope, icons, and
-  animation. Cursor animation and the cursor line are disabled in terminal
+  animation of the cursor, scrolling, window resizing, and window opening and
+  closing. Cursor animation and the cursor line are disabled in terminal
   buffers because they made typing in TUIs lag.
 - **Which-key** shows the leader groups. Bindings follow Doom Emacs.
 - Dropbar, Outline, Trouble, todo-comments, render-markdown, and
   nvim-highlight-colors round out the UI.
 - **Auto Dark Mode** switches between the light and dark variant of the theme
   with the system appearance.
+
+### Start screen
+
+The Snacks dashboard (`plugins/ui/dashboard.lua`) is the start screen. It shows
+a header modelled on Neovim's own `:intro` text, an action list, recent files,
+and a random fortune.
+
+| Key | Action |
+| --- | --- |
+| `f` | Find file |
+| `g` | Search the project, from the VCS root when there is one |
+| `r` | Recent files |
+| `n` | New buffer |
+| `s` | VCS status, labelled "jj status" or "Git status"; hidden outside a repository |
+| `e` | File tree |
+| `c` | Claude Code; hidden when `claude` is not on `PATH` |
+| `q` | Quit |
+
+The action list is rebuilt on every render, so the VCS entry follows the
+working directory. Recent files are limited to the current working directory,
+and the block is hidden when there are none. The fortune is chosen once per
+session, so resizing the window does not change it.
+
+When the window is wide enough for two columns, a second pane runs the
+`dashboard-pokemon` script, which prints a random
+[pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
+sprite centred against the height of the main pane. The script and
+`pokemon-colorscripts` are on Neovim's wrapped `PATH`; if the script is not
+found, the pane is omitted. The pane is not cached, so each launch shows a
+different sprite. Indent scope and animation are disabled on the dashboard
+buffer.
 
 ### Leader groups
 
@@ -95,7 +129,7 @@ The leader is `Space`; the local leader is `,`.
 | `<leader>h` | Help |
 | `<leader>o` | Open: project sidebar (`op`), terminals (`ot`, `oT`, `of`), AI (`ol`) |
 | `<leader>s` | Search |
-| `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines |
+| `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines, dimming (`td`) |
 | `<leader>w` | Window commands |
 | `<leader>q` | Quit and session |
 

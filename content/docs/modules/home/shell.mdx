@@ -70,7 +70,25 @@ palettes with the desktop.
 | `eza` | Directories first, Git status, headers, and icons |
 | `fzf` | Reverse layout at half height with custom glyphs; `Ctrl-O` opens the selection in `$EDITOR`. A small `fzf-preview` script shows a tree for directories and `bat` for files |
 | `zoxide` | Frecency-based `cd` |
-| `fastfetch` | A tree-style system summary with a custom logo |
+| `fastfetch` | A tree-style system summary with a random Pokémon sprite as its logo (see below) |
 | `jq`, `doggo` | JSON processing and DNS lookups |
 
 `EDITOR` is set to `nvim`.
+
+### Fastfetch greeting
+
+Fastfetch draws its logo with a `command-raw` source that runs the
+`fastfetch-pokemon` script. The script prints a random sprite from
+`pokemon-colorscripts` and pads it with blank lines so it is vertically centred
+against the information rows. The module list is a shared `fastfetchModules`
+binding, and its length is passed to the script, so adding a module such as a
+second GPU or display lengthens the list and the logo follows. Key colours are
+ANSI escape codes in the module definitions.
+
+Interactive Zsh shells run fastfetch at the end of start-up (order 1500, after
+the other init fragments). It runs only when stdout is a terminal,
+`FASTFETCH_SHOWN` is unset, and `NVIM` is unset, so Neovim terminals stay
+quiet. The check uses an exported `FASTFETCH_SHOWN` marker rather than `SHLVL`,
+because terminals started from a desktop session can inherit a raised `SHLVL`.
+Nested shells inherit the marker and skip the greeting. Each new terminal shows
+a different Pokémon.
