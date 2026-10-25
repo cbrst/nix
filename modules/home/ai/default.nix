@@ -76,10 +76,12 @@ let
     subagents = ''
       ## Subagents
 
-      You may start read-only subagents (search, exploration, or planning
-      agents that cannot edit files or run consequential commands) without
-      asking, when a task needs a broad sweep across many files or several
-      independent investigations. Prefer doing small lookups yourself.
+      Prefer read-only subagents (search, exploration, or planning agents
+      that cannot edit files or run consequential commands) when they offer
+      a substantial advantage, such as a broad sweep across many files or
+      several independent investigations that can run in parallel. Start
+      them without asking. Prefer doing small or sequentially dependent
+      lookups yourself.
 
       Ask before starting any subagent that can edit files, run builds or
       other consequential commands, or act outside the repository. When you
