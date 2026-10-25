@@ -205,6 +205,7 @@ function M.setup()
 	}
 	require("neogit").setup(neogit_config)
 	require("neojj").setup(vim.deepcopy(shared_config))
+	require("plugins.ui.commit-draft").setup()
 
 	local mappings = {
 		{ "<leader>gg", "status", "VCS status" },

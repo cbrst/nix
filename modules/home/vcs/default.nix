@@ -1,15 +1,27 @@
 { lib, pkgs, ... }:
 let
+  # Shared by the Git/jj hook and Neovim's NeoJJ description buffer.
+  claudeCommitDraft = pkgs.writeShellApplication {
+    name = "claude-commit-draft";
+    text = builtins.readFile ./hooks/claude-commit-draft;
+  };
+
   prepareCommitMessage = pkgs.writeTextFile {
     name = "prepare-commit-msg";
     executable = true;
-    text = builtins.readFile ./hooks/prepare-commit-msg;
+    text =
+      builtins.replaceStrings
+        [ "@claudeCommitDraft@" ]
+        [ "${claudeCommitDraft}/bin/claude-commit-draft" ]
+        (builtins.readFile ./hooks/prepare-commit-msg);
   };
 
   jjCommitEditor = pkgs.writeShellApplication {
     name = "jj-commit-editor";
     text = ''
       ${prepareCommitMessage} "$1" "" jj
+      # Tells Neovim's description-buffer autocmd the hook already ran.
+      export CLAUDE_COMMIT_DRAFT_DONE=1
       exec "''${EDITOR:-nvim}" "$@"
     '';
   };
@@ -124,5 +136,6 @@ in
 
   home.packages = [
     pkgs.blazingjj
+    claudeCommitDraft
   ];
 }

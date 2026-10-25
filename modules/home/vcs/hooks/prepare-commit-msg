@@ -8,24 +8,6 @@ message_file=$1
 source=${2:-}
 vcs=${3:-git}
 
-prompt=$(
-	cat <<EOF
-  Write a commit message for the attached diff.
-
-  Return only the commit message as plain text.
-
-  Follow Conventional Commits spec. Make sure the subject line is no longer than
-  72 characters.
-
-  Make sure the body text has no lines longer than 80 characters. Insert
-  newlines as needed.
-
-  Do not use Markdown fences, headings, trailers, or validation results.
-
-  Do not modify any files. Only use the attached diff.
-EOF
-)
-
 if [ "$vcs" = git ]; then
 	case "$source" in
 	message | template | merge | squash | commit)
@@ -61,11 +43,6 @@ report() {
 		mv "$message_file.claude-report" "$message_file"
 }
 
-if ! command -v claude >/dev/null 2>&1; then
-	report 'claude is not on PATH; skipped.'
-	exit 0
-fi
-
 tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/claude-commit.XXXXXX") || exit 0
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
@@ -82,17 +59,7 @@ fi
 
 printf '%s\n' 'Generating commit-message draft with Claude Code...' >&2
 
-claude --print \
-	--agent write-commit-msg \
-	--output-format text \
-	--permission-mode dontAsk \
-	--permission-prompts none \
-	--tools "" \
-	--disallowed-tools "mcp__*" \
-	--no-session-persistence \
-	"${prompt}" \
-	<"${diff_file}" \
-	>"${output_file}"
+@claudeCommitDraft@ <"${diff_file}" >"${output_file}"
 claude_status=$?
 
 if [ "$claude_status" -ne 0 ]; then
