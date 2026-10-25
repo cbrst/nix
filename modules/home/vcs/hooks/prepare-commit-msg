@@ -14,8 +14,8 @@ prompt=$(
 
   Return only the commit message as plain text.
 
-	Follow Conventional Commits spec. Make sure the subject line is no longer than
-	72 characters.
+  Follow Conventional Commits spec. Make sure the subject line is no longer than
+  72 characters.
 
   Make sure the body text has no lines longer than 80 characters. Insert
   newlines as needed.
