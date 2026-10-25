@@ -8,7 +8,7 @@ together.
 | Path | Role |
 | --- | --- |
 | `spec.nix` | The editor definition: unwrapped Neovim, every plugin and Treesitter grammar, the tools on `PATH`, and the Lua configuration directory |
-| `tools.nix` | External executables on the editor's `PATH`: LSP servers, formatters, debug adapters, and helpers |
+| `tools.nix` | External executables on the editor's `PATH`, in named groups (see below) |
 | `default.nix` | Home Manager module: feeds `spec.nix` into `programs.neovim`, links the configuration into `~/.config/nvim`, and writes the Mago/rumdl fallback configuration |
 | `package.nix` | Standalone wrapper published as `packages.<system>.nvim` |
 | `configs/` | `init.lua`, `lua/` and `colors/`; plain Lua, testable straight from the checkout |
@@ -39,9 +39,41 @@ To add something:
   the Lua configuration;
 - a custom or pinned plugin: add a `buildVimPlugin` derivation in the `let`
   block of `spec.nix`, then list it in `plugins`;
-- an LSP server, formatter, or debug adapter: add it to `tools.nix`;
+- an LSP server, formatter, or debug adapter: add it to the matching group in
+  `tools.nix`;
 - a Home Manager-only value: add an argument to `spec.nix` and pass it from both
   `default.nix` and `package.nix`.
+
+## Tool groups
+
+`tools.nix` returns an attribute set of package lists instead of one flat list:
+
+| Group | Contents | Used by |
+| --- | --- | --- |
+| `core` | `file`, `man-db`, `ripgrep`, `tree-sitter` | Pickers, previews, `:Man` |
+| `runtimes` | `bash`, `lua`, `nodejs`, `python3`, `zsh` | Debug launches, Overseer tasks, terminals, language tooling |
+| `debug` | bashdb and its adapter, the local Lua adapter, debugpy, vscode-js-debug | `plugins/debug/` |
+| `languages.lua` | lua-language-server, StyLua | |
+| `languages.markdown` | mdsf, rumdl | |
+| `languages.nix` | nil, nixd | |
+| `languages.php` | js-beautify (`html-beautify`), Mago, Phpactor | |
+| `languages.python` | Ruff, Zuban | |
+| `languages.shell` | bash-language-server, Shellharden, shfmt, zshcs | |
+| `languages.web` | Emmet, Prettier, Some Sass, TypeScript (`tsserver`), vscode-langservers-extracted | |
+| `languages.yaml` | yaml-language-server | |
+
+`spec.nix` currently puts every group on `PATH`. The grouping is groundwork for
+per-host options that drop groups a machine does not need. Two invariants keep
+regrouping safe: each package belongs to exactly one group, and no two packages
+ship a command with the same name, so the order of groups on `PATH` never
+changes which executable runs. Interpreters live in `runtimes` rather than
+`debug` because more than the debuggers use them.
+
+Dropping a group is not yet free of side effects in Lua. `plugins/lsp/init.lua`
+skips servers whose command is missing from `PATH`, but then warns about them on
+every start ("Missing Home Manager LSP tools"). typescript-tools.nvim is set up
+unconditionally and expects `tsserver`. The Lua side therefore needs to learn
+which groups are enabled before options can remove them.
 
 ## Standalone editor
 

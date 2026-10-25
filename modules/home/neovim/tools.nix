@@ -24,41 +24,80 @@ let
     '';
   };
 in
+# Executables for Neovim's PATH, grouped so callers can select subsets.
+# `spec.nix` currently concatenates every group. Each package belongs to
+# exactly one group; the Lua configuration names the executables it calls in
+# `config/lsp_servers.lua`, `plugins/smart/autoformat.lua`, and
+# `plugins/debug/init.lua`.
 with pkgs;
-[
-  bash
-  bashdb
-  bashDebugAdapter
-  file
-  lua
-  luaDebugAdapter
-  python3
-  python3Packages.debugpy
-  ripgrep
-  vscode-js-debug
-  bash-language-server
-  emmet-language-server
-  js-beautify
-  lua-language-server
-  mago
-  man-db
-  mdsf
-  nixd
-  nil
-  nodejs
-  phpactor
-  prettier
-  ruff
-  rumdl
-  nur.repos.congee.some-sass-language-server
-  stylua
-  shellharden
-  shfmt
-  tree-sitter
-  typescript_5
-  vscode-langservers-extracted
-  yaml-language-server
-  zsh
-  inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
-  zuban
-]
+{
+  # Search, previews, and `:Man`; needed whatever languages are enabled.
+  core = [
+    file
+    man-db
+    ripgrep
+    tree-sitter
+  ];
+
+  # Interpreters. Debug configurations launch programs with them (python3,
+  # node, bash, lua), Overseer tasks and terminals run them, and some language
+  # tooling expects them on PATH. They stay available when `debug` is dropped.
+  runtimes = [
+    bash
+    lua
+    nodejs
+    python3
+    zsh
+  ];
+
+  # Debug adapters used only by `plugins/debug/`.
+  debug = [
+    bashdb
+    bashDebugAdapter
+    luaDebugAdapter
+    python3Packages.debugpy
+    vscode-js-debug
+  ];
+
+  # Language servers and formatters, one list per language family.
+  languages = {
+    lua = [
+      lua-language-server
+      stylua
+    ];
+    markdown = [
+      mdsf
+      rumdl
+    ];
+    nix = [
+      nil
+      nixd
+    ];
+    php = [
+      # `html-beautify` is the first step of Conform's PHP chain.
+      js-beautify
+      mago
+      phpactor
+    ];
+    python = [
+      ruff
+      zuban
+    ];
+    shell = [
+      bash-language-server
+      shellharden
+      shfmt
+      inputs.zshcs.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ];
+    web = [
+      emmet-language-server
+      prettier
+      nur.repos.congee.some-sass-language-server
+      # `tsserver` for typescript-tools.nvim.
+      typescript_5
+      # HTML, CSS, and JSON servers.
+      vscode-langservers-extracted
+    ];
+    yaml = [ yaml-language-server ];
+  };
+}

@@ -270,7 +270,13 @@ Nix owns the Neovim runtime surface:
   Lazy.nvim, packer, Mason, or runtime plugin/parser installation.
 - `spec.extraPackages` supplies LSP servers, formatters, debug adapters, search
   tools, and other executables on Neovim's `PATH`. Most of them come from
-  `modules/home/neovim/tools.nix`.
+  `modules/home/neovim/tools.nix`, which returns named groups: `core`,
+  `runtimes`, `debug`, and `languages.<family>` (`lua`, `markdown`, `nix`,
+  `php`, `python`, `shell`, `web`, `yaml`). `spec.nix` currently includes every
+  group; the groups exist so options can select subsets. Each package belongs to
+  exactly one group, and no two packages ship the same command, so group order
+  does not change which executable a command resolves to. Keep both properties
+  when adding packages.
 - Under Home Manager, `xdg.configFile."nvim/init.lua"`,
   `xdg.configFile."nvim/lua"`, and `xdg.configFile."nvim/colors"` install the
   source under `modules/home/neovim/configs/` into `~/.config/nvim` through
@@ -285,12 +291,13 @@ Nix owns the Neovim runtime surface:
 - Python and Ruby providers are intentionally disabled.
 
 When adding a plugin or parser, update `spec.nix`; for an LSP server, formatter,
-debug adapter, or command, update `tools.nix`. Do not assume a host-global
-executable or runtime download. Adding a Lua `require` without declaring its
-plugin in Nix can make startup fail. NeoJJ is a pinned local Vim plugin
-derivation because it is not available in the pinned nixpkgs. `blazingjj` and
-`lazygit` remain supplied by `modules/home/vcs/default.nix` for shell use, not
-for the Neovim VCS UI.
+debug adapter, or command, add it to the matching group in `tools.nix` (a new
+language family gets its own list under `languages`). Do not assume a
+host-global executable or runtime download. Adding a Lua `require` without
+declaring its plugin in Nix can make startup fail. NeoJJ is a pinned local Vim
+plugin derivation because it is not available in the pinned nixpkgs. `blazingjj`
+and `lazygit` remain supplied by `modules/home/vcs/default.nix` for shell use,
+not for the Neovim VCS UI.
 
 ## Neovim Startup Order
 

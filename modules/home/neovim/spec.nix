@@ -17,6 +17,8 @@
   claudeCode,
 }:
 let
+  # Grouped executables; see `tools.nix`.
+  tools = import ./tools.nix { inherit inputs pkgs; };
   dashboardPokemon = pkgs.writeShellApplication {
     name = "dashboard-pokemon";
     runtimeInputs = [
@@ -97,11 +99,18 @@ in
 
   # Executables placed on the wrapped editor's PATH: LSP servers, formatters,
   # debug adapters and the helpers the Lua configuration calls.
-  extraPackages = (import ./tools.nix { inherit inputs pkgs; }) ++ [
-    claudeCode
-    # Random, centred sprite in the snacks.dashboard start screen.
-    dashboardPokemon
-  ];
+  # Every group from `tools.nix` is included; the order only matters when two
+  # packages ship the same command, and no two groups currently do.
+  extraPackages =
+    tools.core
+    ++ tools.runtimes
+    ++ tools.debug
+    ++ lib.concatLists (lib.attrValues tools.languages)
+    ++ [
+      claudeCode
+      # Random, centred sprite in the snacks.dashboard start screen.
+      dashboardPokemon
+    ];
 
   # Every plugin and Treesitter grammar; nothing is installed at runtime.
   plugins = with pkgs.vimPlugins; [
