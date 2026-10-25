@@ -9,5 +9,8 @@
     recommendedServices.enable = true;
   };
 
-  environment.systemPackages = [ pkgs.libnotify ];
+  environment.systemPackages = [
+    pkgs.libnotify
+    pkgs.wl-clipboard
+  ];
 }
