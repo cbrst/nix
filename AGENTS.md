@@ -82,7 +82,7 @@ Niflheim exposes a standalone Home Manager output for the same user.
 
 `flake.nix` is the entry point. It pins `nixpkgs` unstable, Home Manager,
 Affinity Nix, Noctalia, Noctalia Greeter, NUR, Serena, zshcs, and non-flake
-theme/package sources. Shared `defaultSettings` define fonts and the theme
+package sources. Shared `defaultSettings` define fonts and the theme
 family. Each host publishes its resolved `settings` through `_module.args`,
 which lets the host apply machine-specific overrides before dependent modules
 are evaluated.
@@ -191,6 +191,12 @@ template helpers turn them into store outputs and profile links. In particular,
 `configLib.renderTemplate` in `lib/default.nix` substitutes theme/font values in
 checked-in source files.
 
+`lib/themes.nix` is the single source of colours. Each family has semantic
+`light`/`dark` palettes plus a `terminal` set (16 ANSI colours, cursor and
+selection) derived with the `configLib.colors` helpers from `lib/colors.nix`.
+Neovim, Emacs, Ghostty, foot, Firefox, Noctalia and the shell prompt all render
+from it, so a new family only needs palette entries there.
+
 External mutable state intentionally outside the repository includes account
 passwords, `/var/lib/sbctl`, `~/.ssh/hosts`, and password-manager agent sockets.
 Do not attempt to make these declarative unless the user specifically requests a
@@ -222,10 +228,16 @@ Nix owns the Neovim runtime surface:
   is no Lazy.nvim, packer, Mason, or runtime plugin/parser installation.
 - `programs.neovim.extraPackages` supplies LSP servers, formatters, search
   tools, and other executables on Neovim's `PATH`.
-- `xdg.configFile."nvim/init.lua"` and `xdg.configFile."nvim/lua"` install the
-  source under `modules/home/neovim/configs/` into `~/.config/nvim` through
-  immutable store-backed links.
-- `CONFIG_THEME_FAMILY` is generated from the shared flake theme settings.
+- `xdg.configFile."nvim/init.lua"`, `xdg.configFile."nvim/lua"`, and
+  `xdg.configFile."nvim/colors"` install the source under
+  `modules/home/neovim/configs/` into `~/.config/nvim` through immutable
+  store-backed links.
+- The generated `flake-palette` plugin exposes the shared theme palette from
+  `lib/themes.nix` as the `flake_palette` Lua module. The `flake` colorscheme
+  (`configs/colors/flake.lua`, implemented in `plugins/theme/flake/`) builds
+  every highlight group from it; there are no third-party colorscheme plugins.
+  New plugins with their own highlight groups get entries in
+  `plugins/theme/flake/groups/`.
 - Python and Ruby providers are intentionally disabled.
 
 When adding a plugin, parser, LSP server, formatter, or command, update
@@ -284,7 +296,7 @@ Preserve meaningful ordering:
   plugin runtime.
 - Blink and LazyDev initialize before LSP capabilities and Lua completion use
   them.
-- Theme plugins configure themselves before the final colorscheme application.
+- Auto Dark Mode is configured before the final colorscheme application.
 
 ## Neovim Lua Map
 
@@ -297,11 +309,11 @@ Preserve meaningful ordering:
 | `configs/lua/config/globals.lua` | Leaders and global capability flags |
 | `configs/lua/config/lsp_servers.lua` | Declarative LSP server table |
 | `configs/lua/config/lsp_keymaps.lua` | `LspAttach` mappings, highlights, and inlay hints |
-| `configs/lua/config/theme.lua` | Theme family/variant selection and colorscheme application |
+| `configs/lua/config/theme.lua` | Light/dark variant selection and colorscheme application |
 | `configs/lua/config/ui_colors.lua` | Shared StatusLine, WinBar, Dropbar, and message colors |
 | `configs/lua/config/util.lua` | Generic command/visual-selection helpers |
 | `configs/lua/utils/icons.lua` | Shared icons |
-| `configs/lua/plugins/theme/` | Meowsoot, Kanagawa, and Auto Dark Mode setup |
+| `configs/lua/plugins/theme/` | The `flake` colorscheme (palette roles, highlight groups) and Auto Dark Mode setup |
 | `configs/lua/plugins/ui/` | Statusline, navigation, pickers, VCS, terminals, symbols, and visual UI |
 | `configs/lua/plugins/smart/` | Completion, Treesitter, formatting, and AI integrations |
 | `configs/lua/plugins/debug/` | DAP adapters, debugger UI, and debug keymaps |
@@ -378,12 +390,16 @@ the checkout's `init.lua`. Do this on the first attempt; a plain installed
 `nvim --headless` tests the previous Home Manager generation.
 
 ```bash
-CONFIG_THEME_FAMILY=meowsoot \
 nvim -n --headless \
   --cmd "set runtimepath^=$PWD/modules/home/neovim/configs" \
   -u "$PWD/modules/home/neovim/configs/init.lua" \
   '+qa'
 ```
+
+This uses the installed generation's plugins, including its `flake_palette`.
+When that generation predates the palette plugin, the `flake` colorscheme warns
+and falls back to `default`. Theme or palette changes therefore need the
+generation pack directory below.
 
 If plugin or executable declarations changed, build the Home Manager generation
 so its generated pack directory and wrapped package are both available. Add that
@@ -393,7 +409,6 @@ pack directory before loading the checkout configuration:
 generation="$(nix build --no-link --print-out-paths \
   '.#homeConfigurations."example-user@generic-linux".activationPackage')"
 
-CONFIG_THEME_FAMILY=meowsoot \
 nix shell \
   '.#homeConfigurations."example-user@generic-linux".config.programs.neovim.finalPackage' \
   -c nvim -n --headless \

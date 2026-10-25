@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   inputs,
   pkgs,
   settings,
@@ -23,15 +24,17 @@ let
       stripRoot = true;
     };
   };
-  meowsootNvim = pkgs.vimUtils.buildVimPlugin {
-    pname = "meowsoot.nvim";
-    version = "unstable-2026-07-19";
-    src = inputs.meowsoot;
-  };
-  kanagawaNvim = pkgs.vimUtils.buildVimPlugin {
-    pname = "kanagawa.nvim";
-    version = "unstable-2026-05-10";
-    src = inputs.kanagawa;
+  # The shared flake palette as a Lua module for the `flake` colorscheme.
+  flakePalette = pkgs.vimUtils.buildVimPlugin {
+    pname = "flake-palette";
+    version = "0";
+    src = pkgs.writeTextDir "lua/flake_palette.lua" ''
+      return ${
+        lib.generators.toLua { } {
+          inherit (settings.theme) light dark terminal;
+        }
+      }
+    '';
   };
   neojjNvim = pkgs.vimUtils.buildVimPlugin {
     pname = "neojj";
@@ -106,15 +109,13 @@ in
       diffs-nvim
       dropbar-nvim
       fidget-nvim
+      flakePalette
       gitsigns-nvim
       heirline-nvim
       lazydev-nvim
       luasnip
       luvit-meta
       mini-nvim
-      monokai-pro-nvim
-      meowsootNvim
-      kanagawaNvim
       neogit
       neojjNvim
       neo-tree-nvim
@@ -150,6 +151,5 @@ in
   # configuration directory instead of copying and maintaining it manually.
   xdg.configFile."nvim/init.lua".source = ./configs/init.lua;
   xdg.configFile."nvim/lua".source = ./configs/lua;
-
-  home.sessionVariables.CONFIG_THEME_FAMILY = settings.theme.family;
+  xdg.configFile."nvim/colors".source = ./configs/colors;
 }

@@ -2,6 +2,50 @@
   family ? "meowsoot",
 }:
 let
+  colors = import ./colors.nix;
+
+  # ANSI terminal colours derived from a variant's semantic palette. Bright
+  # accents move toward the foreground, which adds contrast in either mode.
+  terminalFor =
+    isDark: v:
+    let
+      bright = c: colors.mix c v.foreground 20;
+      accents = [
+        v.error
+        v.success
+        v.warning
+        v.link
+        v.accent2
+        v.accent3
+      ];
+    in
+    {
+      palette = [
+        (if isDark then v.shade4 else v.foreground)
+      ]
+      ++ accents
+      ++ [
+        (if isDark then v.muted else v.shade4)
+        (if isDark then v.faint else v.muted)
+      ]
+      ++ map bright accents
+      ++ [ (if isDark then v.foreground else v.shade2) ];
+      cursor = v.accent;
+      cursorText = v.background;
+      selectionBackground = v.selected;
+      selectionForeground = v.foreground;
+    };
+
+  withTerminal =
+    theme:
+    theme
+    // {
+      terminal = {
+        light = terminalFor false theme.light;
+        dark = terminalFor true theme.dark;
+      };
+    };
+
   themes = {
     meowsoot = {
       light = {
@@ -85,14 +129,6 @@ let
         shade4 = "#353331";
       };
       apps = {
-        ghostty = {
-          light = "meowsoot-dawn";
-          dark = "meowsoot";
-        };
-        neovim = {
-          light = "meowsoot-dawn";
-          dark = "meowsoot";
-        };
         vscode = {
           light = "Meowsoot Dawn";
           dark = "Meowsoot Night";
@@ -191,14 +227,6 @@ let
         shade4 = "#54546D";
       };
       apps = {
-        ghostty = {
-          light = "kanagawa-lotus";
-          dark = "kanagawa-wave";
-        };
-        neovim = {
-          light = "kanagawa-lotus";
-          dark = "kanagawa-wave";
-        };
         vscode = {
           light = "Kanagawa Lotus";
           dark = "Kanagawa Wave";
@@ -217,6 +245,6 @@ let
   };
 in
 if builtins.hasAttr family themes then
-  themes.${family} // { inherit family; }
+  withTerminal themes.${family} // { inherit family; }
 else
   throw "Unknown theme family '${family}'"

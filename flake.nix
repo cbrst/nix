@@ -72,17 +72,6 @@
       flake = false;
     };
 
-    # Add meowsoot as input to get the ghostty theme
-    meowsoot = {
-      url = "github:marekh19/meowsoot.nvim";
-      flake = false;
-    };
-
-    kanagawa = {
-      url = "github:rebelot/kanagawa.nvim";
-      flake = false;
-    };
-
     zshcs = {
       url = "github:yuys13/zshcs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -112,8 +101,7 @@
       configLib = import ./lib { inherit inputs; };
     in
     {
-      overlays.typescript-language-server-pnpm-hash-fix =
-        import ./overlays/typescript-language-server-pnpm-hash-fix.nix;
+      overlays.typescript-language-server-pnpm-hash-fix = import ./overlays/typescript-language-server-pnpm-hash-fix.nix;
 
       # Apply with: sudo nixos-rebuild switch --flake .#example-nixos
       nixosConfigurations.example-nixos = nixpkgs.lib.nixosSystem {

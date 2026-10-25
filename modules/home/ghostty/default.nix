@@ -1,9 +1,31 @@
 {
-  inputs,
+  lib,
   settings,
   pkgs,
   ...
 }:
+let
+  # Ghostty theme files generated from the shared flake palette.
+  themeFile =
+    variant:
+    let
+      colors = settings.theme.${variant};
+      terminal = settings.theme.terminal.${variant};
+    in
+    lib.concatStringsSep "\n" (
+      lib.imap0 (index: color: "palette = ${toString index}=${color}") terminal.palette
+      ++ [
+        "background = ${colors.background}"
+        "foreground = ${colors.foreground}"
+        "cursor-color = ${terminal.cursor}"
+        "cursor-text = ${terminal.cursorText}"
+        "selection-background = ${terminal.selectionBackground}"
+        "selection-foreground = ${terminal.selectionForeground}"
+        "split-divider-color = ${colors.border}"
+      ]
+    )
+    + "\n";
+in
 {
   # home.packages = [ pkgs.ghostty ];
   programs.ghostty = {
@@ -29,16 +51,11 @@
       window-theme = "ghostty";
       macos-titlebar-style = "transparent"; # "tabs" titlebar is buggy in 1.3.1 on Golden Gate
       gtk-titlebar = false;
-      theme = "light:${settings.theme.apps.ghostty.light},dark:${settings.theme.apps.ghostty.dark}";
+      theme = "light:flake-light,dark:flake-dark";
       config-file = "?config-custom";
     };
   };
 
-  xdg.configFile."ghostty/themes/meowsoot".source = "${inputs.meowsoot}/extras/ghostty/meowsoot";
-  xdg.configFile."ghostty/themes/meowsoot-dawn".source =
-    "${inputs.meowsoot}/extras/ghostty/meowsoot-dawn";
-  xdg.configFile."ghostty/themes/kanagawa-lotus".source =
-    "${inputs.kanagawa}/extras/ghostty/kanagawa-lotus";
-  xdg.configFile."ghostty/themes/kanagawa-wave".source =
-    "${inputs.kanagawa}/extras/ghostty/kanagawa-wave";
+  xdg.configFile."ghostty/themes/flake-light".text = themeFile "light";
+  xdg.configFile."ghostty/themes/flake-dark".text = themeFile "dark";
 }

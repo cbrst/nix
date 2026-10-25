@@ -305,38 +305,6 @@
         "type": "github"
       }
     },
-    "kanagawa": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1778430713,
-        "narHash": "sha256-fMP4NUCKD1ZcNkaHy6SuNm020ECXpBOihGv2n1wyTN4=",
-        "owner": "rebelot",
-        "repo": "kanagawa.nvim",
-        "rev": "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "rebelot",
-        "repo": "kanagawa.nvim",
-        "type": "github"
-      }
-    },
-    "meowsoot": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791205867,
-        "narHash": "sha256-JJJsvpc7BvgxVCihP67kC3f2vJPD8sGaNIPEi7pERK8=",
-        "owner": "marekh19",
-        "repo": "meowsoot.nvim",
-        "rev": "800100db4ec6e29f9c5337675cdb41ef9fb6289d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "marekh19",
-        "repo": "meowsoot.nvim",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787631388,
@@ -584,8 +552,6 @@
         "claude-code-playground": "claude-code-playground",
         "claude-kit": "claude-kit",
         "home-manager": "home-manager",
-        "kanagawa": "kanagawa",
-        "meowsoot": "meowsoot",
         "nixpkgs": "nixpkgs_4",
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",

@@ -8,6 +8,9 @@ let
     ;
 
   configLib = rec {
+    # Colour arithmetic for deriving shades from the theme palettes.
+    colors = import ./colors.nix;
+
     renderTemplate =
       replacements: path:
       builtins.replaceStrings (builtins.attrNames replacements) (builtins.attrValues replacements) (
