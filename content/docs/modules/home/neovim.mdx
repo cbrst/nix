@@ -59,7 +59,7 @@ configuration requests their capabilities.
 | --- | --- |
 | Completion | Blink with LazyDev, LSP, paths, LuaSnip, and buffer sources; automatic command-line completion |
 | Language servers | The `vim.lsp.config` / `vim.lsp.enable` API. Servers are enabled only when their executable exists: Bash, Emmet, JSON, Lua, Nix (`nil`), PHP (Phpactor), rumdl, Sass, YAML, Zsh (zshcs), and Python (Zuban). TypeScript uses TypeScript Tools |
-| Formatting | Conform, on save: StyLua for Lua, mdsf then rumdl for Markdown, Ruff for Python, Shellharden then shfmt for Zsh, js-beautify for CSS, Mago for PHP, Prettier as the HTML fallback |
+| Formatting | Conform, on save: StyLua for Lua, mdsf then rumdl for Markdown, Ruff for Python, Shellharden then shfmt for Zsh, js-beautify for CSS, Mago for PHP, Prettier as the HTML fallback. Setting `vim.g.disable_autoformat` (or `vim.b.disable_autoformat` for one buffer) saves without running any formatter |
 | Tree-sitter | Every grammar from nixpkgs. The SCSS grammar is patched and regenerated so it understands namespaced mixins and function calls |
 | Debugging | nvim-dap with DAP UI and virtual text. Adapters for Python (debugpy), JavaScript and TypeScript (js-debug), Bash, standalone Lua, and Neovim Lua (one-small-step-for-vimkind). The Bash adapter is also offered for Zsh files but cannot interpret Zsh-only syntax |
 | Annotations | codedocs.nvim generates documentation comments with `<leader>cA` |
