@@ -3,12 +3,48 @@
 This directory keeps the Neovim installation and its personal configuration
 together.
 
-`default.nix` enables Neovim through Home Manager and links `init.lua` into
-`~/.config/nvim/init.lua`. Add Lua files under `lua/` as the configuration
-grows, then link that directory from the module as well.
+## Layout
+
+| Path | Role |
+| --- | --- |
+| `spec.nix` | The editor definition: unwrapped Neovim, every plugin and Treesitter grammar, the tools on `PATH`, and the Lua configuration directory |
+| `default.nix` | Home Manager module that feeds `spec.nix` into `programs.neovim` and links the configuration into `~/.config/nvim` |
+| `configs/` | `init.lua`, `lua/` and `colors/`; plain Lua, testable straight from the checkout |
+| `scripts/` | Helper scripts packaged by `spec.nix`, such as the dashboard Pokémon |
+| `patches/` | Source patches for packaged dependencies (the SCSS grammar) |
+| `../editor-tools/` | External tool list (`packages.nix`) and Mago/rumdl fallback configuration |
 
 The development profile imports this module, so every host using that profile
 receives the same editor setup.
+
+## The editor definition
+
+`spec.nix` is a plain function rather than a Home Manager module:
+
+```nix
+import ./spec.nix { inherit pkgs lib inputs settings; claudeCode = <package>; }
+# => { package; extraPackages; plugins; configDir; }
+```
+
+Because it does not depend on Home Manager, the same definition can be wrapped
+in more than one place. Today only `default.nix` uses it. A standalone
+`packages.<system>.nvim` flake output, which runs the editor with `nix run` on a
+machine without this Home Manager setup, is the planned second user.
+
+Home Manager-only values are passed in as arguments. `claudeCode` is
+`programs.claude-code.finalPackage` under Home Manager; a standalone build would
+pass `pkgs.claude-code`.
+
+To add something:
+
+- a plugin or grammar: add it to `plugins` in `spec.nix`, then `require` it from
+  the Lua configuration;
+- a custom or pinned plugin: add a `buildVimPlugin` derivation in the `let`
+  block of `spec.nix`, then list it in `plugins`;
+- an LSP server, formatter, or debug adapter: add it to
+  `../editor-tools/packages.nix`;
+- a Home Manager-only value: add an argument to `spec.nix` and pass it from
+  `default.nix`.
 
 ## Version control
 
