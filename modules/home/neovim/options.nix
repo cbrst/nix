@@ -18,8 +18,8 @@ let
     php = "PHP: Phpactor, Mago and html-beautify";
     python = "Python: Zuban and Ruff";
     shell = "Shell: bash-language-server, zshcs, Shellharden and shfmt";
-    web = "Web: TypeScript (typescript-tools.nvim), Emmet, Some Sass, HTML/CSS/JSON servers and Prettier";
-    yaml = "YAML: yaml-language-server";
+    web = "Web: TypeScript (typescript-tools.nvim), Emmet, Some Sass, HTML/CSS/JSON servers, oxlint and oxfmt";
+    yaml = "YAML: yaml-language-server and yamlfmt";
   };
 
   enabledByDefault = description: lib.mkEnableOption description // { default = true; };

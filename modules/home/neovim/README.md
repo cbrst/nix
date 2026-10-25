@@ -134,15 +134,15 @@ parser, and those filetypes fall back to regex syntax highlighting.
 | `languages.php` | js-beautify (`html-beautify`), Mago, Phpactor | `languages.php.enable` |
 | `languages.python` | Ruff, Zuban | `languages.python.enable` |
 | `languages.shell` | bash-language-server, Shellharden, shfmt, zshcs | `languages.shell.enable` |
-| `languages.web` | Emmet, js-beautify (`css-beautify`), Prettier, Some Sass, TypeScript (`tsserver`), vscode-langservers-extracted | `languages.web.enable` |
-| `languages.yaml` | yaml-language-server | `languages.yaml.enable` |
+| `languages.web` | Emmet, oxfmt, oxlint, Some Sass, TypeScript (`tsserver`), vscode-langservers-extracted | `languages.web.enable` |
+| `languages.yaml` | yaml-language-server, yamlfmt | `languages.yaml.enable` |
 
 Interpreters live in `runtimes` rather than `debug` because debug launches,
 Overseer tasks, terminals, and language tooling all use them. A package may sit
-in several language groups when several families need it (js-beautify);
-`spec.nix` removes duplicates. No two distinct packages ship a command with the
-same name, so the order of groups on `PATH` never changes which executable runs;
-keep it that way when adding packages.
+in several language groups when several families need it; `spec.nix` removes
+duplicates. No two distinct packages ship a command with the same name, so the
+order of groups on `PATH` never changes which executable runs; keep it that way
+when adding packages.
 
 ## Standalone editor
 

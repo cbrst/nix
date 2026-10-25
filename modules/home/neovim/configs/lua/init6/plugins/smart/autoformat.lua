@@ -4,24 +4,55 @@ local M = {}
 -- Filetypes of a disabled group get no Conform entry, so saving falls back to
 -- LSP formatting quietly instead of reporting missing formatters.
 local filetype_languages = {
+	astro = "web",
 	css = "web",
+	graphql = "web",
 	html = "web",
+	javascript = "web",
+	javascriptreact = "web",
+	json = "web",
+	jsonc = "web",
+	less = "web",
 	lua = "lua",
 	markdown = "markdown",
 	php = "php",
 	python = "python",
+	scss = "web",
+	svelte = "web",
+	toml = "web",
+	typescript = "web",
+	typescriptreact = "web",
+	vue = "web",
+	yaml = "yaml",
 	zsh = "shell",
 }
 
 function M.setup()
 	local features = require("init6.config.features")
+	-- oxlint applies its fixes before oxfmt formats the result. oxfmt leaves
+	-- Svelte and Astro untouched, so those only get oxlint.
+	local oxc = { "oxlint", "oxfmt" }
 	local formatters_by_ft = {
-		css = { "css_beautify" },
-		html = { "prettierd", "prettier", stop_after_first = true },
+		astro = { "oxlint" },
+		css = { "oxfmt" },
+		graphql = { "oxfmt" },
+		html = { "oxfmt" },
+		javascript = oxc,
+		javascriptreact = oxc,
+		json = { "oxfmt" },
+		jsonc = { "oxfmt" },
+		less = { "oxfmt" },
 		lua = { "stylua" },
 		markdown = { "mdsf", "rumdl" },
 		php = { "html_beautify", "mago_format" },
 		python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
+		scss = { "oxfmt" },
+		svelte = { "oxlint" },
+		toml = { "oxfmt" },
+		typescript = oxc,
+		typescriptreact = oxc,
+		vue = oxc,
+		yaml = { "yamlfmt" },
 		zsh = { "shellharden", "shfmt" },
 		-- Conform can also run multiple formatters sequentially
 		-- python = { "isort", "black" },

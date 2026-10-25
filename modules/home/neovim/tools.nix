@@ -76,7 +76,7 @@ with pkgs;
       nixd
     ];
     php = [
-      # `html-beautify` is the first step of Conform's PHP chain; also in `web`.
+      # `html-beautify` is the first step of Conform's PHP chain.
       js-beautify
       mago
       phpactor
@@ -93,15 +93,18 @@ with pkgs;
     ];
     web = [
       emmet-language-server
-      # `css-beautify` for Conform's CSS formatting; also in `php`.
-      js-beautify
-      prettier
+      # Conform's chains for the web filetypes, JSON, GraphQL, and TOML.
+      oxfmt
+      oxlint
       nur.repos.congee.some-sass-language-server
       # `tsserver` for typescript-tools.nvim.
       typescript_5
       # HTML, CSS, and JSON servers.
       vscode-langservers-extracted
     ];
-    yaml = [ yaml-language-server ];
+    yaml = [
+      yaml-language-server
+      yamlfmt
+    ];
   };
 }

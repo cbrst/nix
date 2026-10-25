@@ -309,9 +309,9 @@ Nix owns the Neovim runtime surface:
   `runtimes`, `debug`, and `languages.<family>` (`lua`, `markdown`, `nix`,
   `php`, `python`, `shell`, `web`, `yaml`). `spec.nix` always includes `core`
   and `runtimes`, and the others as their features allow. A package may appear
-  in several language groups (js-beautify is in `php` and `web`); `spec.nix`
-  deduplicates. No two distinct packages ship the same command, so group order
-  does not change which executable a command resolves to. Keep that property
+  in several language groups; `spec.nix` deduplicates. No two distinct packages
+  ship the same command, so group order does not change which executable a
+  command resolves to. Keep that property
   when adding packages, and add a new language family to both `tools.nix` and
   `options.nix`.
 - Under Home Manager, `xdg.configFile."nvim/init.lua"`,
@@ -450,8 +450,9 @@ Completion is configured in `plugins/smart/autocompletion.lua`. Sources are
 LazyDev, LSP, paths, LuaSnip, and buffer completion. Formatting is configured in
 `plugins/smart/autoformat.lua` through Conform and runs on save. Current chains
 include StyLua for Lua, mdsf then rumdl for Markdown, Ruff operations for
-Python, Shellharden then shfmt for Zsh, and Prettier as the available HTML
-fallback.
+Python, Shellharden then shfmt for Zsh, oxlint then oxfmt for JavaScript,
+TypeScript, and Vue, oxfmt for the other web filetypes, JSON, and TOML, and
+yamlfmt for YAML.
 
 UI responsibilities:
 
