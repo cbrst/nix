@@ -1,6 +1,6 @@
 { ... }:
 {
-  # Both editors use the same fallbacks; project-local configuration wins.
+  # Fallback formatter settings for Neovim; project-local configuration wins.
   xdg.configFile."mago.toml".text = ''
     [formatter]
     tab-width = 2

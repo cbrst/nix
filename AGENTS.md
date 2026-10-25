@@ -163,7 +163,7 @@ profiles/home/minimal.nix
 
 profiles/home/development.nix
 ├── profiles/home/minimal.nix
-└── modules/home/{code,neovim,emacs,ai,direnv}
+└── modules/home/{code,neovim,ai,direnv}
 
 profiles/home/gaming.nix
 └── modules/home/mangohud.nix
@@ -194,8 +194,8 @@ checked-in source files.
 `lib/themes.nix` is the single source of colours. Each family has semantic
 `light`/`dark` palettes plus a `terminal` set (16 ANSI colours, cursor and
 selection) derived with the `configLib.colors` helpers from `lib/colors.nix`.
-Neovim, Emacs, Ghostty, foot, Firefox, Noctalia and the shell prompt all render
-from it, so a new family only needs palette entries there.
+Neovim, Ghostty, foot, Firefox, Noctalia and the shell prompt all render from
+it, so a new family only needs palette entries there.
 
 External mutable state intentionally outside the repository includes account
 passwords, `/var/lib/sbctl`, `~/.ssh/hosts`, and password-manager agent sockets.
@@ -463,26 +463,15 @@ Fetch before editing, since the bot advances `docs@origin`.
 
 ## Change Discipline
 
-### Emacs Ownership
+### Editor Tools
 
-`modules/home/emacs/` is imported alongside Neovim by the development profile.
-Neovim remains the default editor. Emacs Lisp follows the same ordered layout:
-globals, options, keymap, autocmds, languages, plugins, then theme. Nix generates
-`nix-settings.el` with the shared font/palettes, executable paths, and grammar
-paths; source Lisp lives in `configs/lisp/{config,languages,plugins}/`.
-
-Both editors import `modules/home/editor-tools/` for Mago/rumdl fallback settings
-and `editor-tools/packages.nix` for the external server/formatter/debugger list.
-Keep additions intended for both editors there. Emacs-specific packages remain
-in its own `default.nix`; do not use runtime package, server or parser downloads.
-
-Use the newly built `programs.emacs.finalPackage`, generated settings via
-`EMACS_NIX_SETTINGS`, and the checkout's `tests/run-tests.el` for validation.
-Commands and known parity differences are documented in
-`modules/home/emacs/README.md`. Do not use an installed Emacs configuration as
-validation of unactivated source edits. The test suite runs temporary live
-language servers, Git/jj fixtures, formatter chains and terminal input; it does
-not test authenticated ACP requests or all debugger sessions.
+`modules/home/editor-tools/` holds editor support that lives outside the Neovim
+module. `default.nix` writes the Mago and rumdl fallback configurations
+(project-local configuration wins), and `packages.nix` is the list of LSP
+servers, formatters, debug adapters, and helpers that
+`modules/home/neovim/default.nix` puts on Neovim's `PATH`. Neovim is the only
+editor in this flake; Emacs was removed. Do not use runtime package, server, or
+parser downloads.
 
 ### General Rules
 

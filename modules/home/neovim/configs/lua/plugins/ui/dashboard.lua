@@ -13,7 +13,7 @@ local fortunes = {
 	"Your mouse called. It misses you.",
 	"`:wq` is how Vim users say goodbye. `ZZ` is how they say it faster.",
 	"There are two kinds of people: those who have typed `:w` into a browser textarea, and liars.",
-	"Emacs is a great operating system, lacking only a decent editor. (Yes, it's installed here too.)",
+	"Emacs is a great operating system, lacking only a decent editor.",
 	"Recording `@q`… you will never remember what's in it.",
 	"`.` is the most powerful key on your keyboard. Repeat after me.",
 	"Somewhere, a `:%s/foo/bar/g` is about to go terribly wrong.",
