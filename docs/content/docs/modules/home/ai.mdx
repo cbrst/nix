@@ -18,6 +18,16 @@ Home Manager installs and configures [Claude Code](https://claude.com/claude-cod
 - **Global rules** (`~/.claude/CLAUDE.md`) come from the shared `agentRules`
   set in `default.nix`, described under [Shared rules](#shared-rules).
 - **MCP integration** shares the MCP servers declared in `programs.mcp`.
+- **Status line.** `statusLine` runs `claude-statusline`, built from
+  `statusline.sh` with `writeShellApplication` (git, jq, and jujutsu on its
+  `PATH`). It mirrors the shell prompt: user name, current directory with the
+  home prefix shortened to `~`, the repository reference, the model name, and
+  the percentage of the context window in use. In a jj repository the reference
+  is the nearest bookmarked ancestors of `@` followed by the shortest unique
+  change ID prefix and remainder; otherwise it is the Git branch, or the short
+  `HEAD` when detached. jj runs with `--ignore-working-copy` and Git with
+  `--no-optional-locks`, so refreshing the status line never snapshots or locks
+  the repository.
 - **RTK hook.** A `PreToolUse` hook on the Bash tool runs RTK's rewrite script,
   which compresses command output before it reaches the model.
 
