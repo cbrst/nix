@@ -6,6 +6,11 @@ a Fumadocs (Next.js) project; its pages are MDX files in
 title and page order. Your job is to make those pages describe the
 repository as it is **now**, after the commits in the range you were given.
 
+`docs/` is a separate checkout of the repository's `docs` branch, which holds
+only the site. Everything else is `main`. Run `git` commands from the
+repository root so they read `main`'s history; inside `docs/` they would read
+the `docs` branch instead.
+
 ## Inputs
 
 1. Read `AGENTS.md` for the repository structure and conventions. Where it
@@ -17,7 +22,7 @@ repository as it is **now**, after the commits in the range you were given.
    and read the current source files to confirm every claim. Never describe
    behaviour that the current source does not support.
 
-Ignore commits that only touch `docs/`, `.github/`, or `flake.lock`.
+Ignore commits that only touch `.github/` or `flake.lock`.
 
 ## What to change
 

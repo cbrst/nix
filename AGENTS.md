@@ -116,7 +116,7 @@ Directory ownership:
 | `users/` | Person-specific Home Manager state and compatibility versions |
 | `lib/` | Helper functions and theme data; these are not modules |
 | `packages/` | Local derivations such as RTK and the Kanagawa GTK theme |
-| `docs/` | Fumadocs (Next.js) documentation site published to GitHub Pages |
+| `docs` branch | Fumadocs (Next.js) documentation site published to GitHub Pages; not on `main` |
 | `overlays/` | Reserved/documented overlay location; currently no local overlay implementation |
 
 Do not move host-specific values into reusable profiles or modules. Do not put
@@ -413,29 +413,35 @@ sufficient VCS test.
 
 ## Documentation Site
 
-`docs/` is a Fumadocs project on Next.js, statically exported and published
-to <https://cbrst.github.io/nix/>. Pages are MDX in `docs/content/docs/`,
-ordered by a `meta.json` per folder, and describe the current configuration;
-they are not a changelog. Internal links omit the `/nix` base path, which
-Next.js adds. `.github/workflows/docs-sync.yml` runs Claude Code on pushes to
-`main` that change configuration, revises the affected pages for the commits
-since `docs/.last-sync`, and opens or updates a `docs/sync` pull request.
-`.github/workflows/docs-deploy.yml` publishes the site when `docs/` changes on
-`main`. The sync agent follows `.github/docs-sync-prompt.md`.
+The documentation site lives on the separate `docs` branch, not on `main`. It
+is a Fumadocs project on Next.js at that branch's root, statically exported
+and published to <https://cbrst.github.io/nix/>. Pages are MDX in
+`content/docs/`, ordered by a `meta.json` per folder, and describe the current
+configuration; they are not a changelog. Internal links omit the `/nix` base
+path, which Next.js adds.
 
-When a change alters behaviour that the pages describe, updating the matching
-page in the same change is welcome but not required. Validate documentation
-edits with:
+`.github/workflows/docs-sync.yml` on `main` runs Claude Code on pushes to
+`main` that change configuration. It checks out the `docs` branch into
+`docs/`, revises the affected pages for the commits since the branch's
+`.last-sync`, opens or updates a `docs-sync` pull request against `docs`,
+merges it once the site builds, and then calls the `docs` branch's
+`.github/workflows/docs-deploy.yml` to publish. That deploy workflow also runs
+on direct pushes to `docs`. The sync agent follows
+`.github/docs-sync-prompt.md`. Because the bot never merges into `main`, it
+does not move `main@origin` underneath local work.
+
+When a change alters behaviour that the pages describe, the sync workflow
+updates the pages after the change reaches `main`. To edit pages by hand, use
+a separate workspace outside this checkout (`/docs/` is ignored on `main`):
 
 ```bash
-cd docs
+jj workspace add ../nix-docs -r docs
+cd ../nix-docs
 nix shell nixpkgs#nodejs -c npm ci
 nix shell nixpkgs#nodejs -c npm run build
 ```
 
-`docs/node_modules`, `docs/.next`, `docs/.source`, and `docs/out` are
-ignored. Install
-dependencies only after `.gitignore` is in place, or jj will snapshot them.
+Fetch before editing, since the bot advances `docs@origin`.
 
 ## Change Discipline
 

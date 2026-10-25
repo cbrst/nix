@@ -9,10 +9,6 @@ result
 # Claude Code local settings
 .claude/settings.local.json
 
-# Documentation site
-docs/node_modules
-docs/.next
-docs/.source
-docs/out
-docs/next-env.d.ts
-docs/*.tsbuildinfo
+# Documentation site; it lives on the docs branch. Ignored so a leftover or
+# local checkout here is never snapshotted into main.
+/docs/
