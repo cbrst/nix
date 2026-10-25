@@ -25,6 +25,16 @@ let
       exec "''${EDITOR:-nvim}" "$@"
     '';
   };
+
+  # A jj alias that runs jj-aliases/<name>.sh with sh.
+  jjShellAlias = name: [
+    "util"
+    "exec"
+    "--"
+    "sh"
+    "-c"
+    (builtins.readFile ./jj-aliases/${name}.sh)
+  ];
 in
 {
   programs.git = {
@@ -58,58 +68,14 @@ in
           "-r"
           "trunk()..@ | (trunk()..@)-"
         ];
-        pull = [
-          "util"
-          "exec"
-          "--"
-          "sh"
-          "-c"
-          ''
-            jj git fetch &&
-            jj rebase -s "roots(trunk()..stack(@))" \
-            -o "trunk()"
-          ''
-        ];
-        # Moves the nearest bookmark at or behind @ forward to the newest
-        # described, non-empty commit at or behind @, then pushes it.
-        push = [
-          "util"
-          "exec"
-          "--"
-          "sh"
-          "-c"
-          ''
-            names=$(jj bookmark list -r "heads(::@ & bookmarks())" \
-              -T 'name ++ "\n"') &&
-            if [ -z "$names" ]; then
-              echo "No bookmark at or behind @ to move."
-              exit 1
-            fi &&
-            target='heads(::@ & ~empty() & ~description(exact:""))' &&
-            jj bookmark move --from "heads(::@ & bookmarks())" --to "$target" &&
-            jj git push $(printf '%s\n' "$names" | sed 's/^/-b exact:/')
-          ''
-        ];
+        pull = jjShellAlias "pull";
+        # Fetches, rebases onto the bookmark's remote if it gained commits,
+        # then moves the nearest bookmark at or behind @ forward to the
+        # newest described, non-empty commit at or behind @ and pushes it.
+        # Stops before moving anything if the rebase causes conflicts.
+        push = jjShellAlias "push";
         # Pushes every bookmark in the stack; -b also tracks new ones.
-        sync = [
-          "util"
-          "exec"
-          "--"
-          "sh"
-          "-c"
-          ''
-            jj git fetch &&
-            jj rebase -s "roots(trunk()..stack(@))" \
-            -o "trunk()" &&
-            bookmarks=$(jj bookmark list -r "stack(@)" \
-              -T '"-b exact:" ++ name ++ "\n"') &&
-            if [ -n "$bookmarks" ]; then
-              jj git push $bookmarks
-            else
-              echo "No bookmarks in the current stack to push."
-            fi
-          ''
-        ];
+        sync = jjShellAlias "sync";
       };
     };
   };
