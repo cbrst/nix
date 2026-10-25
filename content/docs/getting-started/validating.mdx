@@ -54,11 +54,18 @@ nix run github:nix-community/home-manager -- switch --flake '.#cbrst@niflheim'
 On NixOS, every activation prints a package-version diff between the running
 system and the new one, produced by `nvd` (see [Base system](/modules/nixos/base/)).
 
-## Editor configurations
+## Editor configuration
 
-Neovim and Emacs have their own fast validation paths that load the
-configuration straight from the checkout. See [Neovim](/modules/home/neovim/#validating-changes)
-and [Emacs](/modules/home/emacs/).
+Neovim has its own fast validation paths: the checkout's Lua can be loaded
+directly, and the standalone packages build the whole editor from the checkout
+without activating anything.
+
+```bash
+nix build --no-link '.#nvim' '.#nvim-lite'
+nix eval '.#packages.aarch64-darwin.nvim.drvPath'
+```
+
+See [Neovim](/modules/home/neovim/#validating-changes).
 
 ## Updating inputs
 
