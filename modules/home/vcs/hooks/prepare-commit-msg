@@ -12,10 +12,10 @@ prompt=$(
 	cat <<EOF
   Write a commit message for the attached diff.
 
-  Return only the commit message as plain text: an imperative subject no
-  longer than 72 characters, preferably \$(type: summary), where type is one of
-  "feat", "fix" or "chore", followed by a blank line and a concise explanatory
-  body.
+  Return only the commit message as plain text.
+
+	Follow Conventional Commits spec. Make sure the subject line is no longer than
+	72 characters.
 
   Make sure the body text has no lines longer than 80 characters. Insert
   newlines as needed.
