@@ -66,8 +66,10 @@ local function header()
 	local function line(chunks, hl)
 		return { text = type(chunks) == "string" and { { chunks, hl = hl } } or chunks, align = "center" }
 	end
+	-- Blue left stroke, green diagonal and right stroke, as in the Neovim logo;
+	-- every theme family maps `link` to a blue and `success` to a green.
 	local function logo(n, mid, rest)
-		return line({ { n, hl = "Special" }, { mid, hl = "String" }, { rest, hl = "String" } })
+		return line({ { n, hl = "Directory" }, { mid, hl = "DiagnosticOk" }, { rest, hl = "DiagnosticOk" } })
 	end
 	-- A function, not a shared table: snacks mutates items while laying them out.
 	local function rule()
@@ -76,11 +78,12 @@ local function header()
 
 	return {
 		padding = 2,
-		logo("│", " ╲ ", "││"),
-		logo("││", "╲╲", "││"),
-		logo("││", " ╲ ", "│"),
+		logo("· │", " ╲ ", "││ ·  ╗   ╔═ "),
+		logo("║ ││", "╲╲", "││ ║  ╠═  ╠═╗"),
+		logo("╚ ││", " ╲ ", "│ ╚  ╚═  ╚═╝"),
 		line(" "),
-		line("NVIM v" .. tostring(vim.version()), "String"),
+		logo("a Nix-based", " NVIM", " config"),
+		line("NVIM v" .. tostring(vim.version()), "Comment"),
 		rule(),
 		line("Nvim is open source and freely distributable"),
 		line("https://neovim.io/#chat", "Comment"),
