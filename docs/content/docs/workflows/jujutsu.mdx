@@ -13,7 +13,8 @@ detached `HEAD`; that is expected.
   `@` automatically.
 - After `jj commit`, the finished change is `@-` and `@` is a new empty change.
 - Bookmarks (jj's branches) do not move by themselves. `main` is moved
-  explicitly or by the `sync` alias's push of the current stack.
+  explicitly, by the `push` alias, or by the `sync` alias's push of the current
+  stack.
 
 ## Everyday commands
 
@@ -23,10 +24,11 @@ jj diff            # the diff of @
 jj logn            # local, unpublished work on top of trunk
 jj commit          # describe @ (with an AI-drafted message) and start a new change
 jj pull            # fetch, then rebase the local stack onto trunk
+jj push            # advance the nearest bookmark to the newest described commit and push it
 jj sync            # pull, then push the current stack's bookmarks
 ```
 
-`logn`, `pull`, and `sync` are aliases defined by the
+`logn`, `pull`, `push`, and `sync` are aliases defined by the
 [VCS module](/modules/home/vcs/#aliases).
 
 ## Tooling that understands jj
