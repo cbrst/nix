@@ -58,6 +58,26 @@ in
             -o "trunk()"
           ''
         ];
+        # Moves the nearest bookmark at or behind @ forward to the newest
+        # described, non-empty commit at or behind @, then pushes it.
+        push = [
+          "util"
+          "exec"
+          "--"
+          "sh"
+          "-c"
+          ''
+            names=$(jj bookmark list -r "heads(::@ & bookmarks())" \
+              -T 'name ++ "\n"') &&
+            if [ -z "$names" ]; then
+              echo "No bookmark at or behind @ to move."
+              exit 1
+            fi &&
+            target='heads(::@ & ~empty() & ~description(exact:""))' &&
+            jj bookmark move --from "heads(::@ & bookmarks())" --to "$target" &&
+            jj git push $(printf '%s\n' "$names" | sed 's/^/-b exact:/')
+          ''
+        ];
         # Pushes every bookmark in the stack; -b also tracks new ones.
         sync = [
           "util"
