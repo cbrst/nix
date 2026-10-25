@@ -9,8 +9,21 @@
   lib,
   inputs,
   settings,
+  # Overrides for `editor.neovim.features`, in the same shape a Home Manager
+  # host would set them, e.g. `{ debug.enable = false; }`.
+  features ? { },
 }:
 let
+  # Evaluate the same option declarations Home Manager uses, so defaults and
+  # type checks are identical.
+  resolvedFeatures =
+    (lib.evalModules {
+      modules = [
+        ./options.nix
+        { editor.neovim.features = features; }
+      ];
+    }).config.editor.neovim.features;
+
   spec = import ./spec.nix {
     inherit
       pkgs
@@ -18,6 +31,7 @@ let
       inputs
       settings
       ;
+    features = resolvedFeatures;
     # Without Home Manager there is no configured `programs.claude-code`.
     claudeCode = pkgs.claude-code;
   };

@@ -104,7 +104,8 @@
       overlays.typescript-language-server-pnpm-hash-fix = import ./overlays/typescript-language-server-pnpm-hash-fix.nix;
 
       # The Home Manager Neovim as a standalone package, built from the same
-      # definition. Run with: nix run .#nvim
+      # definition. Run with: nix run .#nvim (or .#nvim-lite for the smaller
+      # variant without AI, debugging, and project-language tooling).
       packages =
         nixpkgs.lib.genAttrs
           [
@@ -115,13 +116,17 @@
             system:
             let
               pkgs = configLib.mkPkgs system;
+              mkNeovim =
+                features:
+                import ./modules/home/neovim/package.nix {
+                  inherit pkgs inputs features;
+                  inherit (pkgs) lib;
+                  settings = defaultSettings;
+                };
             in
             {
-              nvim = import ./modules/home/neovim/package.nix {
-                inherit pkgs inputs;
-                inherit (pkgs) lib;
-                settings = defaultSettings;
-              };
+              nvim = mkNeovim { };
+              nvim-lite = mkNeovim (import ./modules/home/neovim/lite.nix);
             }
           );
 

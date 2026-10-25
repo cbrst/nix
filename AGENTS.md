@@ -42,8 +42,9 @@ nix build --no-link '.#nixosConfigurations.example-nixos.config.system.build.top
 nix build --no-link '.#homeConfigurations."example-user@generic-linux".activationPackage'
 nix eval '.#homeConfigurations."example-user@macbook".activationPackage.drvPath'
 nix eval '.#homeConfigurations."cbrst@niflheim".activationPackage.drvPath'
-nix build --no-link '.#nvim'
+nix build --no-link '.#nvim' '.#nvim-lite'
 nix eval '.#packages.aarch64-darwin.nvim.drvPath'
+nix eval '.#packages.aarch64-darwin.nvim-lite.drvPath'
 ```
 
 For Asgard's embedded Home Manager configuration:
@@ -102,7 +103,8 @@ Exported outputs:
 | `homeConfigurations."example-user@generic-linux"` | `x86_64-linux` | Standalone Home Manager development environment |
 | `homeConfigurations."example-user@macbook"` | `aarch64-darwin` | Standalone Home Manager development environment plus macOS additions |
 | `homeConfigurations."cbrst@niflheim"` | `aarch64-darwin` | Real Niflheim Home Manager environment for `cbrst` |
-| `packages.<system>.nvim` | `x86_64-linux`, `aarch64-darwin` | Standalone Neovim from `modules/home/neovim/package.nix`, using `defaultSettings`; `nix run .#nvim` |
+| `packages.<system>.nvim` | `x86_64-linux`, `aarch64-darwin` | Standalone Neovim from `modules/home/neovim/package.nix`, using `defaultSettings` and default features; `nix run .#nvim` |
+| `packages.<system>.nvim-lite` | `x86_64-linux`, `aarch64-darwin` | Same, with the overrides in `modules/home/neovim/lite.nix` (no AI, debugging, PHP, Python, or web tooling; curated grammars) |
 
 The normal composition flow is:
 
@@ -229,9 +231,42 @@ The editor itself is defined once in `modules/home/neovim/spec.nix`. It is a
 plain function, not a module:
 
 ```text
-spec.nix { pkgs, lib, inputs, settings, claudeCode }
+spec.nix { pkgs, lib, inputs, settings, features, claudeCode }
   -> { package, extraPackages, plugins, configDir }
 ```
+
+`features` is the resolved `editor.neovim.features` option set declared in
+`modules/home/neovim/options.nix`. Every switch defaults to on:
+
+| Option | Removes when disabled |
+| --- | --- |
+| `ai.enable` | claudecode.nvim and the Claude CLI |
+| `debug.enable` | nvim-dap, dap-ui, virtual text, nvim-nio, osv, and the `debug` tool group |
+| `grammars` (`"all"` or a list of names) | Every Treesitter grammar not listed |
+| `languages.<name>.enable` | That `tools.nix` language group; `web` also removes typescript-tools.nvim |
+
+Hosts set them like any Home Manager option, for example
+`editor.neovim.features.languages.php.enable = false;` in
+`hosts/home/niflheim.nix`. `package.nix` evaluates the same `options.nix` with
+`lib.evalModules`, so the standalone packages share defaults and type checks.
+Unknown names and wrong types fail evaluation; `spec.nix` also rejects grammar
+names missing from `builtGrammars` and language lists that differ between
+`options.nix` and `tools.nix`.
+
+The Lua configuration learns the result from a generated `flake_features` module
+(built like `flake_palette`), read through `config/features.lua`. That module
+falls back to "everything enabled" when `flake_features` is absent, as it is in
+an older installed generation. Lua that sets up a feature-specific plugin or
+tool must check it first:
+
+- `features.ai`: claudecode setup, the Heirline Claude segment, the dashboard
+  key, and the Snacks `<a-o>` picker action.
+- `features.debug`: `plugins.debug`.
+- `features.language(name)`: LSP servers (through `server_languages` in
+  `plugins/lsp/init.lua`), Conform formatters (through `filetype_languages` in
+  `plugins/smart/autoformat.lua`), and typescript-tools (`web`). Servers and
+  formatters of a disabled language are skipped without the "missing tools"
+  warning. Add new servers and formatted filetypes to those maps.
 
 Two consumers wrap it:
 
@@ -272,11 +307,13 @@ Nix owns the Neovim runtime surface:
   tools, and other executables on Neovim's `PATH`. Most of them come from
   `modules/home/neovim/tools.nix`, which returns named groups: `core`,
   `runtimes`, `debug`, and `languages.<family>` (`lua`, `markdown`, `nix`,
-  `php`, `python`, `shell`, `web`, `yaml`). `spec.nix` currently includes every
-  group; the groups exist so options can select subsets. Each package belongs to
-  exactly one group, and no two packages ship the same command, so group order
-  does not change which executable a command resolves to. Keep both properties
-  when adding packages.
+  `php`, `python`, `shell`, `web`, `yaml`). `spec.nix` always includes `core`
+  and `runtimes`, and the others as their features allow. A package may appear
+  in several language groups (js-beautify is in `php` and `web`); `spec.nix`
+  deduplicates. No two distinct packages ship the same command, so group order
+  does not change which executable a command resolves to. Keep that property
+  when adding packages, and add a new language family to both `tools.nix` and
+  `options.nix`.
 - Under Home Manager, `xdg.configFile."nvim/init.lua"`,
   `xdg.configFile."nvim/lua"`, and `xdg.configFile."nvim/colors"` install the
   source under `modules/home/neovim/configs/` into `~/.config/nvim` through
@@ -359,6 +396,7 @@ Preserve meaningful ordering:
 | `configs/lua/autocmds.lua` | Yank highlighting and editing-buffer status column |
 | `configs/lua/languages/` | Filetype-specific behavior; register new modules in `languages/init.lua` |
 | `configs/lua/config/globals.lua` | Leaders and global capability flags |
+| `configs/lua/config/features.lua` | Nix-selected features from the generated `flake_features` module |
 | `configs/lua/config/lsp_servers.lua` | Declarative LSP server table |
 | `configs/lua/config/lsp_keymaps.lua` | `LspAttach` mappings, highlights, and inlay hints |
 | `configs/lua/config/theme.lua` | Light/dark variant selection and colorscheme application |
@@ -380,11 +418,12 @@ helpers, and `languages/` for filetype behavior.
 ## Neovim Subsystems
 
 LSP uses the newer `vim.lsp.config`/`vim.lsp.enable` API. Blink capabilities are
-merged into configured servers. Most servers are enabled only when their
-resolved command is executable; TypeScript Tools is configured separately.
-Server definitions belong in `config/lsp_servers.lua`, mappings in
-`config/lsp_keymaps.lua`, package declarations in `default.nix`, and
-orchestration in `plugins/lsp/init.lua`.
+merged into configured servers. Servers of a disabled language group are
+skipped; the rest are enabled only when their resolved command is executable.
+TypeScript Tools is configured separately and only with the `web` group. Server
+definitions belong in `config/lsp_servers.lua`, mappings in
+`config/lsp_keymaps.lua`, server-to-language mapping and orchestration in
+`plugins/lsp/init.lua`, and package declarations in `tools.nix`.
 
 claudecode.nvim is the active Neovim AI integration. It starts the Claude Code
 CLI through a right-side Snacks terminal, exposes editor context through its IDE
@@ -464,6 +503,12 @@ env XDG_CONFIG_HOME="$scratch/config" XDG_DATA_HOME="$scratch/data" \
   XDG_STATE_HOME="$scratch/state" XDG_CACHE_HOME="$scratch/cache" \
   nix run '.#nvim' -- -n --headless path/to/real/file '+qa'
 ```
+
+Run the same command with `'.#nvim-lite'` whenever a change touches
+feature-specific Lua or `spec.nix`: it is the build with AI, debugging, and the
+PHP, Python, and web groups disabled, so it exercises the feature checks. Open
+files of disabled languages too; startup and editing must stay free of errors
+and "missing tools" warnings.
 
 To test the Home Manager wrapper itself rather than the standalone one, build
 the Home Manager generation so its generated pack directory and wrapped package

@@ -145,7 +145,7 @@ local function keys()
 			icon = "\u{ec10} ",
 			key = "c",
 			desc = "Claude Code",
-			enabled = vim.fn.executable("claude") == 1,
+			enabled = require("config.features").ai and vim.fn.executable("claude") == 1,
 			action = function()
 				require("plugins.smart.claudecode").toggle()
 			end,

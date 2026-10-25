@@ -24,11 +24,13 @@ let
     '';
   };
 in
-# Executables for Neovim's PATH, grouped so callers can select subsets.
-# `spec.nix` currently concatenates every group. Each package belongs to
-# exactly one group; the Lua configuration names the executables it calls in
-# `config/lsp_servers.lua`, `plugins/smart/autoformat.lua`, and
-# `plugins/debug/init.lua`.
+# Executables for Neovim's PATH, grouped so `spec.nix` can select them from
+# `editor.neovim.features`: `core` and `runtimes` always, `debug` with
+# `debug.enable`, and each `languages.<name>` with its own toggle. The language
+# names must match `options.nix`. A package may appear in several language
+# groups when several families use it; `spec.nix` removes duplicates. The Lua
+# configuration names the executables it calls in `config/lsp_servers.lua`,
+# `plugins/smart/autoformat.lua`, and `plugins/debug/init.lua`.
 with pkgs;
 {
   # Search, previews, and `:Man`; needed whatever languages are enabled.
@@ -74,7 +76,7 @@ with pkgs;
       nixd
     ];
     php = [
-      # `html-beautify` is the first step of Conform's PHP chain.
+      # `html-beautify` is the first step of Conform's PHP chain; also in `web`.
       js-beautify
       mago
       phpactor
@@ -91,6 +93,8 @@ with pkgs;
     ];
     web = [
       emmet-language-server
+      # `css-beautify` for Conform's CSS formatting; also in `php`.
+      js-beautify
       prettier
       nur.repos.congee.some-sass-language-server
       # `tsserver` for typescript-tools.nvim.

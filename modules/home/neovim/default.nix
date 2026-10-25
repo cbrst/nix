@@ -15,10 +15,15 @@ let
       inputs
       settings
       ;
+    inherit (config.editor.neovim) features;
     claudeCode = config.programs.claude-code.finalPackage;
   };
 in
 {
+  # `editor.neovim.features.*`: per-host switches for AI, debugging,
+  # Treesitter grammars, and language tooling.
+  imports = [ ./options.nix ];
+
   # Install Neovim for the current Home Manager user.
   programs.neovim = {
     enable = true;

@@ -243,9 +243,10 @@ function M.setup()
 		end,
 	}
 
+	local ai_enabled = require("config.features").ai
 	local claudecode = {
 		condition = function()
-			return require("claudecode.terminal").get_active_terminal_bufnr() ~= nil
+			return ai_enabled and require("claudecode.terminal").get_active_terminal_bufnr() ~= nil
 		end,
 		provider = " Claude ",
 		on_click = {

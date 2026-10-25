@@ -1,6 +1,40 @@
 local M = {}
 
+-- The `tools.nix` language group that installs each filetype's formatters.
+-- Filetypes of a disabled group get no Conform entry, so saving falls back to
+-- LSP formatting quietly instead of reporting missing formatters.
+local filetype_languages = {
+	css = "web",
+	html = "web",
+	lua = "lua",
+	markdown = "markdown",
+	php = "php",
+	python = "python",
+	zsh = "shell",
+}
+
 function M.setup()
+	local features = require("config.features")
+	local formatters_by_ft = {
+		css = { "css_beautify" },
+		html = { "prettierd", "prettier", stop_after_first = true },
+		lua = { "stylua" },
+		markdown = { "mdsf", "rumdl" },
+		php = { "html_beautify", "mago_format" },
+		python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
+		zsh = { "shellharden", "shfmt" },
+		-- Conform can also run multiple formatters sequentially
+		-- python = { "isort", "black" },
+		--
+		-- You can use 'stop_after_first' to run the first available formatter from the list
+		-- javascript = { "prettierd", "prettier", stop_after_first = true },
+	}
+	for filetype, language in pairs(filetype_languages) do
+		if not features.language(language) then
+			formatters_by_ft[filetype] = nil
+		end
+	end
+
 	require("conform").setup({
 		notify_on_error = false,
 		format_on_save = function(bufnr)
@@ -27,20 +61,7 @@ function M.setup()
 				lsp_format = lsp_format_opt,
 			}
 		end,
-		formatters_by_ft = {
-			css = { "css_beautify" },
-			html = { "prettierd", "prettier", stop_after_first = true },
-			lua = { "stylua" },
-			markdown = { "mdsf", "rumdl" },
-			php = { "html_beautify", "mago_format" },
-			python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
-			zsh = { "shellharden", "shfmt" },
-			-- Conform can also run multiple formatters sequentially
-			-- python = { "isort", "black" },
-			--
-			-- You can use 'stop_after_first' to run the first available formatter from the list
-			-- javascript = { "prettierd", "prettier", stop_after_first = true },
-		},
+		formatters_by_ft = formatters_by_ft,
 	})
 	vim.keymap.set({ "n", "v" }, "<leader>cf", function()
 		require("conform").format({ async = true, lsp_format = "fallback" })
