@@ -24,6 +24,7 @@
   # A profile is a named group of reusable NixOS modules.
   imports = [
     ./hardware-configuration.nix
+    ./peripheral-battery.nix
     ../../../modules/nixos/secure-boot.nix
     ../../../modules/nixos/gaming.nix
     ../../../profiles/nixos/desktop.nix

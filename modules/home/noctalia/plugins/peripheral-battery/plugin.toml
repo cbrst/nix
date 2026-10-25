@@ -1,0 +1,16 @@
+# Battery levels of wireless peripherals, read from a host-provided command.
+
+id = "local/peripheral-battery"
+name = "Peripheral Battery"
+version = "1.0.0"
+plugin_api = 24
+author = "local"
+license = "MIT"
+dependencies = ["peripheral-battery"]
+tags = ["bar", "battery"]
+icon = "battery"
+description = "Shows the battery levels that the peripheral-battery command reports."
+
+[[widget]]
+id = "status"
+entry = "widget.luau"

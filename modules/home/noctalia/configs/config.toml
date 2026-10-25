@@ -19,7 +19,7 @@ order = [ "main" ]
     color = "primary"
     concave_edge_corners = true
     contact_shadow = false
-    end = [ "group:g1", "tray", "widget", "status", "taildrop", "notifications", "clipboard", "volume", "session" ]
+    end = [ "group:g1", "tray", "widget", "status", "taildrop", "notifications", "clipboard", "peripheral_battery", "volume", "session" ]
     font_weight = 700
     icon_color = "primary"
     margin_edge = 0
@@ -180,7 +180,7 @@ manager_position = "auto"
 notify_on_peer_change = false
 
 [plugins]
-enabled = [ "liamwh/emoji-picker", "cleboost/ssh-launcher", "carlocamacho/taildrop" ]
+enabled = [ "liamwh/emoji-picker", "cleboost/ssh-launcher", "carlocamacho/taildrop", "local/peripheral-battery" ]
 
 [shell]
 avatar_path = "/home/cbrst/.face.png"
@@ -300,6 +300,9 @@ hide_album_art = true
 hide_when_no_media = true
 max_length = 602
 title_scroll = "on_hover"
+
+[widget.peripheral_battery]
+type = "local/peripheral-battery:status"
 
 [widget.status]
 show_counts = false

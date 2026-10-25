@@ -6,6 +6,9 @@
       "@font@" = settings.fonts.mono;
     } ./configs/config.toml;
   };
+  # Noctalia discovers plugins in its data directory. The widget only reads the
+  # peripheral-battery command, which each host provides for its own devices.
+  xdg.dataFile."noctalia/plugins/peripheral-battery".source = ./plugins/peripheral-battery;
   xdg.configFile."noctalia/palettes/palette.json".text = configLib.renderTemplate {
     "@dark-background@" = settings.theme.dark.background;
     "@dark-foreground@" = settings.theme.dark.foreground;
