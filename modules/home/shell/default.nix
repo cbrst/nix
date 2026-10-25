@@ -25,6 +25,8 @@ let
     '';
   };
 
+  noctalia = config.programs.noctalia.enable or false;
+
   fastfetchModules = [
     "break"
     {
@@ -32,57 +34,70 @@ let
       format = "{#1;2}@{#0;1;39}{host-name}";
     }
     {
-      type = "custom";
-      format = "{#0;90}├┬ {#0;1;39}Hardware";
-    }
-    {
       type = "host";
-      key = "{#0;90}│├─ {#0;32}{icon}";
+      key = "{#0;90}├─ {#0;1;39}Host {#0;90}┬ {#0;32}{icon}";
     }
     {
       type = "cpu";
-      key = "{#0;90}│├┬ {#0;32}{icon}";
+      key = "{#0;90}│       ├┬ {#0;32}{icon}";
     }
     {
       type = "memory";
-      key = "{#0;90}││╰─ {#0;32}{icon}";
+      key = "{#0;90}│       │╰─ {#0;32}{icon}";
     }
     {
       type = "gpu";
-      key = "{#0;90}│╰┬ {#0;32}{icon}";
+      key = "{#0;90}│       ╰┬ {#0;32}{icon}";
     }
     {
       type = "display";
-      key = "{#0;90}│ ╰─ {#0;32}{icon}";
+      key = "{#0;90}│        ╰─ {#0;32}{icon}";
       format = "{}×{}px {}hz";
     }
     {
-      type = "custom";
-      format = "{#0;90}├┬ {#0;1;39}Software";
-    }
-    {
       type = "os";
-      key = "{#0;90}│├┬ {#0;33}{icon}";
+      key = "{#0;90}├─ {#0;1;39}OS {#0;90}──┬┬ {#0;33}{icon}";
     }
     {
       type = "kernel";
-      key = "{#0;90}││╰─ {#0;33}{icon}";
+      key = "{#0;90}│       │╰─ {#0;33}{icon}";
     }
     {
       type = "wm";
-      key = "{#0;90}│├─ {#0;34}{icon}";
+      key = "{#0;90}│       ╰${if noctalia then "┬" else "─"} {#0;34}{icon}";
     }
+  ]
+  # Fastfetch detects neither a Quickshell desktop shell nor a prompt engine,
+  # so their versions come from the packages this generation installs.
+  ++ lib.optional noctalia {
+    type = "custom";
+    keyIcon = "";
+    key = "{#0;90}│        ╰─ {#0;34}{icon}";
+    format = "Noctalia ${config.programs.noctalia.package.version}";
+  }
+  ++ [
     {
       type = "terminal";
-      key = "{#0;90}│╰┬ {#0;35}{icon}";
+      keyIcon = "";
+      key = "{#0;90}├─ {#0;1;39}Term {#0;90}┬ {#0;35}{icon}";
     }
     {
       type = "shell";
-      key = "{#0;90}│ ├─ {#0;35}{icon}";
+      keyIcon = "%_";
+      paddingLeft = 0;
+      key = "{#0;90}│       ├┬ {#0;35}{icon}";
+    }
+    {
+      type = "custom";
+      keyIcon = ">_";
+      key = "{#0;90}│       │╰─ {#0;35}{icon}";
+      paddingLeft = 0;
+      format = "oh-my-posh ${config.programs.oh-my-posh.package.version}";
     }
     {
       type = "terminalfont";
-      key = "{#0;90}│ ╰─ {#0;35}{icon}";
+      keyIcon = "󰛖";
+      key = "{#0;90}│       ╰─ {#0;35}{icon}";
     }
     {
       type = "colors";
