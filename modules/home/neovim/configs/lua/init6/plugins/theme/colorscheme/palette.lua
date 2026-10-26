@@ -50,6 +50,8 @@ function M.build(p, terminal)
 
 		-- Syntax.
 		keyword = p.syntaxKeyword,
+		-- Optional: control flow (branches, loops, returns, imports, exceptions).
+		keyword_control = p.syntaxKeywordControl or p.syntaxKeyword,
 		func = p.syntaxFunction,
 		string = p.syntaxString,
 		number = p.syntaxNumber,
@@ -58,7 +60,8 @@ function M.build(p, terminal)
 		punctuation = p.syntaxPunctuation,
 		constant = p.accent4,
 		special = p.accent4,
-		builtin = p.syntaxKeyword,
+		-- Optional: builtin variables such as `self` and `this`.
+		builtin = p.syntaxBuiltin or p.syntaxKeyword,
 		attribute = p.accent5,
 
 		-- Version control.
@@ -74,7 +77,7 @@ function M.build(p, terminal)
 	-- Derived text tones for groups the palette has no slot for.
 	c.guide = blend(c.border, bg, 0.5)
 	c.whitespace = blend(c.border, bg, 0.35)
-	c.parameter = blend(c.accent4, fg, 0.4)
+	c.parameter = p.syntaxParameter or blend(c.accent4, fg, 0.4)
 	c.property = blend(c.accent3, fg, 0.45)
 	c.module = blend(c.type, fg, 0.7)
 	c.regex = blend(c.string, c.accent4, 0.6)
