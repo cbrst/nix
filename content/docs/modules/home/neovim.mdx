@@ -65,7 +65,7 @@ Everything is on by default.
 | `ai.enable` | No claudecode.nvim or Claude CLI, and no Claude statusline segment, dashboard key, or `<a-o>` picker action |
 | `debug.enable` | No nvim-dap, DAP UI, virtual text, nvim-nio, one-small-step-for-vimkind, or debug adapters |
 | `grammars` | `"all"` installs every grammar; a list of names from `vimPlugins.nvim-treesitter.builtGrammars` installs only those |
-| `languages.<name>.enable` | No tools from that language group and no LSP or Conform setup for it; `web` also drops typescript-tools.nvim |
+| `languages.<name>.enable` | No tools from that language group and no LSP or Conform setup for it; `web` also drops nvim-vtsls and nvim-ts-autotag |
 
 The languages are `lua`, `markdown`, `nix`, `php`, `python`, `shell`, `web`, and
 `yaml`. A host sets them like any Home Manager option, for example
@@ -97,7 +97,7 @@ tasks, terminals, and language tooling all use them.
 | `languages.php` | js-beautify (`html-beautify`), Mago, Phpactor |
 | `languages.python` | Ruff, Zuban |
 | `languages.shell` | bash-language-server, Shellharden, shfmt, zshcs |
-| `languages.web` | Emmet, oxfmt, oxlint, Some Sass, TypeScript, vscode-langservers-extracted |
+| `languages.web` | Emmet, oxfmt, oxlint, the `oxlint-unused-imports` script, Some Sass, vtsls, vscode-langservers-extracted |
 | `languages.yaml` | yaml-language-server, yamlfmt |
 
 A package may appear in several groups; duplicates are removed. No
@@ -112,6 +112,12 @@ project's own configuration always takes precedence.
 - `~/.config/mago.toml`: PHP formatting with two-space tabs and double quotes.
 - `~/.config/rumdl/rumdl.toml`: Markdown lines are reflowed to 80 characters,
   except code blocks, tables, headings, and math.
+
+oxfmt has no global configuration, so projects without their own
+`.oxfmtrc.json(c)` or `oxfmt.config.*` get the bundled `configs/oxfmtrc.json`
+through `-c`. It enables `sortImports` and `sortTailwindcss`. Home Manager links
+it to `~/.config/nvim/oxfmtrc.json`; the standalone packages bundle it with the
+rest of the configuration.
 
 ## Standalone editor
 
@@ -152,7 +158,11 @@ There are no third-party colour scheme plugins. The `init6` colour scheme
 every highlight group from the palettes in `lib/themes.nix`. Nix generates an
 `init6-palette` plugin that exposes the active [theme family](/architecture/settings-and-themes/)
 to Lua as the `init6.generated.palette` module, and Home Manager installs the
-colour scheme file through `xdg.configFile."nvim/colors"`. The Lua side blends
+colour scheme file through `xdg.configFile."nvim/colors"`. Control-flow keywords (`@keyword.conditional`, `.repeat`, `.return`,
+`.exception`, `.import`, `.coroutine`) use their own `keyword_control` role,
+apart from declaration keywords, and builtin variables and parameters have
+roles of their own, fed by the optional palette slots described in
+[Settings and themes](/architecture/settings-and-themes/). The Lua side blends
 any shades the palette lacks from its slots, so every family gets the same
 highlight structure. The command line has its own background (`bg_command`), the
 darker of the palette's `shade0` and `shade2`, and the line number of the cursor
@@ -186,9 +196,10 @@ configuration requests their capabilities.
 | Area | Plugins and behaviour |
 | --- | --- |
 | Completion | Blink with LazyDev, LSP, paths, LuaSnip, and buffer sources; automatic command-line completion |
-| Language servers | The `vim.lsp.config` / `vim.lsp.enable` API. Servers are enabled only when their executable exists: Bash, Emmet, JSON, Lua, Nix (`nil`), PHP (Phpactor), rumdl, Sass, YAML, Zsh (zshcs), and Python (Zuban). TypeScript uses TypeScript Tools |
-| Formatting | Conform, on save: StyLua for Lua, mdsf then rumdl for Markdown, Ruff for Python, Shellharden then shfmt for Zsh, html-beautify then Mago for PHP, oxlint then oxfmt for JavaScript, TypeScript (including JSX and TSX), and Vue, oxfmt alone for CSS, SCSS, Less, HTML, JSON, JSONC, GraphQL, and TOML, oxlint alone for Svelte and Astro (oxfmt does not format them), and yamlfmt for YAML. Setting `vim.g.disable_autoformat` (or `vim.b.disable_autoformat` for one buffer) saves without running any formatter |
+| Language servers | The `vim.lsp.config` / `vim.lsp.enable` API. Servers are enabled only when their executable exists: Bash, Emmet, JSON, Lua, Nix (`nil`), PHP (Phpactor), rumdl, Sass, YAML, Zsh (zshcs), and Python (Zuban). TypeScript and JavaScript use vtsls, a regular server in the `web` group, with nvim-vtsls (`:VtsExec`) and its buffer-local mappings (see below). nvim-ts-autotag closes and renames paired tags in HTML, JSX, Vue, Svelte, XML, and PHP |
+| Formatting | Conform, on save: StyLua for Lua, mdsf then rumdl for Markdown, Ruff for Python, Shellharden then shfmt for Zsh, html-beautify then Mago for PHP, `oxlint-unused-imports`, oxlint, then oxfmt for JavaScript and TypeScript (including JSX and TSX), oxlint then oxfmt for Vue, oxfmt alone for CSS, SCSS, Less, HTML, JSON, JSONC, GraphQL, and TOML, oxlint alone for Svelte and Astro (oxfmt does not format them), and yamlfmt for YAML. Setting `vim.g.disable_autoformat` (or `vim.b.disable_autoformat` for one buffer) saves without running any formatter |
 | Tree-sitter | Every grammar from nixpkgs. The SCSS grammar is patched and regenerated so it understands namespaced mixins and function calls |
+| Import cleanup | `oxlint-unused-imports` deletes unused imports through oxlint's `no-unused-vars` suggestion fix and leaves unused locals, parameters, and functions alone. It runs apart from the oxlint step, because oxlint applies nothing when `--fix` and `--fix-suggestions` are combined, and repeats up to three times, because oxlint skips overlapping fixes such as adjacent import lines. Vue and Svelte are excluded: oxlint does not see their templates and would delete imported components |
 | Debugging | nvim-dap with DAP UI and virtual text. Adapters for Python (debugpy), JavaScript and TypeScript (js-debug), Bash, standalone Lua, and Neovim Lua (one-small-step-for-vimkind). The Bash adapter is also offered for Zsh files but cannot interpret Zsh-only syntax |
 | Annotations | codedocs.nvim generates documentation comments with `<leader>cA` |
 
@@ -218,6 +229,15 @@ configuration requests their capabilities.
 - **Which-key** shows the leader groups. Bindings follow the Doom Emacs layout.
 - Dropbar, Outline, Trouble, todo-comments, render-markdown, and
   nvim-highlight-colors round out the UI.
+- **Block brackets** (`plugins/ui/block-brackets.lua`) dim both ends of a
+  bracket pair that sits on different lines, and a semicolon right after the
+  closer (as in `});`), with the `Init6BlockBracket` highlight group, which uses
+  the indent-guide shade. Pairs on one line, such as `(bar)` or `foo(1);`, keep
+  their colours. Pairs come from the trees of the active Tree-sitter
+  highlighter, so injected languages are covered and brackets in strings and
+  comments are ignored; the marks are ephemeral and nothing is stored in the
+  buffer. It is on by default; `vim.g.init6_dim_block_brackets = false` (for
+  example in a project's `.nvim.lua`) turns it off and `<leader>tB` toggles it.
 - **Auto Dark Mode** switches between the light and dark variant of the theme
   with the system appearance.
 
@@ -266,7 +286,7 @@ The leader is `Space`; the local leader is `,`.
 | `<leader>h` | Help |
 | `<leader>o` | Open: project sidebar (`op`), symbol outline (`oo`), terminals (`ot`, `oT`, `of`), AI (`ol`) |
 | `<leader>s` | Search |
-| `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines, dimming (`td`) |
+| `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines, dimming (`td`), block brackets (`tB`) |
 | `<leader>w` | Window commands |
 | `<leader>q` | Quit and session |
 
@@ -300,6 +320,26 @@ stage, and `<leader>ghr` to revert a hunk. **diffs.nvim** adds syntax-aware and
 intra-line diff highlighting to Neogit, NeoJJ, Gitsigns previews, Telescope
 previews, and conflict markers. Its own `:Diff` command only understands Git,
 so the portable entry point is `<leader>gd`.
+
+## TypeScript
+
+vtsls is a stdio server built on VS Code's TypeScript extension and bundles its
+own TypeScript, so its semantic tokens match VS Code. `plugins/lsp/vtsls.lua`
+sets up nvim-vtsls with mappings that are local to each buffer vtsls attaches
+to:
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>co` | Organize imports |
+| `<leader>cm` | Add missing imports |
+| `<leader>cu` | Remove unused declarations |
+| `<leader>cF` | Fix all |
+| `<leader>cR` | Rename file |
+| `gS` | Go to source definition |
+| `<leader>cT` | Group: sort and remove unused imports, tsconfig, file references, TypeScript version, restart tsserver, reload projects, tsserver log |
+
+Extract refactors start a rename. nvim-vtsls has no licence file, so nixpkgs
+marks it unfree; `configLib.mkPkgs` allows that.
 
 ## Claude Code
 
