@@ -94,7 +94,7 @@
           terminalSize = 11;
         };
         gaming.vrrOutput = null;
-        theme = import ./lib/themes.nix { family = "meowsoot"; };
+        theme = import ./lib/themes.nix { family = "vscode2026"; };
       };
 
       # Shared helper for standalone Home Manager configurations.
