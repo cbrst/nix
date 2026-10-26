@@ -9,6 +9,11 @@ function M.setup()
 	-- This API supersedes the removed nvim-treesitter.configs module.
 	treesitter.setup()
 
+	-- Close and rename paired HTML, JSX and template tags; part of `web`.
+	if require("init6.config.features").language("web") then
+		require("nvim-ts-autotag").setup({})
+	end
+
 	local function attach_features(buf, language)
 		if not vim.api.nvim_buf_is_valid(buf) then
 			return

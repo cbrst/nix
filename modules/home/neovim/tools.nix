@@ -15,6 +15,23 @@ let
       exec node "${bashDebugExtension}/share/vscode/extensions/rogalmic.bash-debug/out/bashDebug.js" "$@"
     '';
   };
+  # Deletes unused imports through oxlint's no-unused-vars suggestion fix,
+  # leaving unused locals, parameters and functions alone. oxlint applies only
+  # non-overlapping fixes per run, so adjacent imports need further passes.
+  oxlintUnusedImports = pkgs.writeShellApplication {
+    name = "oxlint-unused-imports";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.oxlint
+    ];
+    text = ''
+      for _ in 1 2 3; do
+        before=$(cksum < "$1")
+        oxlint --fix-suggestions -A all -D no-unused-vars "$1" > /dev/null || true
+        [ "$(cksum < "$1")" = "$before" ] && break
+      done
+    '';
+  };
   luaDebugExtension = pkgs.vscode-extensions.tomblind.local-lua-debugger-vscode;
   luaDebugAdapter = pkgs.writeShellApplication {
     name = "local-lua-debug-adapter";
@@ -96,9 +113,10 @@ with pkgs;
       # Conform's chains for the web filetypes, JSON, GraphQL, and TOML.
       oxfmt
       oxlint
+      oxlintUnusedImports
       nur.repos.congee.some-sass-language-server
-      # `tsserver` for typescript-tools.nvim.
-      typescript_5
+      # TypeScript and JavaScript server; bundles its own TypeScript.
+      vtsls
       # HTML, CSS, and JSON servers.
       vscode-langservers-extracted
     ];

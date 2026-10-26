@@ -27,18 +27,33 @@ local filetype_languages = {
 	zsh = "shell",
 }
 
+-- Project-local oxfmt configuration, which wins over the bundled fallback.
+local oxfmt_config_files = {
+	".oxfmtrc.json",
+	".oxfmtrc.jsonc",
+	"oxfmt.config.ts",
+	"oxfmt.config.mts",
+	"oxfmt.config.cts",
+	"oxfmt.config.js",
+	"oxfmt.config.mjs",
+	"oxfmt.config.cjs",
+}
+
 function M.setup()
 	local features = require("init6.config.features")
 	-- oxlint applies its fixes before oxfmt formats the result. oxfmt leaves
 	-- Svelte and Astro untouched, so those only get oxlint.
 	local oxc = { "oxlint", "oxfmt" }
+	-- Plain scripts also drop unused imports first. Vue and Svelte stay out:
+	-- oxlint does not see their templates, so it would remove used imports.
+	local typescript = { "oxlint_unused_imports", "oxlint", "oxfmt" }
 	local formatters_by_ft = {
 		astro = { "oxlint" },
 		css = { "oxfmt" },
 		graphql = { "oxfmt" },
 		html = { "oxfmt" },
-		javascript = oxc,
-		javascriptreact = oxc,
+		javascript = typescript,
+		javascriptreact = typescript,
 		json = { "oxfmt" },
 		jsonc = { "oxfmt" },
 		less = { "oxfmt" },
@@ -49,8 +64,8 @@ function M.setup()
 		scss = { "oxfmt" },
 		svelte = { "oxlint" },
 		toml = { "oxfmt" },
-		typescript = oxc,
-		typescriptreact = oxc,
+		typescript = typescript,
+		typescriptreact = typescript,
 		vue = oxc,
 		yaml = { "yamlfmt" },
 		zsh = { "shellharden", "shfmt" },
@@ -92,6 +107,29 @@ function M.setup()
 				lsp_format = lsp_format_opt,
 			}
 		end,
+		formatters = {
+			-- oxlint's no-unused-vars suggestion fix, from `tools.nix`. It runs
+			-- apart from the oxlint step because oxlint applies nothing when
+			-- --fix and --fix-suggestions are combined.
+			oxlint_unused_imports = {
+				meta = { description = "Delete unused imports with oxlint." },
+				command = "oxlint-unused-imports",
+				args = { "$FILENAME" },
+				stdin = false,
+			},
+			oxfmt = {
+				-- Projects without their own oxfmt configuration get the bundled
+				-- fallback, which also sorts imports and Tailwind classes.
+				prepend_args = function(_, ctx)
+					local project_config = vim.fs.find(oxfmt_config_files, { upward = true, path = ctx.dirname })[1]
+					if project_config then
+						return {}
+					end
+					local config_dir = vim.g.init6_config_dir or vim.fn.stdpath("config")
+					return { "-c", vim.fs.joinpath(config_dir, "oxfmtrc.json") }
+				end,
+			},
+		},
 		formatters_by_ft = formatters_by_ft,
 	})
 	vim.keymap.set({ "n", "v" }, "<leader>cf", function()

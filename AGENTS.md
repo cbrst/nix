@@ -243,7 +243,7 @@ spec.nix { pkgs, lib, inputs, settings, features, claudeCode }
 | `ai.enable` | claudecode.nvim and the Claude CLI |
 | `debug.enable` | nvim-dap, dap-ui, virtual text, nvim-nio, osv, and the `debug` tool group |
 | `grammars` (`"all"` or a list of names) | Every Treesitter grammar not listed |
-| `languages.<name>.enable` | That `tools.nix` language group; `web` also removes typescript-tools.nvim |
+| `languages.<name>.enable` | That `tools.nix` language group; `web` also removes nvim-vtsls and nvim-ts-autotag |
 
 Hosts set them like any Home Manager option, for example
 `editor.neovim.features.languages.php.enable = false;` in
@@ -264,7 +264,7 @@ Lua that sets up a feature-specific plugin or tool must check it first:
 - `features.debug`: `plugins.debug`.
 - `features.language(name)`: LSP servers (through `server_languages` in
   `plugins/lsp/init.lua`), Conform formatters (through `filetype_languages` in
-  `plugins/smart/autoformat.lua`), and typescript-tools (`web`). Servers and
+  `plugins/smart/autoformat.lua`). Servers and
   formatters of a disabled language are skipped without the "missing tools"
   warning. Add new servers and formatted filetypes to those maps.
 
@@ -429,10 +429,14 @@ helpers, and `languages/` for filetype behavior.
 LSP uses the newer `vim.lsp.config`/`vim.lsp.enable` API. Blink capabilities are
 merged into configured servers. Servers of a disabled language group are
 skipped; the rest are enabled only when their resolved command is executable.
-TypeScript Tools is configured separately and only with the `web` group. Server
+TypeScript and JavaScript use vtsls, a regular server in the `web` group. Server
 definitions belong in `config/lsp_servers.lua`, mappings in
 `config/lsp_keymaps.lua`, server-to-language mapping and orchestration in
 `plugins/lsp/init.lua`, and package declarations in `tools.nix`.
+`plugins/lsp/vtsls.lua` sets up nvim-vtsls (`:VtsExec`) and its buffer-local
+mappings (`<leader>co`, `cm`, `cu`, `cF`, `cR`, `gS`, and the `<leader>cT`
+group). nvim-vtsls has no licence file, so nixpkgs marks it unfree;
+`configLib.mkPkgs` allows that.
 
 claudecode.nvim is the active Neovim AI integration. It starts the Claude Code
 CLI through a right-side Snacks terminal, exposes editor context through its IDE
@@ -450,9 +454,17 @@ Completion is configured in `plugins/smart/autocompletion.lua`. Sources are
 LazyDev, LSP, paths, LuaSnip, and buffer completion. Formatting is configured in
 `plugins/smart/autoformat.lua` through Conform and runs on save. Current chains
 include StyLua for Lua, mdsf then rumdl for Markdown, Ruff operations for
-Python, Shellharden then shfmt for Zsh, oxlint then oxfmt for JavaScript,
-TypeScript, and Vue, oxfmt for the other web filetypes, JSON, and TOML, and
-yamlfmt for YAML.
+Python, Shellharden then shfmt for Zsh, `oxlint-unused-imports` then oxlint then
+oxfmt for JavaScript and TypeScript, oxlint then oxfmt for Vue, oxfmt for the
+other web filetypes, JSON, and TOML, and yamlfmt for YAML.
+`oxlint-unused-imports` is a `tools.nix` script that deletes unused imports
+through oxlint's `no-unused-vars` suggestion fix; it stays off Vue and Svelte,
+whose template usage oxlint cannot see. oxfmt uses the project's own
+configuration, or else the bundled `configs/oxfmtrc.json` (passed with `-c`;
+Home Manager links it to `~/.config/nvim/oxfmtrc.json`), which enables
+`sortImports` and `sortTailwindcss`. nvim-ts-autotag, set up in
+`plugins/smart/treesitter.lua` with the `web` group, closes and renames paired
+tags.
 
 UI responsibilities:
 

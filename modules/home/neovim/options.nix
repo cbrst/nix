@@ -18,7 +18,7 @@ let
     php = "PHP: Phpactor, Mago and html-beautify";
     python = "Python: Zuban and Ruff";
     shell = "Shell: bash-language-server, zshcs, Shellharden and shfmt";
-    web = "Web: TypeScript (typescript-tools.nvim), Emmet, Some Sass, HTML/CSS/JSON servers, oxlint and oxfmt";
+    web = "Web: TypeScript (vtsls, nvim-vtsls), Emmet, Some Sass, HTML/CSS/JSON servers, tag auto-closing, oxlint and oxfmt";
     yaml = "YAML: yaml-language-server and yamlfmt";
   };
 

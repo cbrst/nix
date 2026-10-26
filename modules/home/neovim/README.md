@@ -83,7 +83,7 @@ a host that sets nothing gets the full editor:
 | `ai.enable` | `true` | No claudecode.nvim or Claude CLI; no Claude statusline segment, dashboard key, or `<a-o>` picker action |
 | `debug.enable` | `true` | No nvim-dap, dap-ui, virtual text, nvim-nio, osv, or debug adapters; `plugins/debug/` is not loaded |
 | `grammars` | `"all"` | A list of `builtGrammars` names installs only those parsers |
-| `languages.<name>.enable` | `true` | No tools from that group, and no LSP or Conform setup for it; `web` also drops typescript-tools.nvim |
+| `languages.<name>.enable` | `true` | No tools from that group, and no LSP or Conform setup for it; `web` also drops nvim-vtsls and nvim-ts-autotag |
 
 Languages: `lua`, `markdown`, `nix`, `php`, `python`, `shell`, `web`, `yaml`.
 `tools.nix` lists the packages in each.
@@ -134,7 +134,7 @@ parser, and those filetypes fall back to regex syntax highlighting.
 | `languages.php` | js-beautify (`html-beautify`), Mago, Phpactor | `languages.php.enable` |
 | `languages.python` | Ruff, Zuban | `languages.python.enable` |
 | `languages.shell` | bash-language-server, Shellharden, shfmt, zshcs | `languages.shell.enable` |
-| `languages.web` | Emmet, oxfmt, oxlint, Some Sass, TypeScript (`tsserver`), vscode-langservers-extracted | `languages.web.enable` |
+| `languages.web` | Emmet, oxfmt, oxlint, Some Sass, TypeScript (vtsls), vscode-langservers-extracted | `languages.web.enable` |
 | `languages.yaml` | yaml-language-server, yamlfmt | `languages.yaml.enable` |
 
 Interpreters live in `runtimes` rather than `debug` because debug launches,

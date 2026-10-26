@@ -208,7 +208,12 @@ in
       # `osv`, the adapter for debugging Neovim's own Lua.
       one-small-step-for-vimkind
     ]
-    ++ lib.optional (languageEnabled "web") typescript-tools-nvim;
+    ++ lib.optionals (languageEnabled "web") [
+      # vtsls commands (:VtsExec) and source actions.
+      nvim-vtsls
+      # Closes and renames paired HTML, JSX and template tags.
+      nvim-ts-autotag
+    ];
 
   # The Lua configuration: `init.lua`, `lua/` and `colors/`.
   configDir = ./configs;

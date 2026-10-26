@@ -16,6 +16,7 @@ local server_languages = {
 	phpactor = "php",
 	rumdl = "markdown",
 	somesass_ls = "web",
+	vtsls = "web",
 	yamlls = "yaml",
 	zshcs = "shell",
 	zuban = "python",
@@ -45,16 +46,9 @@ function M.setup()
 		},
 	})
 	require("fidget").setup({})
-	-- typescript-tools.nvim and its `tsserver` belong to the `web` group.
+	-- nvim-vtsls commands and mappings belong to the `web` group with vtsls.
 	if features.language("web") then
-		require("typescript-tools").setup({
-			settings = {
-				jsx_close_tag = {
-					enable = true,
-					filetypes = { "javascriptreact", "typescriptreact" },
-				},
-			},
-		})
+		require("init6.plugins.lsp.vtsls").setup()
 	end
 	require("trouble").setup({})
 	vim.keymap.set("n", "<leader>cx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "List diagnostics" })

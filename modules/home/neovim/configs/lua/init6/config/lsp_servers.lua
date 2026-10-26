@@ -48,6 +48,7 @@ return {
 	phpactor = {},
 	rumdl = {},
 	somesass_ls = {},
+	vtsls = {},
 	yamlls = {
 		cmd = { "yaml-language-server", "--stdio" },
 	},

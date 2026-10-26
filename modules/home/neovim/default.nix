@@ -40,6 +40,8 @@ in
   xdg.configFile."nvim/init.lua".source = spec.configDir + "/init.lua";
   xdg.configFile."nvim/lua".source = spec.configDir + "/lua";
   xdg.configFile."nvim/colors".source = spec.configDir + "/colors";
+  # oxfmt fallback for projects without their own configuration.
+  xdg.configFile."nvim/oxfmtrc.json".source = spec.configDir + "/oxfmtrc.json";
 
   # Fallback formatter settings; project-local configuration wins.
   xdg.configFile."mago.toml".text = ''
