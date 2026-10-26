@@ -13,6 +13,7 @@ function M.setup()
 			},
 		},
 	})
+	require("init6.plugins.ui.block-brackets").setup()
 end
 
 return M

@@ -73,6 +73,9 @@ function M.get(c)
 		["@punctuation.delimiter"] = "Delimiter",
 		["@punctuation.bracket"] = { fg = c.punctuation },
 		["@punctuation.special"] = { fg = c.escape },
+		-- Brackets whose pair is on another line (`plugins/ui/block-brackets.lua`).
+		-- Same shade as the indent guides.
+		Init6BlockBracket = { fg = c.guide },
 
 		["@comment"] = "Comment",
 		["@comment.documentation"] = "Comment",

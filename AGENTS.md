@@ -491,6 +491,11 @@ UI responsibilities:
   current-file following.
 - `plugins/ui/mini.lua`: text objects, surrounds, pairs, indent scope, icons,
   and animation.
+- `plugins/ui/block-brackets.lua`: a decoration provider that draws bracket
+  pairs spanning several lines, and a semicolon right after the closer, with
+  `Init6BlockBracket` (the indent-guide shade), from the trees of the
+  active Treesitter highlighter. On unless `vim.g.init6_dim_block_brackets` is
+  `false`; `<leader>tB` toggles it.
 
 Treesitter grammars come from Nix. Do not reintroduce dynamic parser downloads
 without redesigning ownership. Nerd Font support is assumed; the portable
