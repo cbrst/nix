@@ -18,7 +18,7 @@ defaultSettings = {
     terminalSize = 11;
   };
   gaming.vrrOutput = null;
-  theme = import ./lib/themes.nix { family = "meowsoot"; };
+  theme = import ./lib/themes.nix { family = "vscode2026"; };
 };
 ```
 
@@ -52,13 +52,20 @@ and user modules see the same values.
 ## Theme families
 
 [`lib/themes.nix`](https://github.com/cbrst/nix/blob/main/lib/themes.nix)
-defines two families, **Meowsoot** (the default) and **Kanagawa**. An unknown
-family name fails evaluation. Each family provides:
+defines three families: **VS Code 2026** (`vscode2026`, the default),
+**Meowsoot**, and **Kanagawa**. An unknown family name fails evaluation.
+`vscode2026` follows VS Code's "Light 2026" and "Dark 2026" themes for the
+editor, widgets, selection, diff, and git colours, and uses the syntax colours
+that VS Code renders. Its GTK theme stays Adwaita dark. Each family provides:
 
 - A `light` and a `dark` palette with the same semantic keys: background,
   foreground, muted, border, hover, selected, accents, link, status colours
   (error, warning, success, info), diff colours, syntax colours, and five
-  surface shades (`shade0` to `shade4`).
+  surface shades (`shade0` to `shade4`). The optional syntax slots
+  `syntaxKeywordControl`, `syntaxBuiltin`, and `syntaxParameter` colour control
+  flow keywords, builtin variables such as `this`, and parameters; without them
+  the Neovim colour scheme falls back to the keyword, or accent and foreground
+  blend, colours it used before.
 - `terminal`: a `light` and a `dark` set with the 16 ANSI colours (`palette`),
   cursor, cursor text, and selection colours. It is derived from the semantic
   palette with the hex helpers in
@@ -98,5 +105,5 @@ generate their colour sections from the palette and its `terminal` set, and
 Neovim receives the palette as the generated `init6.generated.palette` Lua module (see
 [Neovim](/modules/home/neovim/#colour-scheme)). Asgard's Limine boot menu uses the Meowsoot dark colours.
 
-To switch the whole setup to Kanagawa, change `family` in `defaultSettings` (or
+To switch the whole setup to another family, such as Kanagawa, change `family` in `defaultSettings` (or
 override `theme` for one host) and rebuild.
