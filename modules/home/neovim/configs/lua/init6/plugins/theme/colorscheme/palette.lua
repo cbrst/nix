@@ -75,7 +75,7 @@ function M.build(p, terminal)
 	c.bg_command = color.darker(p.shade0, p.shade2)
 
 	-- Derived text tones for groups the palette has no slot for.
-	c.guide = blend(c.border, bg, 0.5)
+	c.guide = c.border
 	c.whitespace = blend(c.border, bg, 0.35)
 	c.parameter = p.syntaxParameter or blend(c.accent4, fg, 0.4)
 	c.property = blend(c.accent3, fg, 0.45)
