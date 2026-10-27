@@ -1,14 +1,12 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
-  setNoctaliaWallpaper = pkgs.writeShellApplication {
-    name = "set-noctalia-wallpaper";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.imagemagick
-      pkgs.libnotify
-      config.programs.noctalia.package
-    ];
-    text = builtins.readFile ./scripts/set-noctalia-wallpaper.sh;
+  setNoctaliaWallpaper = pkgs.callPackage ../../../packages/set-noctalia-wallpaper {
+    noctalia = config.programs.noctalia.package;
   };
 
   openFolderSlideshow = pkgs.writeShellApplication {
@@ -19,7 +17,9 @@ let
 
   contextActions = pkgs.replaceVars ./extensions/context_actions.py {
     openFolderSlideshow = "${openFolderSlideshow}/bin/open-folder-slideshow";
-    setNoctaliaWallpaper = "${setNoctaliaWallpaper}/bin/set-noctalia-wallpaper";
+    setNoctaliaWallpaper = lib.optionalString config.programs.noctalia.enable (
+      lib.getExe setNoctaliaWallpaper
+    );
   };
 
   # Link the whole directory so Python cannot write __pycache__ next to the

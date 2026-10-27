@@ -1,5 +1,8 @@
 from gi.repository import Gio, GLib, GObject, Nautilus
 
+# Empty when Noctalia is disabled, which hides the wallpaper action.
+SET_NOCTALIA_WALLPAPER = "@setNoctaliaWallpaper@"
+
 
 class ContextActions(GObject.GObject, Nautilus.MenuProvider):
     def get_background_items(self, _current_folder):
@@ -27,14 +30,18 @@ class ContextActions(GObject.GObject, Nautilus.MenuProvider):
             return [item]
 
         mime_type = selected.get_mime_type()
-        if mime_type is not None and mime_type.startswith("image/"):
+        if (
+            SET_NOCTALIA_WALLPAPER
+            and mime_type is not None
+            and mime_type.startswith("image/")
+        ):
             item = Nautilus.MenuItem(
                 name="ContextActions::SetNoctaliaWallpaper",
                 label="Set as Noctalia Wallpaper",
                 tip="Replace the current Noctalia wallpaper with this image",
             )
             item.connect(
-                "activate", self._launch, "@setNoctaliaWallpaper@", path
+                "activate", self._launch, SET_NOCTALIA_WALLPAPER, path
             )
             return [item]
 
