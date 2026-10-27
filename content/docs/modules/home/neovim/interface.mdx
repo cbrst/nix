@@ -1,0 +1,209 @@
+---
+title: Interface
+description: Statusline, pickers, file tree, terminals, start screen, and the other UI plugins, and the shared helpers they call.
+---
+
+Sources:
+[`plugins/ui/`](https://github.com/cbrst/nix/tree/main/modules/home/neovim/configs/lua/init6/plugins/ui).
+
+## Statusline
+
+Heirline (`plugins/ui/heirline.lua`) draws one global statusline
+(`laststatus=3`). Its segments, left to right:
+
+| Segment | Content | Click |
+| --- | --- | --- |
+| Mode | `N`, `I`, `V`, `R`, or `E` (command line) on a coloured badge | |
+| File name | Name of the current buffer, with a pencil when modified, a lock when read-only, or both | |
+| Filetype | `text` when there is none | |
+| Diagnostics | Error, warning, info, and hint counts for the buffer | Opens Trouble's diagnostics list |
+| | (right-aligned from here) | |
+| LSP | Names of the attached clients | |
+| Claude | Shown while a Claude Code terminal exists (AI feature only) | Toggles the Claude Code terminal |
+| VCS | Git branch, or jj bookmarks and change ID, with `+added ~changed -removed` | Opens the VCS status |
+| Position | Line, column, and percentage | |
+
+Segment colours come from `init6.config.ui_colors`, evaluated on each redraw,
+so they follow the current theme variant; see
+[Theme](/modules/home/neovim/theme/#shared-ui-colours). The mode badge uses
+fixed colours. The VCS segment reads cached state from
+`init6.plugins.ui.vcs`, which refreshes in the background and calls
+`redrawstatus` when new counts arrive; see
+[Version control](/modules/home/neovim/vcs/#statusline-state). The Claude
+segment is redrawn on every `TermOpen` and `TermClose`.
+
+## Telescope
+
+`plugins/ui/telescope.lua` uses the Ivy layout (a bottom panel), the fzf
+sorter, `ui-select` (so `vim.ui.select` prompts become a Telescope dropdown),
+and `live-grep-args`. Each extension is loaded with `pcall`, so start-up
+survives one going missing.
+
+All searches run ripgrep with `--hidden --no-require-git` and exclude `.git`
+and `.jj`. `--no-require-git` makes ripgrep honour `.gitignore` even in a
+non-colocated jj repository, where there is no `.git` directory.
+
+| Mapping | Picker |
+| --- | --- |
+| `<leader><leader>` | Find file in the project |
+| `<leader>.`, `<leader>ff` | Find file from the working directory |
+| `<leader>/` | Live grep in the project |
+| `<leader>*` | Grep the project for the word under the cursor |
+| `<leader>,`, `<leader>bb` | Switch buffer |
+| `<leader>fr` | Recent files |
+| `<leader>fp` | Find file in the Neovim configuration |
+| `<leader>sb`, `<leader>ss` | Fuzzy search in the current buffer |
+| `<leader>sB` | Live grep in open buffers |
+| `<leader>'` | Resume the last picker |
+| `<leader>st` | Choose any Telescope picker |
+| `<leader>hh` | Help tags |
+| `<leader>hbb` | Key mappings |
+| `<leader>cX` | Diagnostics |
+
+The project is the repository root from `init6.plugins.ui.vcs.context()`, or
+the working directory outside a repository.
+
+In the find-file and live-grep pickers, `<M-i>` closes the picker and reopens it
+with ignored files included (or excluded again), keeping the typed prompt. Live
+grep accepts ripgrep flags after a quoted pattern (for example
+`"pattern" -t lua` or `-g *.nix`); `<C-k>` quotes the prompt and `<C-t>` quotes
+it and adds `--iglob`. Without the extension, live grep falls back to the stock
+picker, where `<C-Space>` refines results fuzzily. The dashboard calls the same
+`find_files` and `live_grep` wrappers, so it behaves the same.
+
+## Neo-tree
+
+`plugins/ui/neo-tree.lua` shows four sources: the file system, buffers, Git
+status, and document symbols. The tree follows the current file, closes when it
+is the last window, and keeps the cursor on the file name. Files are nested
+under their parents with the rules from `neotree-file-nesting-config`, extended
+so `AGENTS*` and `INSTALL*` nest under `README.*`. `.DS_Store` is never shown.
+The fold column is turned off in tree buffers.
+
+`\` and `<leader>op` toggle the tree and reveal the current file; when the file
+lies outside the working directory, the tree changes to it without asking. While the working directory is on an SSHFS mount, Git status
+is off; see [Remote hosts](/modules/home/neovim/remote/).
+
+## Snacks
+
+`plugins/ui/snacks.lua` enables Snacks' input, picker, terminal, dashboard, and
+dim modules. Dimming is enabled at start-up and `<leader>td` toggles it. With
+the AI feature, `<a-o>` in a Snacks picker sends the selected files (with line
+ranges where the item has them) to Claude Code as `@` mentions.
+
+### Terminals
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>ot` | Toggle the terminal |
+| `<leader>oT` | Open a new terminal |
+| `<leader>of` | Focus the terminal |
+
+These are normal-mode mappings only. A terminal-mode mapping starting with
+`<leader>` would swallow a typed space followed by `t` or `f` in any terminal,
+including the Claude Code prompt.
+
+`M.terminal(action, cmd, opts)` is the shared entry point; the remote shell
+uses it too. It places the split by the current layout:
+
+- **Right**, when the tab has a single column of windows and the code keeps
+  at least 100 columns beside the terminal's 40 % width.
+- **Bottom**, otherwise.
+
+Fixed-width sidebars such as Neo-tree and Outline reduce the available width
+instead of counting as a column; other terminals, Claude Code included, count
+as one. A hidden terminal is placed again when it is shown, so it follows the
+layout at that moment.
+
+### Start screen
+
+The Snacks dashboard (`plugins/ui/dashboard.lua`) is the start screen. It shows
+a header modelled on Neovim's own `:intro` text, an action list, recent files,
+and a random fortune.
+
+| Key | Action |
+| --- | --- |
+| `f` | Find file |
+| `g` | Search the project, from the VCS root when there is one |
+| `r` | Recent files |
+| `n` | New buffer |
+| `s` | VCS status, labelled "jj status" or "Git status"; hidden outside a repository |
+| `e` | File tree |
+| `h` | Remote host: pick a host and mount it (see [Remote hosts](/modules/home/neovim/remote/)) |
+| `c` | Claude Code; hidden without the AI feature or when `claude` is not on `PATH` |
+| `q` | Quit |
+
+The action list is rebuilt on every render, so the VCS entry follows the
+working directory. Recent files are limited to the current working directory,
+and the block is hidden when there are none. The fortune is chosen once per
+session, so resizing the window does not change it.
+
+When the window is wide enough for two columns, a second pane runs the
+`dashboard-pokemon` script, which prints a random
+[pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)
+sprite centred against the height of the main pane. The script and
+`pokemon-colorscripts` are on Neovim's wrapped `PATH`; if the script is not
+found, the pane is omitted. The pane is not cached, so each launch shows a
+different sprite. Indent scope and animation are disabled on the dashboard
+buffer.
+
+## Mini
+
+`plugins/ui/mini.lua` sets up:
+
+| Module | Behaviour |
+| --- | --- |
+| mini.ai | Extra text objects, searching up to 500 lines |
+| mini.surround | Add, delete, and replace surroundings |
+| mini.operators | Evaluate, exchange, multiply, and sort operators; the replace prefix is empty, so `gr` stays free for LSP references |
+| mini.pairs | Auto-pairs typed brackets and quotes; Blink adds brackets after accepted functions |
+| mini.indentscope | Draws the current scope with `│`, treating the border lines as part of it |
+| mini.icons | The only icon provider; glyphs with a Nerd Font, else ASCII. `mock_nvim_web_devicons()` serves plugins that ask for nvim-web-devicons |
+| mini.animate | Cursor, scrolling, resizing, and window open and close animations; off in terminals |
+
+## Other UI
+
+- **Which-key** (`plugins/ui/which-key.lua`) names the leader groups below.
+  Bindings follow the Doom Emacs layout.
+- **Dropbar** shows breadcrumbs in the window bar, which
+  [`ui_colors`](/modules/home/neovim/theme/#shared-ui-colours) keeps on the
+  editor background.
+- **Outline** opens a symbol sidebar on the right: `<leader>oo` toggles it and
+  `<leader>si` opens it to jump to a symbol.
+- **Trouble** lists diagnostics (`<leader>cx`).
+- **render-markdown** renders Markdown in every mode.
+- **nvim-highlight-colors** shows a colour swatch at the end of lines with
+  colour values, including Tailwind classes.
+- **todo-comments** highlights `TODO`, `FIXME`, and similar keywords, without
+  signs.
+
+### Block brackets
+
+`plugins/ui/block-brackets.lua` dims both ends of a bracket pair that sits on
+different lines, and a semicolon right after the closer (as in `});`), with the
+`Init6BlockBracket` highlight group, which uses the indent-guide shade. Pairs
+on one line, such as `(bar)` or `foo(1);`, keep their colours. Pairs come from
+the trees of the active Tree-sitter highlighter, so injected languages are
+covered and brackets in strings and comments are ignored; the marks are drawn
+by a decoration provider and nothing is stored in the buffer. It is on by
+default; `vim.g.init6_dim_block_brackets = false` (for example in a project's
+`.nvim.lua`) turns it off and `<leader>tB` toggles it.
+
+## Leader groups
+
+The leader is `Space`; the local leader is `,`.
+
+| Prefix | Group |
+| --- | --- |
+| `<leader>b` | Buffers |
+| `<leader>c` | Code: actions, rename, format (`cf`), diagnostics, tasks (`cc`, `cC`), annotations (`cA`) |
+| `<leader>d` | Debugging |
+| `<leader>f` | Files: find (`ff`), recent (`fr`), configuration (`fp`) |
+| `<leader>g` | Version control; `<leader>gh` holds Git hunks |
+| `<leader>h` | Help |
+| `<leader>o` | Open: project sidebar (`op`), symbol outline (`oo`), terminals (`ot`, `oT`, `of`), Claude Code (`ol`) |
+| `<leader>s` | Search |
+| `<leader>t` | Toggles: whitespace (`tv`), relative numbers (`tl`), inlay hints (`th`), blame (`tb`), deleted lines (`tD`), dimming (`td`), block brackets (`tB`) |
+| `<leader>w` | Window commands |
+| `<leader>q` | Quit and session |
+| `<leader>R` | Remote hosts |

@@ -1,0 +1,113 @@
+---
+title: Extending and validating
+description: Where each kind of addition goes, which files have to change together, and how to test a change before activation.
+---
+
+Because Nix installs everything and Lua only configures it, most additions
+touch both layers. A Lua `require` for a plugin that Nix does not install makes
+start-up fail, and a server or formatter without its executable produces a
+"missing tools" warning.
+
+## Recipes
+
+### A plugin
+
+1. Add it to `plugins` in `spec.nix`. If it belongs to a feature, put it in the
+   matching `lib.optional(s)` block.
+2. If nixpkgs lacks it, add a `buildVimPlugin` derivation with a pinned source
+   in the `let` block of `spec.nix` and list that instead.
+3. Configure it in a module under `lua/init6/plugins/<group>/` that exposes
+   `M.setup()`, and call it from the group's `init.lua`, behind the same
+   feature check, at the right point in the
+   [load order](/modules/home/neovim/startup/#plugin-load-order).
+4. Give its highlight groups entries in
+   `plugins/theme/colorscheme/groups/plugins.lua`.
+5. Name its leader group in `plugins/ui/which-key.lua` if it adds one.
+
+### A language server
+
+1. Add the package to the matching language group in `tools.nix`.
+2. Add the server to `config/lsp_servers.lua` with any overrides; an empty
+   table uses nvim-lspconfig's defaults.
+3. Map it to its language in `server_languages` in `plugins/lsp/init.lua`, so a
+   disabled language skips it quietly and `:checkhealth init6` reports it
+   correctly.
+
+### A formatter
+
+1. Add the package to the matching language group in `tools.nix`.
+2. Add the chain to `formatters_by_ft` in `plugins/smart/autoformat.lua`, and
+   a custom formatter definition under `formatters` if Conform does not know
+   it.
+3. Map each new filetype in `filetype_languages`.
+
+### A language family
+
+1. Add a list under `languages` in `tools.nix`.
+2. Add an entry to `languages` in `options.nix`. Evaluation fails until both
+   lists name the same families.
+3. Map its servers and filetypes as above.
+
+### A feature switch
+
+1. Declare the option in `options.nix`.
+2. Select plugins and tools by it in `spec.nix`.
+3. Add it to the generated `init6-features` module in `spec.nix` and expose it
+   in `config/features.lua`, defaulting to enabled when the generated module
+   lacks it.
+4. Check it in every Lua consumer, and report it in `health.lua`.
+
+### A Home Manager-only value
+
+Add an argument to `spec.nix` and pass it from both `default.nix` and
+`package.nix`; `spec.nix` must never read Home Manager's `config`.
+
+### Filetype behaviour
+
+Add a module under `lua/init6/languages/` and call it from
+`languages/init.lua`. Name its autocommand group `init6-<purpose>`.
+
+### Things to avoid
+
+- Top-level Lua modules outside `init6`; generic names collide with plugins.
+- Assuming `~/.config/nvim`; use
+  `vim.g.init6_config_dir or vim.fn.stdpath("config")`.
+- Run-time downloads of plugins, parsers, or tools.
+- Two packages that ship the same command name.
+
+## Validating changes
+
+The installed `nvim` runs the last activated configuration. To test Lua edits
+in the checkout, load it explicitly:
+
+```bash
+nvim -n --headless \
+  --cmd "set runtimepath^=$PWD/modules/home/neovim/configs" \
+  -u "$PWD/modules/home/neovim/configs/init.lua" \
+  '+qa'
+```
+
+That run uses the installed generation's plugins, so a generation older than
+`init6.generated.palette` warns and falls back to the default colour scheme.
+When plugins, executables, or theme values changed, run the standalone package,
+which is built entirely from the checkout, against a scratch state directory:
+
+```bash
+scratch="$(mktemp -d)"
+env XDG_CONFIG_HOME="$scratch/config" XDG_DATA_HOME="$scratch/data" \
+  XDG_STATE_HOME="$scratch/state" XDG_CACHE_HOME="$scratch/cache" \
+  nix run '.#nvim' -- -n --headless path/to/real/file '+qa'
+```
+
+Also run `nvim-lite` after changing feature-specific Lua or `spec.nix`, and open
+files of the disabled languages; start-up and editing must stay free of errors
+and "missing tools" warnings. `:checkhealth init6` shows what the running
+editor has.
+
+The Home Manager wrapper itself is tested with a built generation's pack
+directory; the exact command is in
+[`AGENTS.md`](https://github.com/cbrst/nix/blob/main/AGENTS.md#neovim-validation-before-activation).
+Format changed Lua with `stylua`.
+
+Asynchronous integrations such as the VCS layer need a real file inside a test
+repository: an unnamed buffer can resolve roots differently.

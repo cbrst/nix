@@ -1,0 +1,223 @@
+---
+title: Language tools
+description: Language servers, completion, formatting on save, Tree-sitter, TypeScript, and tasks, and how they decide what to start.
+---
+
+Sources:
+[`plugins/lsp/`](https://github.com/cbrst/nix/tree/main/modules/home/neovim/configs/lua/init6/plugins/lsp),
+[`config/lsp_servers.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/config/lsp_servers.lua),
+[`config/lsp_keymaps.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/config/lsp_keymaps.lua),
+[`plugins/smart/`](https://github.com/cbrst/nix/tree/main/modules/home/neovim/configs/lua/init6/plugins/smart).
+
+Every executable on this page comes from a [tool group](/modules/home/neovim/packaging/#tool-groups)
+and is skipped when its [language feature](/modules/home/neovim/features/) is
+off.
+
+## Language servers
+
+Servers use Neovim's own `vim.lsp.config` / `vim.lsp.enable` API.
+nvim-lspconfig is installed only for its default server definitions (command,
+filetypes, root markers); it is never called directly.
+
+`plugins/lsp/init.lua` starts each server in five steps:
+
+```text
+config/lsp_servers.lua      server name → overrides (cmd, settings, …)
+   │
+   ├─ server_languages[name] disabled?  ── skip quietly
+   ▼
+deep copy, merge Blink capabilities
+   ▼
+vim.lsp.config(name, overrides)   merged over nvim-lspconfig's defaults
+   ▼
+resolved cmd[1] executable?
+   ├─ yes ── vim.lsp.enable(name)
+   └─ no  ── collect; one "Missing Home Manager LSP tools" warning
+```
+
+Checking the executable before enabling keeps a missing tool from producing a
+failed start on every matching buffer. The warning is scheduled so it appears
+once start-up has finished.
+
+| Server | Language group | Filetypes and notes |
+| --- | --- | --- |
+| `bashls` | `shell` | Bash and sh |
+| `zshcs` | `shell` | Zsh; root marker `.git`; experimental diagnostics and hover enabled |
+| `emmet_language_server` | `web` | HTML, CSS, Sass, SCSS, Less, JSX, TSX, Pug, ERB; abbreviation suggestions always shown in the completion menu |
+| `jsonls` | `web` | JSON (`vscode-json-language-server`) |
+| `somesass_ls` | `web` | Sass and SCSS |
+| `vtsls` | `web` | JavaScript and TypeScript; see [TypeScript](#typescript) |
+| `lua_ls` | `lua` | Lua; call snippets replace the call expression |
+| `nil_ls` | `nix` | Nix; missing flake inputs are fetched automatically (`autoArchive`) instead of prompting on every attach |
+| `phpactor` | `php` | PHP |
+| `zuban` | `python` | Python |
+| `rumdl` | `markdown` | Markdown lint diagnostics |
+| `yamlls` | `yaml` | YAML |
+
+nixd is installed in the `nix` group but has no server entry; only `nil`
+attaches to Nix buffers.
+
+### Around the servers
+
+`plugins/lsp/init.lua` also sets up:
+
+- **Diagnostic signs** from the shared icon table.
+- **LazyDev** with the `luvit-meta` library for `vim.uv`, which feeds Neovim
+  API types to lua-language-server and Blink.
+- **Fidget** for LSP progress messages.
+- **Trouble**, with `<leader>cx` for the diagnostics list. Clicking the
+  statusline diagnostics opens the same list.
+
+### Buffer mappings
+
+`config/lsp_keymaps.lua` adds these on `LspAttach`, local to the buffer:
+
+| Mapping | Action |
+| --- | --- |
+| `gd` | Definitions (Telescope) |
+| `gD` | Declaration |
+| `gr` | References (Telescope) |
+| `gI` | Implementations (Telescope) |
+| `<leader>ca` | Code action (normal and visual) |
+| `<leader>cr` | Rename |
+| `<leader>ct` | Type definition (Telescope) |
+| `<leader>cS` | Document symbols (Telescope) |
+| `<leader>cj` | Workspace symbols (Telescope) |
+| `<leader>th` | Toggle inlay hints; only when the server supports them |
+
+When the server supports document highlights, the symbol under the cursor and
+its references are highlighted after `updatetime` (250 ms) and cleared when the
+cursor moves. On `LspDetach` those highlights and autocommands are removed
+for that buffer only.
+
+Outside LSP buffers, `<leader>cX` searches all diagnostics in Telescope and
+`<leader>cq` puts them in the location list.
+
+## Completion
+
+`plugins/smart/autocompletion.lua` configures Blink with LuaSnip snippets:
+
+| Setting | Value |
+| --- | --- |
+| Sources, in order | LazyDev (score boost of 100, so Neovim API items rank first in Lua), LSP, paths, snippets, buffer |
+| Keys | Blink's `default` preset, plus `<C-l>` / `<C-h>` to jump forward and back in a snippet |
+| Brackets | Accepting a function adds the call brackets; mini.pairs handles brackets typed by hand |
+| Documentation | Shown automatically beside the menu |
+| Signature help | Enabled, in a rounded window |
+| Command line | Same keys; the menu opens automatically |
+| Matcher | Rust implementation, with a warning if it is unavailable |
+
+The LSP source's `fallbacks` list is empty, so buffer words are always offered
+next to server results; by default Blink only shows them when the server
+returns nothing.
+
+## Formatting
+
+`plugins/smart/autoformat.lua` configures Conform and formats on save.
+
+| Filetypes | Chain |
+| --- | --- |
+| Lua | StyLua |
+| Markdown | mdsf, then rumdl |
+| Python | Ruff fix, Ruff format, Ruff organize imports |
+| Zsh | Shellharden, then shfmt |
+| PHP | html-beautify, then Mago |
+| JavaScript, TypeScript, JSX, TSX | `oxlint-unused-imports`, oxlint, then oxfmt |
+| Vue | oxlint, then oxfmt |
+| Svelte, Astro | oxlint only (oxfmt does not format them) |
+| CSS, SCSS, Less, HTML, JSON, JSONC, GraphQL, TOML | oxfmt |
+| YAML | yamlfmt |
+
+Filetypes of a disabled language lose their entry, so saving falls back to LSP
+formatting quietly instead of reporting missing formatters.
+
+### Format on save
+
+For every save, `format_on_save` decides in order:
+
+1. `vim.g.disable_autoformat` or `vim.b.disable_autoformat` set: no
+   formatting. Put the global one in a project's `.nvim.lua` for shared
+   repositories.
+2. The file is on an [SSHFS mount](/modules/home/neovim/remote/): no
+   formatting; remote files are often live and are formatted on request only.
+3. C and C++: Conform only, never LSP formatting, because those languages have
+   no single accepted style.
+4. Everything else: Conform with a 500 ms timeout, falling back to LSP
+   formatting when the filetype has no formatter.
+
+Errors are not shown as notifications. `<leader>cf` formats the buffer or
+selection on request, asynchronously, with the same LSP fallback.
+
+### oxlint and oxfmt
+
+- oxlint applies its fixes before oxfmt formats the result.
+- `oxlint-unused-imports` deletes unused imports through oxlint's
+  `no-unused-vars` suggestion fix and leaves unused locals, parameters, and
+  functions alone. It is a separate step because oxlint applies nothing when
+  `--fix` and `--fix-suggestions` are combined, and it repeats up to three
+  times because oxlint skips overlapping fixes such as adjacent import lines.
+  It works on the file, not on standard input. Vue and Svelte are excluded:
+  oxlint does not see their templates and would delete imported components.
+- oxfmt has no global configuration file. Before each run Conform searches
+  upwards from the file for `.oxfmtrc.json`, `.oxfmtrc.jsonc`, or
+  `oxfmt.config.{ts,mts,cts,js,mjs,cjs}`. If none exists it passes
+  `-c <config dir>/oxfmtrc.json`, the bundled fallback, which enables
+  `sortImports` and `sortTailwindcss`. Home Manager links it to
+  `~/.config/nvim/oxfmtrc.json`; the standalone packages bundle it.
+
+## Tree-sitter
+
+Grammars come from Nix; nothing is compiled or downloaded at run time.
+`plugins/smart/treesitter.lua` calls the current nvim-treesitter `setup()` (the
+old `nvim-treesitter.configs` module no longer exists) and then attaches
+features on every `FileType` event:
+
+1. Look up the parser language for the filetype with
+   `vim.treesitter.language.get_lang`.
+2. Start highlighting with `vim.treesitter.start`. If no parser is installed,
+   for example a grammar left out of `features.grammars`, stop here; Vim's
+   regex syntax stays.
+3. In every window showing the buffer, set the Tree-sitter fold expression and
+   recompute folds (`zx`), since folds computed before the parser attached
+   would be wrong.
+
+With the `web` language, nvim-ts-autotag closes and renames paired tags in
+HTML, JSX, Vue, Svelte, XML, and PHP.
+
+The SCSS grammar is patched and regenerated so it understands namespaced
+mixins and function calls; see [Packaging](/modules/home/neovim/packaging/#local-derivations).
+
+## TypeScript
+
+vtsls is a stdio server built on VS Code's TypeScript extension and bundles its
+own TypeScript, so its semantic tokens match VS Code. `plugins/lsp/vtsls.lua`
+(loaded only with the `web` language) configures nvim-vtsls to start a rename
+after extract refactors, and adds mappings in buffers where vtsls attaches:
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>co` | Organize imports |
+| `<leader>cm` | Add missing imports |
+| `<leader>cu` | Remove unused declarations |
+| `<leader>cF` | Fix all |
+| `<leader>cR` | Rename file and update imports |
+| `gS` | Go to source definition |
+| `<leader>cTc` | Open tsconfig or jsconfig |
+| `<leader>cTf` | File references |
+| `<leader>cTs` | Sort imports |
+| `<leader>cTu` | Remove unused imports |
+| `<leader>cTv` | Select TypeScript version |
+| `<leader>cTr` | Restart tsserver |
+| `<leader>cTR` | Reload projects |
+| `<leader>cTl` | Open tsserver log |
+
+`:VtsExec` runs any other vtsls command. nvim-vtsls has no licence file, so
+nixpkgs marks it unfree; `configLib.mkPkgs` allows that.
+
+## Tasks and annotations
+
+- **Overseer** (`plugins/integrations/overseer.lua`) runs build and project
+  tasks: `<leader>cc` picks and runs one, `<leader>cC` toggles the task list.
+  Tasks use the interpreters from the `runtimes` group.
+- **codedocs.nvim** (`plugins/smart/codedocs.lua`) generates a documentation
+  comment for the item under the cursor with `<leader>cA`.

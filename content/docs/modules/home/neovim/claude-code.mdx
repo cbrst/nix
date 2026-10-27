@@ -1,0 +1,62 @@
+---
+title: Claude Code
+description: claudecode.nvim, its terminal, the context it sends, and the other places the editor talks to Claude Code.
+---
+
+Source:
+[`plugins/smart/claudecode.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/smart/claudecode.lua).
+
+[claudecode.nvim](https://github.com/coder/claudecode.nvim) runs the Claude Code
+CLI in a right-side Snacks terminal and exposes the editor's context (open
+files, selections, diagnostics) through its IDE bridge. It is the `ai.enable`
+[feature](/modules/home/neovim/features/): with it, Nix adds the plugin and puts
+the CLI on Neovim's `PATH`. Under Home Manager the CLI is
+`programs.claude-code.finalPackage`, configured by the
+[AI module](/modules/home/ai/); the standalone `nvim` uses plain
+`pkgs.claude-code`.
+
+## Terminal
+
+The terminal opens on the right, focused and in insert mode, without a window
+bar. The leader mappings that open terminals are normal-mode only, so typing
+into Claude Code cannot trigger them; `<Esc><Esc>` leaves terminal mode first.
+
+## Mappings and actions
+
+| Mapping | Mode | Action |
+| --- | --- | --- |
+| `<leader>oll` | Normal | Toggle the Claude Code terminal |
+| `<leader>ola` | Normal, visual | Ask a question about the current context |
+| `<leader>olr` | Normal, visual | Ask for an improvement; the input is prefixed with "Improve the current code: " |
+| `<leader>ols` | Normal, visual | Pick an action from a list |
+| `<leader>oln` | Normal | New session (sends `/clear`) |
+| `<leader>olc` | Normal | Select a model (sends `/model`) |
+| `<leader>olR` | Normal | Review the current changes |
+
+The *current context* is the current file with the cursor line, or the
+selected line range in visual mode; an unnamed buffer has none. Asking and
+improving read a prompt, send the context as an `@` mention, open the
+terminal, and then type the prompt into it after a short delay so the mention
+arrives first.
+
+`<leader>ols` offers: ask about the current context, improve it, review the
+current changes, start a new session, select a model, and toggle the terminal.
+The review sends a fixed prompt asking for bugs, regressions, and missing tests,
+ordered by severity with file and line references.
+
+## Elsewhere in the editor
+
+| Place | Behaviour |
+| --- | --- |
+| Statusline | A "Claude" segment while the Claude Code terminal exists; clicking it toggles the terminal. Redrawn on every `TermOpen` and `TermClose` |
+| Start screen | `c` toggles Claude Code; hidden when `claude` is not on `PATH` |
+| Snacks pickers | `<a-o>` sends the selected files and line ranges as `@` mentions |
+| Terminal placement | The Claude Code terminal counts as a window column, so other terminals open at the bottom beside it |
+| NeoJJ descriptions | Empty descriptions get a commit message draft from `claude-commit-draft`; see [Version control](/modules/home/neovim/vcs/#commit-message-drafts) |
+
+The commit draft is independent of the `ai` feature: it runs whenever
+`claude-commit-draft` is on `PATH`.
+
+Avante is kept as an inactive alternative: its configuration remains in
+`plugins/smart/avante.lua`, but the plugin is commented out in `spec.nix` and
+the setup call in `plugins/smart/init.lua`.

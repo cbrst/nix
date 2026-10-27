@@ -1,0 +1,70 @@
+---
+title: Debugging
+description: nvim-dap adapters and launch configurations for Python, JavaScript and TypeScript, shell, and Lua, with their mappings.
+---
+
+Source:
+[`plugins/debug/init.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/debug/init.lua).
+
+Debugging is the `debug.enable` [feature](/modules/home/neovim/features/).
+With it, Nix installs nvim-dap, nvim-dap-ui (with its nvim-nio dependency),
+nvim-dap-virtual-text, one-small-step-for-vimkind, and the `debug`
+[tool group](/modules/home/neovim/packaging/#tool-groups); without it,
+`plugins/debug/` is never loaded.
+
+## Session behaviour
+
+- The DAP UI opens when a session initialises and closes when it terminates or
+  exits.
+- Virtual text shows variable values next to the code.
+- Breakpoint, conditional breakpoint, rejected breakpoint, log point, and
+  stopped-line signs use the shared icons and diagnostic colours.
+
+Adapters are resolved with `exepath` when the configuration loads, so they
+must be on the wrapped `PATH`; `:checkhealth init6` checks
+`debugpy-adapter`, `js-debug`, `bash-debug-adapter`, and
+`local-lua-debug-adapter`.
+
+## Adapters and configurations
+
+| Filetypes | Adapter | Configurations |
+| --- | --- | --- |
+| Python | `debugpy-adapter` | Debug the current file. The interpreter is `.venv/bin/python` or `venv/bin/python` in the working directory when one exists, else `python3` from `PATH` |
+| JavaScript, TypeScript, JSX, TSX | `js-debug` (`pwa-node`, a server on a free port) | Debug the current file with Node.js (source maps on, Node internals and `node_modules` skipped); attach to a running Node process picked from a list |
+| sh, Zsh | `bash-debug-adapter` (bashdb) | Debug the current file with Bash in the integrated terminal |
+| Lua | `local-lua-debug-adapter` | Debug the current file with the standalone `lua` interpreter |
+| Lua | `nlua` (osv) | Attach to a Neovim instance on port 8086 |
+
+The Bash configuration passes resolved store paths for `bash`, `bashdb`, its
+library directory, `cat`, `mkfifo`, and `pkill`, because the adapter does not
+search `PATH` for them. It is also offered for Zsh files but runs them with
+Bash, so Zsh-only syntax fails; there is no native Zsh debug adapter.
+
+The Bash and Lua adapters come from their VS Code extensions and are wrapped in
+small scripts that run them with Node.js.
+
+### Debugging Neovim's own Lua
+
+To debug Lua running inside Neovim, for example this configuration:
+
+1. In the Neovim to be debugged, press `<leader>dL`. It starts an osv debug
+   server on port 8086.
+2. In a second Neovim, open the Lua file, set breakpoints, press `<F5>`, and
+   choose "Attach to Neovim".
+
+## Mappings
+
+| Mapping | Action |
+| --- | --- |
+| `<F5>`, `<leader>dc` | Start or continue |
+| `<F10>` | Step over |
+| `<F11>` | Step into |
+| `<F12>` | Step out |
+| `<leader>db` | Toggle breakpoint |
+| `<leader>dB` | Set a conditional breakpoint |
+| `<leader>dl` | Run the last session again |
+| `<leader>dr` | Toggle the debug REPL |
+| `<leader>du` | Toggle the DAP UI |
+| `<leader>de` | Evaluate the expression under the cursor or the selection |
+| `<leader>dx` | Terminate the session |
+| `<leader>dL` | Start the osv server for debugging this Neovim |

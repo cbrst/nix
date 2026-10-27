@@ -1,0 +1,79 @@
+---
+title: Remote hosts
+description: Editing files on SSH hosts through SSHFS mounts, remote shells with mosh, and what the rest of the editor turns off on a mount.
+---
+
+Source:
+[`plugins/ui/remote.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/ui/remote.lua).
+
+`plugins/ui/remote.lua` sets up remote-sshfs.nvim, which mounts an SSH host
+under `~/.sshfs/<host>` so Neo-tree, Telescope, and the language servers see its
+files as ordinary local paths. Hosts are listed from `~/.ssh/config`,
+`~/.ssh/hosts`, and `/etc/ssh/ssh_config`; the plugin does not follow `Include`,
+so the included host file is named explicitly. Hosts are chosen in a Telescope
+picker, and connecting does not ask for a separate confirmation. The plugin's
+remaining prompts, such as accepting an unknown host key, are pickers too,
+because its yes/no input prompt lost focus when opened from a Telescope action.
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>Rc` | Connect to a host (also `h` on the start screen) |
+| `<leader>Rd` | Disconnect, and return to the previous local directory if the working directory is on the mount |
+| `<leader>Re` | Edit the SSH configuration |
+| `<leader>Rf` | Find files on the host |
+| `<leader>Rg` | Live grep on the host |
+| `<leader>Rs` | Open a shell on the host in a terminal split |
+
+Find and grep run on the host rather than through the mount, so they need `rg`
+(or `fd`/`find`) there.
+
+## Mount options
+
+Mounts use `-o reconnect` with `ConnectTimeout=5`, `ServerAliveInterval=15`,
+and `ServerAliveCountMax=3`. ssh exits about 45 seconds after the link dies and
+sshfs reconnects, instead of file access, and with it the editor, blocking until
+TCP times out. This list replaces the plugin's default sshfs options.
+
+## Returning home
+
+A `DirChangedPre` autocommand remembers the local working directory whenever
+the editor changes from a local directory into a mount. `<leader>Rd` unmounts
+and, if the working directory is still on the mount, changes back to that
+remembered directory.
+
+## Remote shells
+
+`<leader>Rs` picks the host in this order: the current connection, else the
+host whose mount holds the working directory, else a picker of the SSH config
+hosts (wildcard patterns are skipped). The terminal runs `mosh` and falls back
+to `ssh` when mosh cannot start a session, for example when `mosh-server` is
+missing on the host or UDP is blocked. A normal logout exits 0 and does not
+fall back. Without `mosh` on `PATH` it warns and runs `ssh` directly.
+
+The shell opens through the shared
+[Snacks terminal helper](/modules/home/neovim/interface/#terminals), so it is
+placed right or bottom like other terminals, and pressing `<leader>Rs` again
+for the same host toggles the same terminal. It starts in the home directory,
+because a working directory on a stale mount would block the spawn.
+
+## What turns off on a mount
+
+`M.contains(path)` decides whether a path is remote by comparing it with the
+mount directory as a string; it never touches the mount, because a `stat`
+there would be a network round trip. Other modules call it:
+
+| Module | Behaviour on a mount |
+| --- | --- |
+| `plugins/ui/vcs.lua` | No repository context, so no VCS segment, project root, or Git and jj commands |
+| `plugins/ui/gitsigns.lua` | Gitsigns does not attach |
+| `plugins/smart/autoformat.lua` | No format on save; `<leader>cf` still formats on request |
+| `plugins/ui/remote.lua` (Neo-tree) | Git status is off while the working directory is on a mount, updated on every `DirChanged` |
+
+Git status over SSHFS is slow, and a remote site is usually edited in place
+rather than through version control.
+
+## Requirements
+
+`sshfs` and `mosh` are in the `core` tool group. sshfs needs FUSE: NixOS
+provides `fusermount`, while macOS needs macFUSE installed outside Nix. mosh
+also needs `mosh-server` on the host.

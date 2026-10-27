@@ -1,0 +1,110 @@
+---
+title: Neovim
+description: The default editor, with plugins, language servers, formatters, debuggers, and grammars all owned by Nix.
+---
+
+Neovim is the default editor (`EDITOR=nvim`). The module lives in
+[`modules/home/neovim/`](https://github.com/cbrst/nix/tree/main/modules/home/neovim)
+and is imported by the [development profile](/profiles/home/#development),
+so Asgard, Niflheim, and the templates all get the same setup. The same
+definition is also published as the standalone `nvim` and `nvim-lite`
+packages.
+
+## Nix installs, Lua configures
+
+There is no plugin manager such as Lazy.nvim, packer, or Mason, and nothing is
+downloaded when Neovim starts. The work is split in two layers that meet at a
+few well-defined points:
+
+- **Nix** decides what exists: the Neovim binary, every plugin and Tree-sitter
+  grammar, every executable on the editor's `PATH`, and two generated Lua
+  modules that describe the build (the theme palette and the enabled
+  features).
+- **Lua** decides how it behaves. It configures what Nix installed, and reads
+  the generated modules to know what it may set up.
+
+```text
+                         lib/themes.nix        options.nix
+                               │                    │ editor.neovim.features
+                               ▼                    ▼
+ tools.nix ──────────────▶ spec.nix ◀───────── lite.nix (nvim-lite only)
+                               │
+        ┌──────────────────────┼──────────────────────────┐
+        ▼                      ▼                          ▼
+  package               plugins + grammars          extraPackages
+  neovim-unwrapped      incl. init6-palette,        LSP servers, formatters,
+                        init6-features              adapters, claude, …
+        └──────────────┬───────┴──────────────┬───────────┘
+                       ▼                      ▼
+                 default.nix             package.nix
+               programs.neovim        wrapNeovimUnstable
+               ~/.config/nvim ◀─┐  ┌─▶ bundled store path, -u
+                                │  │
+                          configs/ (init.lua, lua/init6/, colors/)
+```
+
+[Packaging](/modules/home/neovim/packaging/) describes the Nix side and
+[Features](/modules/home/neovim/features/) how a host switch travels from
+`options.nix` into the Lua code.
+
+## Where things live
+
+| Path | Role | Page |
+| --- | --- | --- |
+| `spec.nix` | The editor definition: plugins, grammars, tools, generated modules | [Packaging](/modules/home/neovim/packaging/) |
+| `tools.nix` | Executables for `PATH`, in named groups | [Packaging](/modules/home/neovim/packaging/#tool-groups) |
+| `options.nix`, `lite.nix` | `editor.neovim.features` and the `nvim-lite` overrides | [Features](/modules/home/neovim/features/) |
+| `default.nix`, `package.nix` | Home Manager and standalone wrappers | [Packaging](/modules/home/neovim/packaging/#two-wrappers) |
+| `configs/init.lua` | Entry point; fixed start-up sequence | [Start-up](/modules/home/neovim/startup/) |
+| `lua/init6/options.lua`, `keymap.lua`, `autocmds.lua`, `languages/` | Core editor behaviour | [Start-up](/modules/home/neovim/startup/#core-editor) |
+| `lua/init6/config/` | Shared policy: globals, features, LSP tables, theme, UI colours | Several |
+| `lua/init6/plugins/lsp/`, `plugins/smart/` | LSP, completion, formatting, Tree-sitter | [Language tools](/modules/home/neovim/language-tools/) |
+| `lua/init6/plugins/theme/`, `colors/init6.lua` | The `init6` colour scheme and Auto Dark Mode | [Theme](/modules/home/neovim/theme/) |
+| `lua/init6/plugins/ui/` | Statusline, pickers, tree, terminals, dashboard | [Interface](/modules/home/neovim/interface/) |
+| `lua/init6/plugins/ui/vcs.lua`, `gitsigns.lua`, `commit-draft.lua` | Repository detection and Neogit/NeoJJ | [Version control](/modules/home/neovim/vcs/) |
+| `lua/init6/plugins/ui/remote.lua` | SSHFS mounts and remote shells | [Remote hosts](/modules/home/neovim/remote/) |
+| `lua/init6/plugins/debug/` | nvim-dap adapters and mappings | [Debugging](/modules/home/neovim/debugging/) |
+| `lua/init6/plugins/smart/claudecode.lua` | Claude Code integration | [Claude Code](/modules/home/neovim/claude-code/) |
+| `lua/init6/health.lua` | `:checkhealth init6` | [Features](/modules/home/neovim/features/#checkhealth-init6) |
+
+Adding plugins, servers, formatters, or languages, and testing a change before
+activation, are covered in [Extending and validating](/modules/home/neovim/extending/).
+
+## The init6 namespace
+
+The configuration is branded *init6*. All hand-written Lua lives under
+`configs/lua/init6/` and is required as `init6.*`, so it cannot collide with
+plugin modules that use generic names such as `config` or `utils`. Only
+`init.lua` and `colors/init6.lua` sit outside it, because Neovim looks them up
+by fixed paths.
+
+| Name | What it is |
+| --- | --- |
+| `init6.generated.palette`, `init6.generated.features` | Lua modules that Nix generates, shipped as the `init6-palette` and `init6-features` plugins |
+| `:colorscheme init6` | The theme, implemented in `init6.plugins.theme.colorscheme` |
+| `init6-<purpose>` | Every autocommand group the configuration creates |
+| `vim.g.init6_config_dir` | The bundled configuration path in the standalone packages |
+| `vim.g.init6_dim_block_brackets` | Turns the [block-bracket dimming](/modules/home/neovim/interface/#block-brackets) off when `false` |
+| `:checkhealth init6` | The generated modules, the enabled features and languages, and whether the tools they need are on `PATH` |
+
+Inside the namespace, `config/` holds shared editor policy and state,
+`plugins/<group>/` holds plugin setup and orchestration, `languages/` holds
+filetype behaviour, and `utils/` holds generic helpers such as the shared icon
+table. Every plugin group exposes `M.setup()` and is called from an explicit,
+ordered list rather than discovered at run time.
+
+## Shared helpers that tie modules together
+
+A few modules are called from many places; changing them affects more than
+their own feature.
+
+| Helper | Called by |
+| --- | --- |
+| `init6.config.features` | Plugin loader, smart loader, LSP, formatting, Tree-sitter, Heirline, Snacks, dashboard, health |
+| `init6.plugins.ui.vcs` (`context`, `get`, `open`) | Heirline, Telescope project root, dashboard, `<leader>g` mappings, `:Vcs` |
+| `init6.plugins.ui.remote` (`contains`) | VCS context, Gitsigns, Conform format on save, Neo-tree Git status |
+| `init6.plugins.ui.snacks` (`terminal`) | Terminal mappings and the remote shell |
+| `init6.plugins.ui.telescope` (`find_files`, `live_grep`) | Leader mappings and dashboard |
+| `init6.config.theme` (`set_colorscheme`) | `init.lua` and Auto Dark Mode |
+| `init6.config.ui_colors` | Theme application and every Heirline segment |
+| `init6.utils.icons` | Options (fold markers), diagnostics signs, debugger signs, Heirline |

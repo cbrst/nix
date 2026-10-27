@@ -1,0 +1,133 @@
+---
+title: Theme
+description: How the shared palette becomes the init6 colour scheme, and how it is applied, re-applied, and shared with the statusline.
+---
+
+Sources:
+[`plugins/theme/colorscheme/`](https://github.com/cbrst/nix/tree/main/modules/home/neovim/configs/lua/init6/plugins/theme/colorscheme),
+[`colors/init6.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/colors/init6.lua),
+[`config/theme.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/config/theme.lua),
+[`config/ui_colors.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/config/ui_colors.lua).
+
+There are no third-party colour scheme plugins. The `init6` colour scheme
+builds every highlight group from the palettes in `lib/themes.nix`, so Neovim
+follows the same [theme family](/architecture/settings-and-themes/) as the
+terminal, desktop, and browser.
+
+## From palette to highlight groups
+
+```text
+lib/themes.nix  settings.theme.{light, dark, terminal}
+   │  spec.nix: lib.generators.toLua
+   ▼
+init6.generated.palette          (init6-palette plugin)
+   │
+   ▼  colorscheme/init.lua: colors(variant)  ← vim.o.background
+colorscheme/palette.lua: build(p, terminal)
+   │  semantic roles, derived tones, washes, diff colours
+   ▼
+colorscheme/groups/{editor, syntax, treesitter, lsp, plugins, vcs}.lua
+   │  each returns { Group = spec | "LinkTarget" }
+   ▼
+nvim_set_hl for every group, terminal_color_0 … 15
+```
+
+`colors/init6.lua` only calls `init6.plugins.theme.colorscheme.load()`, so
+`:colorscheme init6` works like any other scheme. When the generated palette
+is missing, as in an installed generation built before it existed, `load()`
+warns and falls back to `default`.
+
+### Semantic roles
+
+`palette.build` turns one palette variant into named roles, so the group
+modules never refer to raw slots:
+
+| Kind | Roles | Source |
+| --- | --- | --- |
+| Surfaces | `bg`, `bg_deep`, `bg_raised`, `bg_line`, `bg_strong`, `bg_heavy`, `bg_visual` | `background`, `shade0`–`shade4`, `hover`, `selected` |
+| Text | `fg`, `fg_muted`, `fg_faint`, `comment`, `gutter`, `border` | `foreground`, `muted`, `faint`, `border` |
+| Accents | `accent` … `accent5`, `accent_fg`, `link` | The accent slots |
+| Status | `error`, `warning`, `info`, `hint`, `ok` | Status slots (`hint` is `accent3`) |
+| Syntax | `keyword`, `keyword_control`, `func`, `string`, `number`, `type`, `operator`, `punctuation`, `builtin`, `parameter`, … | `syntax*` slots |
+| Version control | `added`, `removed`, `changed`, and `diff.*` | VCS and `diff*` slots |
+
+Three syntax roles use optional palette slots and fall back when a family lacks
+them: `keyword_control` (`syntaxKeywordControl`, else the keyword colour) for
+control-flow keywords (`@keyword.conditional`, `.repeat`, `.return`,
+`.exception`, `.import`, `.coroutine`); `builtin` (`syntaxBuiltin`) for
+variables such as `self` and `this`; and `parameter` (`syntaxParameter`).
+
+### Derived colours
+
+Colours the palette has no slot for are mixed in Lua with the helpers in
+`colorscheme/color.lua` (`blend`, `luminance`, `darker`, `lighten`, `darken`),
+so every family gets the same highlight structure:
+
+- text tones such as `property`, `module`, `regex`, and `whitespace`, blended
+  between an accent and the foreground or background;
+- washes behind text: search, the current search match, LSP references, and
+  one tint per diagnostic severity (12 % of the colour over the background);
+- inline diff highlights, blended from the palette's `diffHighlight*` slots;
+- `bg_command`, the command-line background, which is the darker of `shade0`
+  and `shade2` (in a dark palette `shade0` is darkest, in a light one it is
+  lightest);
+- `rainbow`, an ordered list of accents for headings, rainbow guides, and graph
+  lanes.
+
+The line number of the cursor line takes the cursor line background.
+
+### Group modules
+
+| Module | Covers |
+| --- | --- |
+| `groups/editor.lua` | Built-in UI groups (`:h highlight-groups`): `Normal`, floats, menus, status and tab lines, search, folds, diff buffers, diagnostics, debugging signs |
+| `groups/syntax.lua` | Legacy Vim syntax groups, including Vim's own Markdown and help syntax |
+| `groups/treesitter.lua` | `@capture` groups, plus `Init6BlockBracket` (the indent-guide shade) |
+| `groups/lsp.lua` | Semantic tokens and LSP references |
+| `groups/plugins.lua` | Completion and symbol kinds, Blink, Telescope, Neo-tree, which-key, Snacks, Mini, Gitsigns, DAP, render-markdown, Trouble, Outline, Dropbar, Overseer, todo-comments, diffs.nvim, and Claude Code's inline diff |
+| `groups/vcs.lua` | Neogit and NeoJJ status buffers, which would otherwise derive their colours from unrelated syntax groups |
+
+A string value links to another group. Plugins that derive their colours from
+base groups on `ColorScheme` (Gitsigns, diffs.nvim, Dropbar, todo-comments)
+are only overridden where that derivation needs a better anchor. A new plugin
+with its own highlight groups gets entries in `groups/plugins.lua`, never a
+separate colour scheme.
+
+## Applying the theme
+
+`config/theme.set_colorscheme(variant)` is the only way the theme is applied:
+
+1. Set `background` to the variant (or keep the current one).
+2. `:colorscheme init6`, which clears all highlights and defines the groups
+   above.
+3. `heirline.utils.on_colorscheme()`, because clearing removed the groups
+   Heirline generated for its segments.
+4. `config/ui_colors.apply()`, which reapplies the shared surfaces (below).
+
+`init.lua` calls it once, after every plugin has been set up. Auto Dark Mode
+(`plugins/theme/auto-dark-mode.lua`) calls it again with `"dark"` or `"light"`
+whenever the system appearance changes. The Lua configuration only ever picks
+the variant; the colours themselves come from Nix.
+
+## Shared UI colours
+
+`config/ui_colors.lua` is the bridge between the colour scheme and the
+statusline. `get()` reads back resolved groups (`Normal`, `StatusLine`,
+`StatusLineNC`, `Comment`, `Visual`, `NormalFloat`, `MsgArea`) and returns a
+small table (`bar`, `inactive`, `fg`, `muted`, `tab`, `editor`, `context`,
+`command`). Heirline evaluates it for every segment, so the statusline always
+matches the current variant without a palette lookup of its own.
+
+`apply()` then overrides a few groups that plugins would otherwise reset or
+draw differently:
+
+- `StatusLine` / `StatusLineNC` from those colours, and `WinBar` / `WinBarNC`
+  on the editor background, so Dropbar sits flush with the buffer.
+- Dropbar's current-context groups keep their foreground cue but drop the
+  `Visual` background, and folder icons drop the `Directory` background.
+- `MsgArea` uses muted text on the command-line background.
+- `NeoTreeDirectoryName` links to `NeoTreeFileName`.
+
+The mode badge at the left of the statusline is the exception: its colours are
+fixed hex values in `plugins/ui/heirline.lua`, not palette roles, so they do
+not change with the theme family.

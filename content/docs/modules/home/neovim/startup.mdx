@@ -1,0 +1,133 @@
+---
+title: Start-up and core editor
+description: The fixed start-up sequence, the core options, mappings, and autocommands, and why plugins load in the order they do.
+---
+
+Sources:
+[`init.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/init.lua),
+[`options.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/options.lua),
+[`keymap.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/keymap.lua),
+[`autocmds.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/autocmds.lua),
+[`plugins/init.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/init.lua).
+
+Start-up is eager: every plugin is loaded and configured on launch, in an
+explicit order, with no lazy-loading layer.
+
+```text
+init6.config.globals.setup()      leaders and capability flags
+init6.options                     editor options
+init6.keymap                      global mappings
+init6.autocmds                    yank highlight, status column, terminals
+init6.languages.setup()           filetype behaviour
+init6.plugins.setup()             explicit, ordered plugin groups
+init6.config.theme.set_colorscheme()
+```
+
+The colour scheme is applied last because applying one clears highlight
+groups, including the ones Heirline and other UI plugins generate during their
+setup; see [Theme](/modules/home/neovim/theme/#applying-the-theme).
+
+## Core editor
+
+### Globals
+
+`config/globals.lua` sets the leader to `Space` and the local leader to `,`
+before anything creates a mapping, and sets `vim.g.have_nerd_font = true`.
+Which-key, Dropbar, and Mini Icons read that flag to choose glyphs over ASCII.
+
+### Options
+
+| Area | Behaviour |
+| --- | --- |
+| Line numbers | Absolute and relative; `<leader>tl` toggles relative numbers |
+| Status column | `%s%=<number> %C`: signs, the line number, then the fold column; only in editing buffers (see below) |
+| Folding | `foldmethod=expr` with `vim.treesitter.foldexpr()`, `foldtext=""` (the first line keeps its highlighting), all folds open (`foldlevel=99`), at most four levels, fold arrows from the shared icon table |
+| Indentation | Tabs (`expandtab=false`), width 2, `smartindent`, `breakindent`; vim-sleuth adapts to each file |
+| Clipboard | `unnamedplus`, set in `vim.schedule` so the clipboard provider does not slow start-up |
+| Search | `ignorecase` with `smartcase`; `inccommand=split` previews `:s` live |
+| Windows | New splits open right and below; one global statusline (`laststatus=3`); rounded borders on every float (`winborder`) |
+| Timing | `updatetime=250` (CursorHold, used by LSP document highlights), `timeoutlen=300` (which-key appears sooner) |
+| Misc | `undofile`, `scrolloff=10`, `cursorline`, `conceallevel=2`, `mouse=a`, `showmode` off (the statusline shows the mode), `termguicolors` |
+| Project config | `exrc` is on, so a trusted `.nvim.lua` in a project runs at start-up |
+
+`exrc` is the per-project switch for several features in this configuration,
+for example `vim.g.disable_autoformat = true` to stop format on save in a
+shared repository, or `vim.g.init6_dim_block_brackets = false`. Neovim asks
+before trusting a new or changed `.nvim.lua`.
+
+### Mappings
+
+| Mapping | Mode | Action |
+| --- | --- | --- |
+| `<Esc>` | Normal | Clear search highlighting |
+| `<Esc><Esc>` | Terminal | Leave terminal mode |
+| `<C-h>` `<C-j>` `<C-k>` `<C-l>` | Normal | Move to the window left, below, above, or right |
+| `<M-j>`, `<M-k>` | Normal, visual, insert | Move the line or selection down or up and reindent it |
+| `<C-CR>` | Insert | Open a new line below without splitting the current one |
+| `<leader>w` | Normal | `<C-w>`, so every window command follows the leader |
+| `<leader>qq` | Normal | Quit all |
+| `<leader>cq` | Normal | Diagnostics to the location list |
+| `<leader>tv` | Normal | Toggle visible whitespace (`list`) |
+
+`<M-j>`/`<M-k>` reindent with `==` in normal mode, reindent and reselect in
+visual mode, and in insert mode leave insert mode, move the line, and return
+with `gi`.
+
+### Autocommands
+
+| Group | Trigger | Behaviour |
+| --- | --- | --- |
+| `init6-highlight-yank` | `TextYankPost` | Briefly highlight yanked text |
+| `init6-statuscolumn` | `BufWinEnter`, `FileType`, `TermOpen` | Use the custom status column only for normal file buffers (`buftype=""`); terminals, pickers, and sidebars get none |
+| `init6-terminal` | `TermOpen` | Disable mini.animate and `cursorline` in terminal buffers; TUIs such as Claude Code move the cursor on nearly every line of output, and animating that made typing lag |
+
+### Filetype behaviour
+
+`languages/init.lua` calls each filetype module explicitly:
+
+- `languages/lua.lua`: two-column indentation for Lua.
+- `languages/markdown.lua`: soft wrapping with `linebreak` and
+  `breakindent`, no hard wrap (`textwidth=0`), and `conceallevel=2` for
+  render-markdown.
+
+New filetype behaviour gets its own module there and a line in
+`languages/init.lua`.
+
+## Plugin load order
+
+`init6.plugins.setup()` runs these groups in order:
+
+```text
+todo-comments                     (no signs)
+init6.plugins.theme               Auto Dark Mode
+init6.plugins.ui                  render-markdown, Dropbar, block brackets
+init6.plugins.ui.mini
+init6.plugins.ui.neo-tree
+init6.plugins.ui.vcs              diffs.nvim globals, Neogit, NeoJJ, commit drafts
+init6.plugins.ui.heirline
+init6.plugins.ui.telescope
+init6.plugins.ui.remote
+init6.plugins.ui.which-key
+init6.plugins.ui.snacks           dashboard, input, picker, terminals, dim
+init6.plugins.ui.outline
+init6.plugins.ui.nvim-highlight-colors
+init6.plugins.ui.gitsigns
+init6.plugins.debug               only with features.debug
+init6.plugins.smart               Blink, Tree-sitter, Conform, Claude Code, codedocs
+init6.plugins.lsp                 LazyDev, Fidget, vtsls, Trouble, servers
+init6.plugins.integrations        Overseer
+```
+
+The order encodes these dependencies:
+
+| Constraint | Why |
+| --- | --- |
+| Leaders before any group | Mappings capture `<leader>` when they are created |
+| Mini before consumers of icons | `MiniIcons.mock_nvim_web_devicons()` provides the `nvim-web-devicons` API that Telescope, Neo-tree, and others call |
+| VCS before Heirline | Heirline's VCS segment calls `init6.plugins.ui.vcs`; the diffs.nvim configuration (`vim.g.diffs`) must also exist before Vim sources that plugin's runtime files |
+| Telescope before remote | remote-sshfs registers a Telescope extension and uses Telescope as its picker |
+| Smart before LSP | `plugins/lsp` asks Blink for completion capabilities, so Blink must already be set up. LazyDev is set up at the start of `plugins/lsp`, before the servers start and before Blink first loads its `lazydev` source while completing |
+| Theme last (in `init.lua`) | Applying the colour scheme clears plugin-defined groups; it then rebuilds Heirline's and reapplies the shared UI colours |
+
+Within each group, modules use explicit `require` calls rather than directory
+scans, so the order is visible in the source.

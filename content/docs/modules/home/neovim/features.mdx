@@ -1,0 +1,136 @@
+---
+title: Features
+description: Per-host switches that trim the editor, and how each one reaches the Nix closure and the Lua configuration.
+---
+
+Sources:
+[`options.nix`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/options.nix),
+[`lite.nix`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/lite.nix),
+[`config/features.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/config/features.lua),
+[`health.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/health.lua).
+
+`editor.neovim.features`, declared in `options.nix`, trims the editor per host.
+Everything is on by default, so a host that sets nothing gets the full editor.
+
+| Option | Default | When disabled |
+| --- | --- | --- |
+| `ai.enable` | `true` | No claudecode.nvim or Claude CLI, and no Claude statusline segment, dashboard key, or `<a-o>` picker action |
+| `debug.enable` | `true` | No nvim-dap, DAP UI, virtual text, nvim-nio, one-small-step-for-vimkind, or debug adapters; `plugins/debug/` is not loaded |
+| `grammars` | `"all"` | A list of names from `vimPlugins.nvim-treesitter.builtGrammars` installs only those parsers |
+| `languages.<name>.enable` | `true` | No tools from that language group and no LSP or Conform setup for it; `web` also drops nvim-vtsls and nvim-ts-autotag |
+
+The languages are `lua`, `markdown`, `nix`, `php`, `python`, `shell`, `web`, and
+`yaml`. A host sets them like any Home Manager option:
+
+```nix
+# hosts/home/niflheim.nix
+editor.neovim.features = {
+  debug.enable = false;
+  languages.php.enable = false;
+};
+```
+
+## From option to editor
+
+One switch takes this path:
+
+```text
+options.nix            typed option, default true
+   │
+   ▼  (Home Manager config, or lib.evalModules in package.nix)
+spec.nix               ├─ plugins:        lib.optional(s) per feature
+                       ├─ extraPackages:  matching tools.nix groups
+                       └─ init6-features: generated Lua table
+   │
+   ▼
+init6.generated.features   { ai = …, debug = …, languages = { lua = …, … } }
+   │
+   ▼
+init6.config.features      features.ai, features.debug, features.language(name)
+   │
+   ▼
+every Lua consumer checks it before it requires a plugin or expects a tool
+```
+
+Nix removes the plugins and executables; Lua must then not set them up, or
+start-up fails on a missing `require` or warns about missing tools. Without the
+generated module, as in an older installed generation or a checkout tested
+against one, `init6.config.features` treats everything as enabled, matching the
+option defaults.
+
+### Who reads which flag
+
+| Flag | Consumer | Effect when off |
+| --- | --- | --- |
+| `features.debug` | `plugins/init.lua` | `init6.plugins.debug` is never required |
+| `features.ai` | `plugins/smart/init.lua` | claudecode.nvim is not set up and its mappings do not exist |
+| `features.ai` | `plugins/ui/heirline.lua` | The Claude statusline segment is never shown |
+| `features.ai` | `plugins/ui/snacks.lua` | The `<a-o>` "send to Claude" picker key and action are not registered |
+| `features.ai` | `plugins/ui/dashboard.lua` | The `c` entry is hidden (it also needs `claude` on `PATH`) |
+| `features.language(name)` | `plugins/lsp/init.lua` | Servers mapped to that language in `server_languages` are skipped |
+| `features.language(name)` | `plugins/smart/autoformat.lua` | Filetypes mapped to that language in `filetype_languages` get no Conform entry |
+| `features.language("web")` | `plugins/lsp/init.lua`, `plugins/smart/treesitter.lua` | nvim-vtsls mappings and nvim-ts-autotag are not set up |
+| all | `health.lua` | Disabled parts are reported as information, not errors |
+
+Grammars need no Lua check: Tree-sitter start-up already tolerates a missing
+parser, and those filetypes fall back to regex syntax highlighting.
+
+### Language maps
+
+Two Lua tables tie configuration to `tools.nix` groups:
+
+- `server_languages` in `plugins/lsp/init.lua` maps each server in
+  `config/lsp_servers.lua` to its group, for example `vtsls = "web"` and
+  `zshcs = "shell"`. A server without an entry is always attempted.
+- `filetype_languages` in `plugins/smart/autoformat.lua` maps each formatted
+  filetype to its group, for example `toml = "web"` (oxfmt formats TOML) and
+  `zsh = "shell"`.
+
+Servers and formatters of a disabled language are skipped quietly. Only an
+*enabled* language whose server is not on `PATH` produces the
+"Missing Home Manager LSP tools" warning, which then points at a real
+packaging problem and refers to `:checkhealth init6`.
+
+## Validation
+
+Mistakes fail evaluation instead of producing a half-working editor:
+
+- unknown option names and wrong types (module system);
+- grammar names missing from `builtGrammars` (`spec.nix` throws);
+- language lists that differ between `options.nix` and `tools.nix`
+  (`spec.nix` compares the attribute names with `lib.throwIfNot`), because a
+  toggle without a tool group would silently do nothing.
+
+## nvim-lite
+
+`lite.nix` is an attribute set in the same shape as the option. `flake.nix`
+passes it as `features` to `package.nix`:
+
+- `ai.enable = false`: the Claude CLI is large and the standalone package
+  cannot use the Home Manager-configured one anyway.
+- `debug.enable = false`: the adapters and their Node-based wrappers.
+- `languages.{php,python,web}.enable = false`: configuration editing keeps
+  Lua, Markdown, Nix, shell, and YAML.
+- `grammars`: 24 names for configuration, scripting, and VCS files (`bash`,
+  `diff`, `git_config`, `git_rebase`, `gitcommit`, `jjdescription`, `json`,
+  `lua`, `markdown`, `nix`, `toml`, `vim`, `yaml`, `zsh`, and their helpers).
+  Grammars that Neovim already bundles are listed too, so the nvim-treesitter
+  queries match the parsers.
+
+A new variant is one attribute set and one line in `flake.nix`.
+
+## :checkhealth init6
+
+`init6.health` reports what Nix installed:
+
+1. **Generated modules**: whether `init6.generated.palette` and
+   `init6.generated.features` load, and the configuration directory in use.
+2. **Features**: `ai`, `debug`, and every language family (taken from
+   `server_languages`).
+3. **Tools**: the `core` executables; `claude` when AI is on; the four debug
+   adapters (`debugpy-adapter`, `js-debug`, `bash-debug-adapter`,
+   `local-lua-debug-adapter`) when debugging is on; and every configured LSP
+   server's resolved command, skipping servers of disabled languages.
+
+A missing executable for an enabled feature is an error; anything disabled is
+informational.

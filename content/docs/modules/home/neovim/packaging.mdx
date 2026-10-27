@@ -1,0 +1,204 @@
+---
+title: Packaging
+description: How spec.nix defines the editor once and two wrappers turn it into the Home Manager editor and the standalone packages.
+---
+
+Sources:
+[`spec.nix`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/spec.nix),
+[`tools.nix`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/tools.nix),
+[`default.nix`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/default.nix),
+[`package.nix`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/package.nix).
+
+## The editor definition
+
+`spec.nix` is a plain function, not a Home Manager module:
+
+```nix
+import ./spec.nix {
+  inherit pkgs lib inputs settings features;
+  claudeCode = <package>;
+}
+# => { package; extraPackages; plugins; configDir; }
+```
+
+Because it never reads Home Manager's `config`, both wrappers can call it.
+Values that only exist under Home Manager are passed in as arguments:
+`claudeCode` is `programs.claude-code.finalPackage` under Home Manager and
+plain `pkgs.claude-code` in the standalone packages. Of `settings`, only
+`settings.theme` is read.
+
+| Output | Contents |
+| --- | --- |
+| `package` | `neovim-unwrapped`; each wrapper creates the final wrapped editor |
+| `plugins` | Every plugin and the Tree-sitter grammars, including local derivations; feature plugins are appended with `lib.optional(s)` |
+| `extraPackages` | `tools.core`, `tools.runtimes`, `tools.debug` if enabled, the enabled language groups, the Claude CLI if AI is enabled, and the `dashboard-pokemon` script; passed through `lib.unique` |
+| `configDir` | `./configs` as a Nix path: `init.lua`, `lua/`, `colors/`, and `oxfmtrc.json` |
+
+### Local derivations
+
+Some plugins are not in the pinned nixpkgs, or need changes, so `spec.nix`
+builds them in its `let` block:
+
+| Derivation | What it is |
+| --- | --- |
+| `init6-palette` | `lua/init6/generated/palette.lua`, written with `lib.generators.toLua` from `settings.theme.{light,dark,terminal}`; see [Theme](/modules/home/neovim/theme/) |
+| `init6-features` | `lua/init6/generated/features.lua` with `ai`, `debug`, and a `languages` table of booleans; see [Features](/modules/home/neovim/features/) |
+| `neojj` | NeoJJ pinned to a commit, with `plenary-nvim` as a dependency; the optional Diffview integration module is skipped by the require check because it is not used |
+| `codedocs` | codedocs.nvim 0.6.0 |
+| `neotree-file-nesting-config` | The Neo-tree nesting rules, pinned to a commit |
+| `dashboard-pokemon` | `scripts/dashboard-pokemon` wrapped by `writeShellApplication` with `gnused` and `pokemon-colorscripts` |
+| SCSS grammar | The nixpkgs grammar with `patches/tree-sitter-scss-namespaces.patch`, regenerated with `tree-sitter generate` so it parses namespaced mixins and function calls (`@include ns.mixin`, `ns.fn()`); its queries are copied from the stock grammar |
+
+The generated modules are separate plugins rather than files in `configs/`
+because their contents depend on the host. Shipping them as plugins puts them
+on the runtime path of both wrappers without either wrapper knowing about them.
+
+### Grammar selection
+
+`features.grammars` is either `"all"` or a list of names. With `"all"`,
+`nvim-treesitter.allGrammars` is used; with a list, each name is looked up in
+`nvim-treesitter.builtGrammars` and an unknown name throws during evaluation.
+Either way the selected set is mapped once more to swap in the patched SCSS
+grammar, and passed to `nvim-treesitter.withPlugins`.
+
+## Tool groups
+
+`tools.nix` returns named package lists instead of one flat list, so `spec.nix`
+can select them by feature:
+
+| Group | Contents | Included |
+| --- | --- | --- |
+| `core` | `file`, `man-db`, `mosh`, `ripgrep`, `sshfs`, `tree-sitter` | Always |
+| `runtimes` | Bash, Lua, Node.js, Python 3, Zsh | Always |
+| `debug` | bashdb with the Bash Debug adapter, the local Lua debug adapter, debugpy, js-debug | `debug.enable` |
+| `languages.lua` | lua-language-server, StyLua | `languages.lua.enable` |
+| `languages.markdown` | mdsf, rumdl | `languages.markdown.enable` |
+| `languages.nix` | nil, nixd | `languages.nix.enable` |
+| `languages.php` | js-beautify (`html-beautify`), Mago, Phpactor | `languages.php.enable` |
+| `languages.python` | Ruff, Zuban | `languages.python.enable` |
+| `languages.shell` | bash-language-server, Shellharden, shfmt, zshcs | `languages.shell.enable` |
+| `languages.web` | Emmet, oxfmt, oxlint, the `oxlint-unused-imports` script, Some Sass, vtsls, vscode-langservers-extracted | `languages.web.enable` |
+| `languages.yaml` | yaml-language-server, yamlfmt | `languages.yaml.enable` |
+
+Interpreters sit in `runtimes` rather than `debug` because debug launches,
+Overseer tasks, terminals, and language tooling all use them, so they stay
+when debugging is disabled.
+
+`tools.nix` also builds three small scripts:
+
+- `bash-debug-adapter` and `local-lua-debug-adapter` run the debug adapters
+  from the VS Code extensions `rogalmic.bash-debug` and
+  `tomblind.local-lua-debugger-vscode` with Node.js.
+- `oxlint-unused-imports` runs
+  `oxlint --fix-suggestions -A all -D no-unused-vars` on one file up to three
+  times, stopping as soon as the file's checksum no longer changes. See
+  [Formatting](/modules/home/neovim/language-tools/#formatting).
+
+A package may appear in several language groups; `lib.unique` removes the
+duplicates. No two distinct packages ship a command with the same name, so
+group order never changes which executable a command resolves to.
+
+The Lua side names these executables in three places:
+`config/lsp_servers.lua` (server commands), `plugins/smart/autoformat.lua`
+(Conform formatters), and `plugins/debug/init.lua` (adapters).
+`:checkhealth init6` checks the same names.
+
+## Two wrappers
+
+| | `default.nix` (Home Manager) | `package.nix` (standalone) |
+| --- | --- | --- |
+| Wrapper | `programs.neovim` | `pkgs.wrapNeovimUnstable` |
+| Features | `config.editor.neovim.features`, set per host | `lib.evalModules` over `options.nix` and a `features` argument |
+| Claude Code | `programs.claude-code.finalPackage` | `pkgs.claude-code` |
+| `PATH` | `extraPackages` (appended) | `--suffix PATH` with the same packages |
+| Configuration | Linked into `~/.config/nvim` | One store path, loaded through `-u` |
+| Language providers | Python and Ruby off | Python and Ruby off |
+| `NVIM_APPNAME` | Unset (`nvim`) | Defaults to `init6` |
+
+### Home Manager
+
+`default.nix` imports `options.nix`, calls `spec.nix`, and passes `package`,
+`plugins`, and `extraPackages` to `programs.neovim`, which also sets
+`defaultEditor`. The configuration is linked with `xdg.configFile`:
+
+```nix
+xdg.configFile."nvim/init.lua".source = spec.configDir + "/init.lua";
+xdg.configFile."nvim/lua".source      = spec.configDir + "/lua";
+xdg.configFile."nvim/colors".source   = spec.configDir + "/colors";
+xdg.configFile."nvim/oxfmtrc.json".source = spec.configDir + "/oxfmtrc.json";
+```
+
+`configDir + "/lua"` keeps each linked entry as its own store path. Writing
+`"${spec.configDir}/lua"` instead would copy the whole `configs/` directory into
+the store as one path and change every link whenever any file changes.
+
+It also writes two global fallback files. A project's own configuration always
+takes precedence.
+
+- `~/.config/mago.toml`: PHP formatting with two-space tabs and double quotes.
+- `~/.config/rumdl/rumdl.toml`: Markdown lines are reflowed to 80 characters,
+  except code blocks, tables, headings, and math.
+
+### Standalone
+
+`package.nix` evaluates `options.nix` on its own:
+
+```nix
+resolvedFeatures = (lib.evalModules {
+  modules = [ ./options.nix { editor.neovim.features = features; } ];
+}).config.editor.neovim.features;
+```
+
+so the packages get the same defaults and type errors as a Home Manager host.
+Here the configuration directory *is* interpolated on purpose: the generated
+init file needs it as one store path. The wrapper's `luaRcContent`, which
+`wrapNeovimUnstable` loads through `-u`, does four things:
+
+1. Creates `stdpath("data")`. Home Manager always creates it; on a fresh
+   machine it is missing and Neo-tree warns on every start when it cannot open
+   its log there.
+2. Sets `vim.g.init6_config_dir` to the bundled configuration.
+3. Prepends that directory to `runtimepath`, so `require("init6.…")` and
+   `colors/init6.lua` resolve.
+4. Runs its `init.lua` with `dofile`.
+
+Lua that needs the configuration directory therefore uses
+`vim.g.init6_config_dir or vim.fn.stdpath("config")`: the Telescope
+"find file in Neovim config" mapping (`<leader>fp`) and the oxfmt fallback both
+do.
+
+## Standalone editor
+
+The flake publishes the editor as two packages for `x86_64-linux` and
+`aarch64-darwin`. They run on any machine with Nix, without Home Manager.
+
+| Package | Features | Closure |
+| --- | --- | --- |
+| `nvim` | The defaults: everything | About 4.6 GiB |
+| `nvim-lite` | Overrides from `lite.nix`: no AI or debugging, no PHP, Python, or web tooling, and 24 grammars for configuration, scripting, and VCS files | About 2.1 GiB |
+
+```bash
+nix run .#nvim -- file.txt                      # from a checkout
+nix run github:cbrst/nix#nvim-lite -- file.txt  # from anywhere
+nix profile install github:cbrst/nix#nvim       # keep it installed
+```
+
+How they differ from the Home Manager editor:
+
+- The bundled configuration is loaded through `-u`; `~/.config/nvim` is never
+  read, so a machine's own Neovim configuration is unaffected.
+- `NVIM_APPNAME` defaults to `init6`, so shada, undo, swap, and state live
+  under `~/.local/state/init6` and `~/.local/share/init6`, apart from any other
+  Neovim. `nvim` and `nvim-lite` share them. The wrapper uses
+  `--set-default`, so setting the variable overrides it.
+- Theme and fonts come from the flake's `defaultSettings`, not a host's
+  overrides. The terminal must still provide a Nerd Font.
+- Claude Code (full `nvim` only) is plain `pkgs.claude-code`, without the
+  plugins, skills, and settings from the [AI module](/modules/home/ai/); the
+  CLI uses whatever `~/.claude` the machine has.
+- The Mago and rumdl fallback files are Home Manager files and are not written.
+
+Most of the closure comes from `cache.nixos.org`. The local derivations above
+are built locally unless a cache has them. In `nvim-lite`, about 1.3 GiB of the
+2.1 GiB is `zshcs`, whose output keeps a reference to the Rust toolchain it was
+built with.

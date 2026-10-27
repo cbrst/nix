@@ -1,0 +1,17 @@
+{
+  "title": "Neovim",
+  "pages": [
+    "index",
+    "packaging",
+    "features",
+    "startup",
+    "language-tools",
+    "theme",
+    "interface",
+    "vcs",
+    "remote",
+    "debugging",
+    "claude-code",
+    "extending"
+  ]
+}

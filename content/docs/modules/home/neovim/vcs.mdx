@@ -1,0 +1,155 @@
+---
+title: Version control
+description: How the editor finds a Git or jj repository, keeps statusline counters fresh, and routes the shared mappings to Neogit or NeoJJ.
+---
+
+Sources:
+[`plugins/ui/vcs.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/ui/vcs.lua),
+[`plugins/ui/gitsigns.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/ui/gitsigns.lua),
+[`plugins/ui/commit-draft.lua`](https://github.com/cbrst/nix/blob/main/modules/home/neovim/configs/lua/init6/plugins/ui/commit-draft.lua).
+
+Repository actions use **NeoJJ** in a jj repository and **Neogit** in a plain
+Git repository, behind one set of mappings. `plugins/ui/vcs.lua` is the layer
+in between; Heirline, Telescope, and the dashboard call it too. The shell
+tools for version control are described in [VCS](/modules/home/vcs/).
+
+## Finding the repository
+
+`context(bufnr)` returns the repository root and its kind (`"jj"` or `"git"`)
+for a buffer:
+
+1. Paths on an [SSHFS mount](/modules/home/neovim/remote/) return nothing, so
+   no Git or jj command ever runs over the network.
+2. `vim.fs.root` finds the nearest directory with `.jj` and the nearest with
+   `.git`.
+3. The nearer one wins (the longer path). When both are the same directory,
+   as in a colocated repository, jj wins.
+
+So a plain Git checkout nested inside a jj repository is treated as Git, and a
+colocated repository is treated as jj.
+
+| Caller | Uses |
+| --- | --- |
+| Heirline VCS segment | `get()` for cached state; click calls `open()` |
+| Telescope `<leader><leader>`, `<leader>/`, `<leader>*` | `context()` as the project root |
+| Dashboard `g` and `s` | `context()` for the search root and the status label |
+| `<leader>g` mappings, `:Vcs` | `open()` |
+
+## Statusline state
+
+`get(bufnr)` returns a cached record per repository root. The first request
+for a root starts a refresh in the background; until it finishes, the segment
+shows nothing.
+
+A refresh runs one command with `vim.system` from the repository root:
+
+| Kind | Command | Result |
+| --- | --- | --- |
+| jj | `jj log -r @ --no-graph` with a template that prints the local bookmarks, the shortest change ID split into its unique prefix and the rest, then `diff.git(0)` | Bookmarks, change ID, and the diff of the working-copy commit `@` |
+| Git | `git diff --no-ext-diff --no-color --unified=0` | Unstaged changes to tracked files |
+
+The hunk headers of that zero-context diff are counted: in each hunk the
+smaller of the old and new line counts is "changed", and the remainder is
+"added" or "removed". The segment shows the non-zero counts as
+`+added ~changed -removed`. For jj it also shows
+`bookmarks@prefix` with the rest of the change ID dimmed; for Git it shows the
+branch name, which comes from Gitsigns' buffer status rather than an extra
+command.
+
+A refresh for a root that is already running is skipped. Refreshes start on:
+
+- `BufEnter`, `BufWritePost`, `FocusGained`, and `ShellCmdPost` (for the
+  current buffer's repository);
+- Neogit and NeoJJ events after a status refresh, commit, push, pull, fetch,
+  rebase, or squash (for every cached repository).
+
+When a refresh completes, `redrawstatus` updates the statusline.
+
+## Dispatching actions
+
+`open(bufnr, action)` resolves the repository again and calls
+`require("neojj").open` or `require("neogit").open` with `cwd` set to its
+root. Every action except `status` passes the backend's popup name:
+
+| Mapping | `:Vcs` action | Neogit | NeoJJ |
+| --- | --- | --- | --- |
+| `<leader>gg` | `status` | Status | Status |
+| `<leader>gc` | `commit` | Commit | Commit |
+| `<leader>gd` | `diff` | Diff | Diff |
+| `<leader>gf` | `fetch` | Fetch | Fetch |
+| `<leader>gl` | `log` | Log | Log |
+| `<leader>gp` | `push` | Push | Push |
+| `<leader>gr` | `rebase` | Rebase | Rebase |
+| `<leader>gm` | `remote` | Remotes | Remotes |
+| `<leader>gb` | `branch` | Branches | Bookmarks |
+| `<leader>gw` | `worktree` | Worktrees | Workspaces |
+
+`:Vcs` without an argument opens the status; arguments complete on the action
+names. Outside a repository it warns instead.
+
+Neogit and NeoJJ share one configuration: the status opens in a new tab,
+popups open in a split, their own Tree-sitter and word-diff highlighting are
+off (diffs.nvim does that), the Snacks integration is on, and the Telescope,
+Diffview, and codediff integrations are off. Inside either status interface the
+common popup keys are `c`, `d`, `f`, `l`, `m`, `p`, and `r`; Neogit's mappings
+are adjusted so `m` is remotes and `p` push, with pull and merge on `P` and
+`M`.
+
+## Gitsigns
+
+`plugins/ui/gitsigns.lua` shows thin bar signs for changed lines and adds
+buffer-local mappings. It does not attach to files on an SSHFS mount.
+
+| Mapping | Action |
+| --- | --- |
+| `]c`, `[c` | Next or previous hunk (native diff navigation in diff mode) |
+| `<leader>ghs` | Stage hunk (or the selected lines in visual mode) |
+| `<leader>ghr` | Revert hunk (or the selected lines) |
+| `<leader>ghS` | Stage buffer |
+| `<leader>ghu` | Undo stage hunk |
+| `<leader>ghR` | Revert buffer |
+| `<leader>ghp` | Preview hunk |
+| `<leader>ghb` | Blame line |
+| `<leader>ghd` | Diff against the index |
+| `<leader>ghD` | Diff against the last commit |
+| `<leader>tb` | Toggle current-line blame |
+| `<leader>tD` | Toggle deleted lines |
+
+Gitsigns is Git-only; in a colocated jj repository it still compares against
+Git's index.
+
+## diffs.nvim
+
+`vim.g.diffs` is set inside `vcs.setup()`, before Vim sources the plugin's
+runtime files. It enables syntax-aware and intra-line highlighting in Neogit,
+NeoJJ, Gitsigns previews, and Telescope previews, and highlights conflict
+markers. Its own `:Diff` command only understands Git objects, so the portable
+entry point is `<leader>gd` or `:Vcs diff`.
+
+## Commit message drafts
+
+`plugins/ui/commit-draft.lua` fills empty jj descriptions opened from NeoJJ
+with a draft from Claude Code. It exists because NeoJJ sets `JJ_EDITOR`, which
+bypasses the `jj-commit-editor` wrapper that drafts messages on the command
+line.
+
+```text
+FileType jjdescription
+   │  once per buffer
+   ├─ description already written?          ── stop
+   ├─ no diff below "JJ: ignore-rest"?      ── stop
+   ▼
+claude-commit-draft  (diff on stdin, asynchronously)
+   │
+   ├─ error or empty output                 ── warning notification
+   ├─ description edited in the meantime    ── draft discarded
+   ▼
+draft replaces the blank lines above the JJ: footer
+```
+
+The autocommand is registered only when `claude-commit-draft` is on `PATH`
+(installed by the [VCS module](/modules/home/vcs/)) and
+`CLAUDE_COMMIT_DRAFT_DONE` is unset; `jj-commit-editor` sets that variable when
+it has already drafted before starting Neovim. See
+[Commit message drafting](/workflows/commit-messages/#in-neovim) for the
+generator and the message style.
