@@ -30,6 +30,64 @@ local function disconnect()
 	end
 end
 
+-- Tries mosh and falls back to ssh when mosh cannot start a session, as when
+-- mosh-server is missing on the host or the UDP ports are blocked. mosh-client
+-- exits 0 when the remote shell ends, so a normal logout does not fall back.
+local mosh_or_ssh = [[
+mosh -- "$1" || {
+	printf '\n[init6] mosh failed (exit %s); falling back to ssh.\n\n' "$?"
+	exec ssh -- "$1"
+}]]
+
+local function open_shell(host)
+	local cmd
+	if vim.fn.executable("mosh") == 1 then
+		cmd = { "sh", "-c", mosh_or_ssh, "sh", host }
+	else
+		vim.notify("mosh is not on PATH; using ssh", vim.log.levels.WARN)
+		cmd = { "ssh", "--", host }
+	end
+	-- The terminal starts in the home directory: a working directory on a stale
+	-- mount would block the spawn. Toggling with the same command reuses it.
+	require("snacks").terminal.toggle(cmd, {
+		cwd = vim.fn.expand("~"),
+		win = { position = "right" },
+	})
+end
+
+-- The host of the current connection, or else the one whose mount holds the
+-- working directory.
+local function current_host()
+	local host = require("remote-sshfs.connections").get_current_host()
+	if host then
+		return host.Name
+	end
+	local cwd = vim.fs.normalize(vim.fn.getcwd())
+	if M.contains(cwd) then
+		return cwd:sub(#M.mount_dir + 1):match("^[^/]+")
+	end
+end
+
+local function shell()
+	local host = current_host()
+	if host then
+		return open_shell(host)
+	end
+	local names = {}
+	for name in pairs(require("remote-sshfs.connections").list_hosts()) do
+		-- Skip patterns such as `*` or `*.example.com`; they are not hosts.
+		if not name:find("[*?!]") then
+			table.insert(names, name)
+		end
+	end
+	table.sort(names)
+	vim.ui.select(names, { prompt = "Shell on host" }, function(name)
+		if name then
+			open_shell(name)
+		end
+	end)
+end
+
 function M.setup()
 	require("remote-sshfs").setup({
 		connections = {
@@ -83,6 +141,8 @@ function M.setup()
 	vim.keymap.set("n", "<leader>Rc", api.connect, { desc = "Connect to host" })
 	vim.keymap.set("n", "<leader>Rd", disconnect, { desc = "Disconnect" })
 	vim.keymap.set("n", "<leader>Re", api.edit, { desc = "Edit SSH config" })
+	-- mosh, else ssh, to the connected host (or a chosen one) in a terminal.
+	vim.keymap.set("n", "<leader>Rs", shell, { desc = "Shell on host" })
 	-- Run find and grep on the host instead of through the mount; they need
 	-- rg (or fd/find) there.
 	vim.keymap.set("n", "<leader>Rf", api.find_files, { desc = "Find files on host" })

@@ -494,6 +494,9 @@ UI responsibilities:
   format on save, the VCS statusline, Gitsigns, and Neo-tree git status
   (while the working directory is on a mount) are off there. `sshfs` is in the
   `core` tool group; macOS additionally needs macFUSE installed outside Nix.
+  `<leader>Rs` opens a right-side Snacks terminal on the connected host (or a
+  picked one) with mosh, falling back to ssh when mosh is absent locally or
+  fails to start; `mosh` is also in `core`.
 - `plugins/ui/neo-tree.lua`: filesystem, buffers, Git, symbols, nesting, and
   current-file following.
 - `plugins/ui/mini.lua`: text objects, surrounds, pairs, indent scope, icons,

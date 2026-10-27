@@ -50,12 +50,13 @@ in
 # `plugins/smart/autoformat.lua`, and `plugins/debug/init.lua`.
 with pkgs;
 {
-  # Search, previews, `:Man`, and remote mounts; needed whatever languages
-  # are enabled. sshfs needs FUSE: NixOS provides fusermount, macOS needs
-  # macFUSE installed outside Nix.
+  # Search, previews, `:Man`, remote mounts, and remote shells; needed whatever
+  # languages are enabled. sshfs needs FUSE: NixOS provides fusermount, macOS
+  # needs macFUSE installed outside Nix. mosh also needs mosh-server on the host.
   core = [
     file
     man-db
+    mosh
     ripgrep
     sshfs
     tree-sitter
