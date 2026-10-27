@@ -126,11 +126,12 @@ in
       extensions.packages =
         with pkgs.nur.repos.rycee.firefox-addons;
         [
-          tridactyl
           export-cookies-txt
-          ublock-origin
+          refined-github
           stylus
           tampermonkey
+          tridactyl
+          ublock-origin
         ]
         ++ [
           pkgs.nur.repos.bandithedoge.firefoxAddons.sponsorblock
