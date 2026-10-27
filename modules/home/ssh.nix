@@ -9,7 +9,7 @@
       ForwardAgent = false;
       AddKeysToAgent = "no";
       Compression = false;
-      ServerAliveInterval = 0;
+      ServerAliveInterval = 15;
       ServerAliveCountMax = 3;
     };
   };

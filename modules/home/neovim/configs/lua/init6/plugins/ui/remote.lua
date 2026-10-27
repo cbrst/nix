@@ -40,6 +40,16 @@ function M.setup()
 				vim.fn.expand("~/.ssh/hosts"),
 				"/etc/ssh/ssh_config",
 			},
+			-- Keepalives make ssh exit within ~45 s of a dead link, so `reconnect`
+			-- takes over instead of file access on the mount (and with it the
+			-- editor) blocking until TCP gives up. The full list replaces the
+			-- plugin's defaults.
+			sshfs_args = {
+				"-o reconnect",
+				"-o ConnectTimeout=5",
+				"-o ServerAliveInterval=15",
+				"-o ServerAliveCountMax=3",
+			},
 		},
 		mounts = { base_dir = M.mount_dir },
 		ui = {
