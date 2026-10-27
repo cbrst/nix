@@ -21,7 +21,10 @@ item:
 | An image | **Set as Noctalia Wallpaper**: converts it to `~/Pictures/Wallpapers/wallpaper.jpg` and tells Noctalia to use it |
 
 Both actions are shell scripts packaged with `writeShellApplication`, and their
-store paths are substituted into the extension. The extension starts them as
+store paths are substituted into the extension. The wallpaper script lives in
+[`packages/set-noctalia-wallpaper`](https://github.com/cbrst/nix/tree/main/packages/set-noctalia-wallpaper),
+shared with imv. The wallpaper action appears only when `programs.noctalia` is
+enabled. The extension starts them as
 Gio subprocesses and waits for them asynchronously, so a failure to start or a
 non-zero exit is reported through GLib instead of being lost. The wallpaper
 script sends a desktop notification on failure. Because Noctalia caches images
@@ -37,7 +40,8 @@ calling old helper paths.
 ## imv and mpv
 
 - **imv** is the image viewer, with its background set to the theme's dark
-  background colour.
+  background colour. When `programs.noctalia` is enabled, `w` runs
+  `set-noctalia-wallpaper` on the current image.
 - **mpv** is the video player, with the [uosc](https://github.com/tomasklaen/uosc)
   interface.
 

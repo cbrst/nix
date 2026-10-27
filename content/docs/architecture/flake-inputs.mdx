@@ -36,6 +36,9 @@ derivations that nixpkgs does not provide:
   output for AI agents. It is built from the pinned `rtk-src` input. Its test
   suite is skipped because the crate denies warnings that only appear in the
   test build; the release binary builds normally.
+- **set-noctalia-wallpaper** (`packages/set-noctalia-wallpaper`): a shell
+  script that converts an image to the Noctalia wallpaper. The imv and Nautilus
+  modules build the same derivation from it.
 - **Kanagawa GTK theme** (`packages/kanagawa-gtk-theme`): installed when the
   theme family is `kanagawa`.
 
