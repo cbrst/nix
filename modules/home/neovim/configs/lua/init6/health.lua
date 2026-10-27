@@ -9,7 +9,7 @@ local M = {}
 local health = vim.health
 
 -- Executables every variant installs (`core` in tools.nix).
-local core_tools = { "rg", "file", "man", "tree-sitter" }
+local core_tools = { "rg", "file", "man", "sshfs", "tree-sitter" }
 
 -- Adapters from the `debug` group that plugins/debug/ resolves by name.
 local debug_tools = { "debugpy-adapter", "js-debug", "bash-debug-adapter", "local-lua-debug-adapter" }

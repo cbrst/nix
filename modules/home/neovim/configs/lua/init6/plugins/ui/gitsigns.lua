@@ -11,6 +11,9 @@ function M.setup()
 			untracked = { text = "▏ " },
 		},
 		on_attach = function(bufnr)
+			if require("init6.plugins.ui.remote").contains(vim.api.nvim_buf_get_name(bufnr)) then
+				return false
+			end
 			local gitsigns = require("gitsigns")
 			local function map(mode, keys, action, options)
 				options = options or {}

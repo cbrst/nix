@@ -365,6 +365,7 @@ init6.plugins.ui.neo-tree
 init6.plugins.ui.vcs
 init6.plugins.ui.heirline
 init6.plugins.ui.telescope
+init6.plugins.ui.remote
 init6.plugins.ui.which-key
 init6.plugins.ui.snacks
 init6.plugins.ui.outline
@@ -487,6 +488,12 @@ UI responsibilities:
   dispatcher.
 - `plugins/ui/telescope.lua`: Ivy-style file/search/buffer/LSP workflows. Its
   project-root helper uses the nearest `.jj` or `.git` marker.
+- `plugins/ui/remote.lua`: remote-sshfs.nvim, which mounts SSH hosts under
+  `~/.sshfs/<host>` (`<leader>R` mappings, host list from `~/.ssh/config` and
+  `~/.ssh/hosts`). `contains(path)` marks mount paths by string comparison;
+  format on save, the VCS statusline, Gitsigns, and Neo-tree git status
+  (while the working directory is on a mount) are off there. `sshfs` is in the
+  `core` tool group; macOS additionally needs macFUSE installed outside Nix.
 - `plugins/ui/neo-tree.lua`: filesystem, buffers, Git, symbols, nesting, and
   current-file following.
 - `plugins/ui/mini.lua`: text objects, surrounds, pairs, indent scope, icons,

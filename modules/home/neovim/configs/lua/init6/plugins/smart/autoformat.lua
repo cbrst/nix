@@ -91,6 +91,10 @@ function M.setup()
 			if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
 				return
 			end
+			-- Files on a remote mount are often live; only format them on request.
+			if require("init6.plugins.ui.remote").contains(vim.api.nvim_buf_get_name(bufnr)) then
+				return
+			end
 
 			-- Disable "format_on_save lsp_fallback" for languages that don't
 			-- have a well standardized coding style. You can add additional

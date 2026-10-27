@@ -50,11 +50,14 @@ in
 # `plugins/smart/autoformat.lua`, and `plugins/debug/init.lua`.
 with pkgs;
 {
-  # Search, previews, and `:Man`; needed whatever languages are enabled.
+  # Search, previews, `:Man`, and remote mounts; needed whatever languages
+  # are enabled. sshfs needs FUSE: NixOS provides fusermount, macOS needs
+  # macFUSE installed outside Nix.
   core = [
     file
     man-db
     ripgrep
+    sshfs
     tree-sitter
   ];
 

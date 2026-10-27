@@ -142,6 +142,14 @@ local function keys()
 		},
 		{ icon = "\u{f07b} ", key = "e", desc = "File tree", action = ":Neotree toggle reveal_force_cwd" },
 		{
+			icon = "\u{f233} ",
+			key = "h",
+			desc = "Remote host",
+			action = function()
+				require("remote-sshfs.api").connect()
+			end,
+		},
+		{
 			icon = "\u{ec10} ",
 			key = "c",
 			desc = "Claude Code",

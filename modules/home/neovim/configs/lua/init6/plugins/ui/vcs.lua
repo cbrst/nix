@@ -21,6 +21,11 @@ table.sort(action_names)
 
 function M.context(bufnr)
 	bufnr = bufnr or 0
+	-- Remote mounts are edited in place; Git and jj state is not wanted there,
+	-- and every lookup would cost network round trips.
+	if require("init6.plugins.ui.remote").contains(vim.api.nvim_buf_get_name(bufnr)) then
+		return
+	end
 	local jj_root = vim.fs.root(bufnr, ".jj")
 	local git_root = vim.fs.root(bufnr, ".git")
 	if not jj_root and not git_root then

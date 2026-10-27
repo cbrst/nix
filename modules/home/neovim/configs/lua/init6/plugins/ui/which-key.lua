@@ -46,6 +46,7 @@ function M.setup()
 			{ "<leader>o", group = "Open", mode = { "n", "t", "x" } },
 			{ "<leader>ol", group = "LLM", mode = { "n", "x" } },
 			{ "<leader>q", group = "Quit/session" },
+			{ "<leader>R", group = "Remote" },
 			{ "<leader>s", group = "Search" },
 			{ "<leader>t", group = "Toggle", mode = { "n", "t" } },
 			{ "<leader>w", group = "Window" },

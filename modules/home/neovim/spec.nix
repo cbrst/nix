@@ -186,6 +186,7 @@ in
       outline-nvim
       overseer-nvim
       plenary-nvim
+      remote-sshfs-nvim
       render-markdown-nvim
       snacks-nvim
       telescope-fzf-native-nvim
