@@ -4,6 +4,7 @@
   imagemagick,
   libnotify,
   noctalia,
+  util-linux,
 }:
 
 writeShellApplication {
@@ -13,6 +14,7 @@ writeShellApplication {
     imagemagick
     libnotify
     noctalia
+    util-linux
   ];
   text = builtins.readFile ./set-noctalia-wallpaper.sh;
 }

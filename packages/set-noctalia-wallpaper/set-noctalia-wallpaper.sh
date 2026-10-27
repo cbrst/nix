@@ -29,6 +29,13 @@ cleanup() {
 
   exit "$status"
 }
+
+# Key repeat in imv can start several runs at once; let the first one win.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/set-noctalia-wallpaper.lock"
+if ! flock -n 9; then
+  exit 0
+fi
+
 trap cleanup EXIT
 
 if [[ ! -f "$source_image" ]]; then
