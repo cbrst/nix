@@ -228,10 +228,16 @@ configuration requests their capabilities.
   reduce the available width instead of counting as a column; other terminals,
   Claude Code included, count as one. A hidden terminal is placed again when
   it is shown, so it follows the layout at that moment.
-- **Mini** adds text objects, surrounds, pairs, indent scope, icons, and
-  animation of the cursor, scrolling, window resizing, and window opening and
-  closing. Cursor animation and the cursor line are disabled in terminal
-  buffers because they made typing in TUIs lag.
+- **Mini** adds text objects, surrounds, operators, pairs, indent scope, icons,
+  and animation of the cursor, scrolling, window resizing, and window opening
+  and closing. Cursor animation and the cursor line are disabled in terminal
+  buffers because they made typing in TUIs lag. mini.operators keeps its
+  evaluate, exchange, multiply, and sort mappings; its replace prefix is empty,
+  so the `gr` replace operator is not mapped.
+- **Line moves:** `<M-j>` and `<M-k>` move the current line down or up, or the
+  selected lines in visual mode. Normal mode reindents the moved line with
+  `==`, visual mode reindents the selection and reselects it, and insert mode
+  leaves insert mode, moves the line, and returns with `gi`.
 - **Which-key** shows the leader groups. Bindings follow the Doom Emacs layout.
 - Dropbar, Outline, Trouble, todo-comments, render-markdown, and
   nvim-highlight-colors round out the UI.
