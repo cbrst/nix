@@ -84,7 +84,7 @@ and the warning points at `:checkhealth init6`.
 ### Tool groups
 
 `tools.nix` returns named package lists. `core` (`file`, `man-db`, `ripgrep`,
-`tree-sitter`) and `runtimes` (Bash, Lua, Node.js, Python 3, Zsh) are always
+`sshfs`, `tree-sitter`) and `runtimes` (Bash, Lua, Node.js, Python 3, Zsh) are always
 installed. Interpreters sit in `runtimes` because debug launches, Overseer
 tasks, terminals, and language tooling all use them.
 
@@ -255,6 +255,7 @@ and a random fortune.
 | `n` | New buffer |
 | `s` | VCS status, labelled "jj status" or "Git status"; hidden outside a repository |
 | `e` | File tree |
+| `h` | Remote host: pick a host and mount it (see [Remote hosts](#remote-hosts)) |
 | `c` | Claude Code; hidden when `claude` is not on `PATH` |
 | `q` | Quit |
 
@@ -289,6 +290,7 @@ The leader is `Space`; the local leader is `,`.
 | `<leader>t` | Toggles: whitespace, relative numbers, blame, deleted lines, dimming (`td`), block brackets (`tB`) |
 | `<leader>w` | Window commands |
 | `<leader>q` | Quit and session |
+| `<leader>R` | Remote hosts |
 
 ## Version control
 
@@ -320,6 +322,35 @@ stage, and `<leader>ghr` to revert a hunk. **diffs.nvim** adds syntax-aware and
 intra-line diff highlighting to Neogit, NeoJJ, Gitsigns previews, Telescope
 previews, and conflict markers. Its own `:Diff` command only understands Git,
 so the portable entry point is `<leader>gd`.
+
+## Remote hosts
+
+`plugins/ui/remote.lua` sets up remote-sshfs.nvim, which mounts an SSH host
+under `~/.sshfs/<host>` so Neo-tree, Telescope, and the language servers see its
+files as ordinary local paths. Hosts are listed from `~/.ssh/config`,
+`~/.ssh/hosts`, and `/etc/ssh/ssh_config`; the plugin does not follow `Include`,
+so the included host file is named explicitly. Hosts are chosen in a Telescope
+picker, and connecting does not ask for a separate confirmation.
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>Rc` | Connect to a host |
+| `<leader>Rd` | Disconnect, and return to the previous local directory if the working directory is on the mount |
+| `<leader>Re` | Edit the SSH configuration |
+| `<leader>Rf` | Find files on the host |
+| `<leader>Rg` | Live grep on the host |
+
+Find and grep run on the host rather than through the mount, so they need `rg`
+(or `fd`/`find`) there.
+
+A path counts as remote when it starts with the mount directory; the check
+compares strings and never touches the mount. On those paths format on save,
+Gitsigns, and the VCS context lookup are off, because Git status over SSHFS is
+slow and a remote site is edited in place. Neo-tree's Git status is off while
+the working directory is on a mount and follows the directory when it changes.
+
+`sshfs` is in the `core` tool group. It needs FUSE: NixOS provides
+`fusermount`, while macOS needs macFUSE installed outside Nix.
 
 ## TypeScript
 
