@@ -477,6 +477,10 @@ UI responsibilities:
   Git counters are unstaged tracked changes; jj counters cover working-copy
   commit `@`.
 - `plugins/ui/snacks.lua`: Snacks input, picker, and terminal mappings.
+  `terminal(action, cmd, opts)` places every terminal split on the right when
+  the tab has one column of windows and the code keeps 100 columns beside it
+  (fixed-width sidebars subtract), otherwise at the bottom; hidden terminals
+  are re-placed when shown again.
 - `plugins/ui/dashboard.lua`: Snacks start screen options (keys, cwd recent
   files, fortunes, centred Pokémon pane via `scripts/dashboard-pokemon`),
   passed in by `snacks.lua`.
@@ -494,7 +498,7 @@ UI responsibilities:
   format on save, the VCS statusline, Gitsigns, and Neo-tree git status
   (while the working directory is on a mount) are off there. `sshfs` is in the
   `core` tool group; macOS additionally needs macFUSE installed outside Nix.
-  `<leader>Rs` opens a right-side Snacks terminal on the connected host (or a
+  `<leader>Rs` opens a Snacks terminal on the connected host (or a
   picked one) with mosh, falling back to ssh when mosh is absent locally or
   fails to start; `mosh` is also in `core`.
 - `plugins/ui/neo-tree.lua`: filesystem, buffers, Git, symbols, nesting, and

@@ -49,10 +49,7 @@ local function open_shell(host)
 	end
 	-- The terminal starts in the home directory: a working directory on a stale
 	-- mount would block the spawn. Toggling with the same command reuses it.
-	require("snacks").terminal.toggle(cmd, {
-		cwd = vim.fn.expand("~"),
-		win = { position = "right" },
-	})
+	require("init6.plugins.ui.snacks").terminal("toggle", cmd, { cwd = vim.fn.expand("~") })
 end
 
 -- The host of the current connection, or else the one whose mount holds the
