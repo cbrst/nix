@@ -8,6 +8,10 @@ function M.setup()
 	require("mini.ai").setup({ n_lines = 500 })
 	require("mini.surround").setup()
 
+	require("mini.operators").setup({
+		replace = { prefix = "" },
+	})
+
 	-- Typed pairs complement Blink's completion-time function-call brackets.
 	require("mini.pairs").setup()
 	require("mini.indentscope").setup({
