@@ -27,6 +27,13 @@ non-zero exit is reported through GLib instead of being lost. The wallpaper
 script sends a desktop notification on failure. Because Noctalia caches images
 by path, it first shows a staged copy and then the final file.
 
+The extension is linked as a directory (a `linkFarm` holding
+`context_actions.py`, placed at `nautilus-python/extensions`) rather than as a
+single file. Python cannot write a `__pycache__` beside a module in the Nix
+store, so it never reuses a stale `.pyc` from an older generation, which could
+otherwise pass the staleness check (store files have an mtime of 1) and keep
+calling old helper paths.
+
 ## imv and mpv
 
 - **imv** is the image viewer, with its background set to the theme's dark
