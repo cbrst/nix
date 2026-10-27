@@ -41,7 +41,11 @@ calling old helper paths.
 
 - **imv** is the image viewer, with its background set to the theme's dark
   background colour. When `programs.noctalia` is enabled, `w` runs
-  `set-noctalia-wallpaper` on the current image.
+  `set-noctalia-wallpaper` on the current image in the background, because imv
+  waits for exec commands and its key repeat would otherwise re-run the slow
+  conversion. The script takes a non-blocking lock, so overlapping runs (key
+  repeat or Nautilus) exit instead of racing on the staging and destination
+  files.
 - **mpv** is the video player, with the [uosc](https://github.com/tomasklaen/uosc)
   interface.
 
