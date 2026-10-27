@@ -24,8 +24,13 @@ Firefox extension. It is not imported by any profile; swap it for
 
 `ssh.nix` (minimal profile) replaces Home Manager's default SSH configuration
 with explicit defaults: no agent forwarding, no automatic key adding, no
-compression, and no keep-alive. Personal host entries live in `~/.ssh/hosts`,
-which is included but kept outside the repository.
+compression. Every connection sends a keep-alive probe after 15 seconds of
+idleness and gives up after three unanswered probes, so a dead link is noticed
+in about 45 seconds. Personal host entries live in `~/.ssh/hosts`, which is
+included but kept outside the repository.
+
+It also installs the `mosh` client. Only the client is installed: a host still
+needs `mosh-server` and open UDP ports 60000-61000 to accept connections.
 
 ## direnv
 

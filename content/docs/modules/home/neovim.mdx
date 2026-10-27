@@ -84,7 +84,7 @@ and the warning points at `:checkhealth init6`.
 ### Tool groups
 
 `tools.nix` returns named package lists. `core` (`file`, `man-db`, `ripgrep`,
-`sshfs`, `tree-sitter`) and `runtimes` (Bash, Lua, Node.js, Python 3, Zsh) are always
+`mosh`, `sshfs`, `tree-sitter`) and `runtimes` (Bash, Lua, Node.js, Python 3, Zsh) are always
 installed. Interpreters sit in `runtimes` because debug launches, Overseer
 tasks, terminals, and language tooling all use them.
 
@@ -221,7 +221,13 @@ configuration requests their capabilities.
   file nesting and current-file following.
 - **Snacks** provides input, picker, and terminal windows, the start screen
   (see below), and window dimming. Dimming is enabled at start-up and
-  `<leader>td` toggles it.
+  `<leader>td` toggles it. Terminal splits (`<leader>ot`, `oT`, `of`, and the
+  remote shell) go on the right when the tab has a single column of windows
+  and the code keeps at least 100 columns beside the terminal's 40% width,
+  otherwise at the bottom. Fixed-width sidebars such as Neo-tree and Outline
+  reduce the available width instead of counting as a column; other terminals,
+  Claude Code included, count as one. A hidden terminal is placed again when
+  it is shown, so it follows the layout at that moment.
 - **Mini** adds text objects, surrounds, pairs, indent scope, icons, and
   animation of the cursor, scrolling, window resizing, and window opening and
   closing. Cursor animation and the cursor line are disabled in terminal
@@ -339,9 +345,23 @@ picker, and connecting does not ask for a separate confirmation.
 | `<leader>Re` | Edit the SSH configuration |
 | `<leader>Rf` | Find files on the host |
 | `<leader>Rg` | Live grep on the host |
+| `<leader>Rs` | Open a shell on the host in a terminal split |
 
 Find and grep run on the host rather than through the mount, so they need `rg`
 (or `fd`/`find`) there.
+
+Mounts use `-o reconnect` with `ConnectTimeout=5`, `ServerAliveInterval=15`,
+and `ServerAliveCountMax=3`. ssh exits about 45 seconds after the link dies and
+sshfs reconnects, instead of file access, and with it the editor, blocking until
+TCP times out. This list replaces the plugin's default sshfs options.
+
+`<leader>Rs` uses the current connection, else the host whose mount holds the
+working directory, else a picker of the SSH config hosts (wildcard patterns are
+skipped). The terminal runs `mosh` and falls back to `ssh` when mosh cannot
+start a session, for example when `mosh-server` is missing on the host. A
+normal logout exits 0 and does not fall back. Without `mosh` on `PATH` it runs
+`ssh` directly. The terminal starts in the home directory, because a working
+directory on a stale mount would block the spawn.
 
 A path counts as remote when it starts with the mount directory; the check
 compares strings and never touches the mount. On those paths format on save,
@@ -349,7 +369,7 @@ Gitsigns, and the VCS context lookup are off, because Git status over SSHFS is
 slow and a remote site is edited in place. Neo-tree's Git status is off while
 the working directory is on a mount and follows the directory when it changes.
 
-`sshfs` is in the `core` tool group. It needs FUSE: NixOS provides
+`sshfs` and `mosh` are in the `core` tool group. sshfs needs FUSE: NixOS provides
 `fusermount`, while macOS needs macFUSE installed outside Nix.
 
 ## TypeScript
