@@ -32,6 +32,42 @@ included but kept outside the repository.
 It also installs the `mosh` client. Only the client is installed: a host still
 needs `mosh-server` and open UDP ports 60000-61000 to accept connections.
 
+## nixie
+
+`nixie.nix` (minimal profile) installs `nixie`, a gum-based command for
+day-to-day management of this flake. Without arguments it opens an interactive
+menu; with a subcommand it runs that action directly.
+
+| Command | Action |
+| --- | --- |
+| `status` | Checkout state, running generations, and input ages |
+| `update [INPUT…] [--dry-run]` | Update all or selected flake inputs |
+| `rebuild [TARGET] [ACTION]` | Build, show a package diff, confirm, activate |
+| `diff` | Build without activating and compare with the running generation |
+| `clean` | Delete old generations and collect garbage (`--keep N`, `--older-than 14d`, `--gc-only`, `--optimise`, `--dry-run`) |
+| `generations`, `rollback [GEN]` | List or switch system generations (NixOS only) |
+| `check` | `nix flake check --no-build` |
+| `edit` | Open the flake in `$VISUAL` or `$EDITOR` |
+
+`rebuild` targets are `all` (default), `home`, `nvim`, and `nvim-lite`; actions
+are `switch` (default), `boot`, `test`, `build`, and `dry`. Rebuilds show a
+package diff with nvd and ask for confirmation before activating. Without a
+TTY, `--yes` is required for any action that would otherwise prompt. Before
+building, nixie warns about files that jj tracks but Git's index does not,
+because a Git-backed flake evaluation cannot see them.
+
+The flake checkout defaults to `/etc/nix-config` on Linux and `~/nix-config` on
+macOS. `NIXIE_FLAKE` overrides the path and `NIXIE_HOST` the host name;
+`NO_COLOR` gives plain output.
+
+The command is a `writeShellApplication` built from
+[`packages/nixie`](https://github.com/cbrst/nix/tree/main/packages/nixie).
+Its runtime tools are pinned in the package, but `nix` and `nixos-rebuild` come
+from the running system so they match the installed daemon and NixOS release.
+`packages/nixie/flake.nix` is a development sub-flake: its default dev shell
+provides `nixie-dev`, which runs the working-tree `nixie.sh` without a rebuild.
+Its nixpkgs input is locked to the root flake's revision.
+
 ## direnv
 
 `direnv.nix` (development profile) enables direnv with Zsh integration and
