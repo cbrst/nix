@@ -12,8 +12,6 @@
     gaming.vrrOutput = "PNP(AOC) AG276QZD2 1322131231233";
   };
 
-  nixpkgs.overlays = [ inputs.affinity-nix.overlays.default ];
-
   nix.settings = {
     extra-substituters = [ "https://cache.forall.systems" ];
     extra-trusted-public-keys = [
