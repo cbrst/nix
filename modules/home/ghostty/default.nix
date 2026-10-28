@@ -49,7 +49,7 @@ in
       window-padding-balance = true;
       window-padding-color = "extend";
       window-theme = "ghostty";
-      macos-titlebar-style = "transparent"; # "tabs" titlebar is buggy in 1.3.1 on Golden Gate
+      macos-titlebar-style = "tabs";
       gtk-titlebar = false;
       theme = "light:flake-light,dark:flake-dark";
       config-file = "?config-custom";
