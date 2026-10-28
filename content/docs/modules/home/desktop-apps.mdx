@@ -45,7 +45,10 @@ calling old helper paths.
   waits for exec commands and its key repeat would otherwise re-run the slow
   conversion. The script takes a non-blocking lock, so overlapping runs (key
   repeat or Nautilus) exit instead of racing on the staging and destination
-  files.
+  files. Other keys are `n` and `p` for the next and previous image, `zz` to
+  centre the view, and `=` to reset the zoom. `y` copies the image file to the
+  Wayland clipboard and `Y` copies its path, both through `wl-copy` from
+  `wl-clipboard` and run in the background for the same reason.
 - **mpv** is the video player, with the [uosc](https://github.com/tomasklaen/uosc)
   interface.
 
