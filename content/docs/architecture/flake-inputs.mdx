@@ -50,5 +50,10 @@ so every build of it failed with a hash mismatch. The overlay pins the hash
 that the fetch actually produces. It is applied in `configLib.mkHome` and should
 be removed once nixpkgs is fixed upstream.
 
-NixOS hosts add the NUR overlay through the desktop profile, and Asgard adds the
-Affinity overlay itself.
+NixOS hosts add the NUR overlay through the desktop profile. The Affinity
+overlay is not applied to any shared package set: the Affinity module imports a
+separate nixpkgs pinned to `affinity-nix`'s own `nixpkgs` input, with the overlay
+and `allowUnfree` applied only there, and takes `affinity-v3` from it. The
+uncacheable Wine prefix is therefore rebuilt only when the `affinity-nix` input
+changes, and `affinity-v3` may use different build inputs from the rest of the
+system.

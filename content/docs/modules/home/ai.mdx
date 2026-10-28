@@ -47,6 +47,13 @@ Everything in `skills/` is installed as Claude Code skills, including:
 
 - `idiomatic-jj`: Jujutsu mental models and safe command choices.
 - `group-unstaged-commits`: splitting working-copy changes into coherent commits.
+- `gum-beautify`: integrating Charmbracelet gum into bash scripts for prompts,
+  styled output, spinners, and leveled logging. Every gum call is guarded by TTY
+  detection, so scripts still work when stdin or stdout is piped, and display
+  helpers write to stderr to keep stdout clean for data. The skill ships a
+  standalone `example.sh` skeleton to copy, not source. The module adds `gum` to
+  `home.packages` so the skill's dependency is on `PATH`; scripts built from the
+  skill fail with an install hint when it is missing.
 - A set of front-end design skills (brand kits, image-to-code, minimalist,
   brutalist, motion, and web interface guidelines) used together with `dennis`.
 
