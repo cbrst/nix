@@ -39,6 +39,10 @@ derivations that nixpkgs does not provide:
 - **set-noctalia-wallpaper** (`packages/set-noctalia-wallpaper`): a shell
   script that converts an image to the Noctalia wallpaper. The imv and Nautilus
   modules build the same derivation from it.
+- **nixie** (`packages/nixie`): the gum-based flake management command,
+  installed by the minimal profile (see
+  [nixie](/modules/home/small-modules/#nixie)). Its `flake.nix` is a
+  development sub-flake, not an output of the root flake.
 - **Kanagawa GTK theme** (`packages/kanagawa-gtk-theme`): installed when the
   theme family is `kanagawa`.
 
