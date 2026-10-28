@@ -7,5 +7,6 @@
     ../../modules/home/vcs
     # ../../modules/home/bitwarden.nix
     ../../modules/home/1password.nix
+    ../../modules/home/nixie.nix
   ];
 }

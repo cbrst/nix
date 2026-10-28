@@ -122,7 +122,7 @@ Directory ownership:
 | `modules/home/` | User programs, dotfiles, and portable Home Manager features |
 | `users/` | Person-specific Home Manager state and compatibility versions |
 | `lib/` | Helper functions and theme data; these are not modules |
-| `packages/` | Local derivations such as RTK and the Kanagawa GTK theme |
+| `packages/` | Local derivations such as RTK, the Kanagawa GTK theme, and `nixie` (the gum flake-management TUI, installed by `modules/home/nixie.nix`; `packages/nixie/flake.nix` is a development sub-flake whose `nix develop` shell provides `nixie-dev` to run the working-tree script without a rebuild) |
 | `docs` branch | Fumadocs (Next.js) documentation site published to GitHub Pages; not on `main` |
 | `overlays/` | Reserved/documented overlay location; currently no local overlay implementation |
 
@@ -166,7 +166,7 @@ Home profiles:
 
 ```text
 profiles/home/minimal.nix
-└── modules/home/{shell,ssh,vcs,bitwarden}
+└── modules/home/{shell,ssh,vcs,1password,nixie}
 
 profiles/home/development.nix
 ├── profiles/home/minimal.nix
