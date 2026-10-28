@@ -112,6 +112,8 @@ in
 {
   home.packages = [
     pkgs.agent-browser
+    # Used by the gum-beautify skill
+    pkgs.gum
     pkgs.playwright
     pkgs.playwright-test
     rtk
