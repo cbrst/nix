@@ -56,9 +56,16 @@ TTY, `--yes` is required for any action that would otherwise prompt. Before
 building, nixie warns about files that jj tracks but Git's index does not,
 because a Git-backed flake evaluation cannot see them.
 
-The flake checkout defaults to `/etc/nix-config` on Linux and `~/nix-config` on
-macOS. `NIXIE_FLAKE` overrides the path and `NIXIE_HOST` the host name;
-`NO_COLOR` gives plain output.
+nixie has no built-in checkout path. The `programs.nixie.flake` option (a
+nullable string) makes Home Manager write `flake = <path>` to
+`$XDG_CONFIG_HOME/nixie/config`; with the default `null` no file is written.
+Asgard sets `/etc/nix-config` and Niflheim `~/Projects/nix`. At run time the
+checkout comes from `NIXIE_FLAKE`, then from that file, then nothing. The file
+is parsed, not sourced: only `key = value` lines and `#` comments are read, a
+leading `~` is expanded, and a trailing slash is removed. Without a checkout,
+commands that need one fail with a message naming the option, the file, and
+`NIXIE_FLAKE`; the usage text shows the active value and where it came from.
+`NIXIE_HOST` overrides the host name and `NO_COLOR` gives plain output.
 
 The command is a `writeShellApplication` built from
 [`packages/nixie`](https://github.com/cbrst/nix/tree/main/packages/nixie).
