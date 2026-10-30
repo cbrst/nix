@@ -46,6 +46,7 @@ return {
 		},
 	},
 	phpactor = {},
+	roslyn_ls = {},
 	rumdl = {},
 	somesass_ls = {},
 	vtsls = {},

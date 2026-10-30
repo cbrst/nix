@@ -78,12 +78,19 @@ with pkgs;
     bashdb
     bashDebugAdapter
     luaDebugAdapter
+    netcoredbg
     python3Packages.debugpy
     vscode-js-debug
   ];
 
   # Language servers and formatters, one list per language family.
   languages = {
+    dotnet = [
+      # Roslyn loads projects through the SDK. It is a fallback: tools are
+      # appended to PATH, so a project's own SDK from direnv wins.
+      dotnet-sdk_10
+      roslyn-ls
+    ];
     lua = [
       lua-language-server
       stylua

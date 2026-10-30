@@ -107,7 +107,8 @@ function M.setup()
 				lsp_format_opt = "fallback"
 			end
 			return {
-				timeout_ms = 500,
+				-- Roslyn answers slowly until the project has loaded.
+				timeout_ms = vim.bo[bufnr].filetype == "cs" and 2000 or 500,
 				lsp_format = lsp_format_opt,
 			}
 		end,

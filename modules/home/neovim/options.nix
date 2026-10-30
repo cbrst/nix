@@ -12,6 +12,7 @@ let
   # Must match the attribute names of `languages` in `tools.nix`; `spec.nix`
   # asserts this.
   languages = {
+    dotnet = "C#: Roslyn language server and the .NET SDK";
     lua = "Lua: lua-language-server and StyLua";
     markdown = "Markdown: rumdl and mdsf";
     nix = "Nix: nil and nixd";

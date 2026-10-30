@@ -148,6 +148,30 @@ function M.setup()
 		},
 	}
 
+	dap.adapters.coreclr = {
+		type = "executable",
+		command = vim.fn.exepath("netcoredbg"),
+		args = { "--interpreter=vscode" },
+	}
+	dap.configurations.cs = {
+		{
+			type = "coreclr",
+			request = "launch",
+			name = "Launch built DLL",
+			-- netcoredbg does not build; run `dotnet build` first.
+			program = function()
+				return vim.fn.input("Path to DLL: ", vim.fs.joinpath(vim.fn.getcwd(), "bin", "Debug") .. "/", "file")
+			end,
+			cwd = "${workspaceFolder}",
+		},
+		{
+			type = "coreclr",
+			request = "attach",
+			name = "Attach to .NET process",
+			processId = require("dap.utils").pick_process,
+		},
+	}
+
 	vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: start/continue" })
 	vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Debug: step over" })
 	vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Debug: step into" })

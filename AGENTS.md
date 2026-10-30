@@ -104,7 +104,7 @@ Exported outputs:
 | `homeConfigurations."example-user@macbook"` | `aarch64-darwin` | Standalone Home Manager development environment plus macOS additions |
 | `homeConfigurations."cbrst@niflheim"` | `aarch64-darwin` | Real Niflheim Home Manager environment for `cbrst` |
 | `packages.<system>.nvim` | `x86_64-linux`, `aarch64-darwin` | Standalone Neovim from `modules/home/neovim/package.nix`, using `defaultSettings` and default features; `nix run .#nvim` |
-| `packages.<system>.nvim-lite` | `x86_64-linux`, `aarch64-darwin` | Same, with the overrides in `modules/home/neovim/lite.nix` (no AI, debugging, PHP, Python, or web tooling; curated grammars) |
+| `packages.<system>.nvim-lite` | `x86_64-linux`, `aarch64-darwin` | Same, with the overrides in `modules/home/neovim/lite.nix` (no AI, debugging, .NET, PHP, Python, or web tooling; curated grammars) |
 
 The normal composition flow is:
 
@@ -306,7 +306,7 @@ Nix owns the Neovim runtime surface:
 - `spec.extraPackages` supplies LSP servers, formatters, debug adapters, search
   tools, and other executables on Neovim's `PATH`. Most of them come from
   `modules/home/neovim/tools.nix`, which returns named groups: `core`,
-  `runtimes`, `debug`, and `languages.<family>` (`lua`, `markdown`, `nix`,
+  `runtimes`, `debug`, and `languages.<family>` (`dotnet`, `lua`, `markdown`, `nix`,
   `php`, `python`, `shell`, `web`, `yaml`). `spec.nix` always includes `core`
   and `runtimes`, and the others as their features allow. A package may appear
   in several language groups; `spec.nix` deduplicates. No two distinct packages
@@ -447,7 +447,8 @@ configured as an inactive alternative, but its setup is disabled in
 `plugins/smart/init.lua`.
 
 Debugging uses nvim-dap with Nix-owned adapters for Python, JavaScript and
-TypeScript, Bash-compatible shell scripts, standalone Lua, and Neovim Lua. The
+TypeScript, C# (netcoredbg, which does not build the program first),
+Bash-compatible shell scripts, standalone Lua, and Neovim Lua. The
 Bash adapter is also offered for `zsh` buffers, but it cannot interpret
 Zsh-specific syntax because no native Zsh DAP adapter is available.
 
@@ -549,7 +550,7 @@ env XDG_CONFIG_HOME="$scratch/config" XDG_DATA_HOME="$scratch/data" \
 
 Run the same command with `'.#nvim-lite'` whenever a change touches
 feature-specific Lua or `spec.nix`: it is the build with AI, debugging, and the
-PHP, Python, and web groups disabled, so it exercises the feature checks. Open
+.NET, PHP, Python, and web groups disabled, so it exercises the feature checks. Open
 files of disabled languages too; startup and editing must stay free of errors
 and "missing tools" warnings.
 

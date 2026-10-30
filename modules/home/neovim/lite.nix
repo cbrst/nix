@@ -42,6 +42,7 @@
 
   # Keep the tooling for editing configuration; drop project languages.
   languages = {
+    dotnet.enable = false;
     php.enable = false;
     python.enable = false;
     web.enable = false;

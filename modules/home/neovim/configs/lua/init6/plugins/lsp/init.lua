@@ -14,6 +14,7 @@ local server_languages = {
 	lua_ls = "lua",
 	nil_ls = "nix",
 	phpactor = "php",
+	roslyn_ls = "dotnet",
 	rumdl = "markdown",
 	somesass_ls = "web",
 	vtsls = "web",

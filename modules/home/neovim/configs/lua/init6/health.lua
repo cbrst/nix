@@ -12,7 +12,7 @@ local health = vim.health
 local core_tools = { "rg", "file", "man", "mosh", "sshfs", "tree-sitter" }
 
 -- Adapters from the `debug` group that plugins/debug/ resolves by name.
-local debug_tools = { "debugpy-adapter", "js-debug", "bash-debug-adapter", "local-lua-debug-adapter" }
+local debug_tools = { "debugpy-adapter", "js-debug", "bash-debug-adapter", "local-lua-debug-adapter", "netcoredbg" }
 
 local function check_executables(names)
 	for _, name in ipairs(names) do
