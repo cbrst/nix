@@ -3,7 +3,7 @@
   imports = [
     ./desktop-base.nix
     ../../modules/home/affinity
-    ../../modules/home/brave-origin
+    # ../../modules/home/brave-origin
     ../../modules/home/firefox
     ../../modules/home/helium
     ../../modules/home/imv
