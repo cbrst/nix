@@ -7,17 +7,40 @@ nixie_version=0.1.0
 
 # --- Environment -------------------------------------------------------------
 
-os=$(uname -s)
 user=${USER:-$(id -un)}
 host=${NIXIE_HOST:-$(uname -n)}
 host=${host%%.*}
 host=$(printf '%s' "$host" | tr '[:upper:]' '[:lower:]')
 
-if [[ $os == Darwin ]]; then
-  flake=${NIXIE_FLAKE:-$HOME/nix-config}
+# The checkout comes from NIXIE_FLAKE, else from the config file, which Home
+# Manager writes from programs.nixie.flake. The file holds "key = value" lines
+# and "#" comments; it is parsed, never sourced.
+config_file=${XDG_CONFIG_HOME:-$HOME/.config}/nixie/config
+
+config_get() {
+  [[ -r $config_file ]] || return 0
+  awk -v key="$1" '
+    { sub(/^[ \t]+/, ""); sub(/[ \t]+$/, "") }
+    /^#/ || !/=/ { next }
+    {
+      k = $0; sub(/[ \t]*=.*/, "", k)
+      if (k != key) next
+      v = $0; sub(/^[^=]*=[ \t]*/, "", v)
+      value = v
+    }
+    END { if (value != "") print value }
+  ' "$config_file"
+}
+
+if [[ -n ${NIXIE_FLAKE:-} ]]; then
+  flake=$NIXIE_FLAKE
+  flake_source="NIXIE_FLAKE"
 else
-  flake=${NIXIE_FLAKE:-/etc/nix-config}
+  flake=$(config_get flake)
+  flake_source=${flake:+$config_file}
 fi
+flake=${flake/#\~/$HOME}
+flake=${flake%/}
 
 # "nixos": NixOS with Home Manager embedded in the system configuration.
 # "home": standalone Home Manager (macOS or another Linux).
@@ -77,11 +100,11 @@ banner() {
   if is_tty_out; then
     local title sub
     title=$(CLICOLOR_FORCE=1 gum style --bold --foreground "$c_accent" "nixie")
-    sub=$(CLICOLOR_FORCE=1 gum style --foreground "$c_dim" "$host · $mode · ${flake/#"$HOME"/\~}")
+    sub=$(CLICOLOR_FORCE=1 gum style --foreground "$c_dim" "$host · $mode · ${flake:+${flake/#"$HOME"/\~}}${flake:-no flake}")
     gum style --border rounded --border-foreground "$c_dim" --padding "0 2" --margin "0 1" \
       "$(CLICOLOR_FORCE=1 gum join --horizontal "$title" "  " "$sub")" >&2
   else
-    echo "nixie $nixie_version · $host · $mode · $flake" >&2
+    echo "nixie $nixie_version · $host · $mode · ${flake:-no flake}" >&2
   fi
 }
 
@@ -275,7 +298,9 @@ fmt_date() { date -d "@$1" '+%Y-%m-%d %H:%M'; }
 # --- Flake helpers -----------------------------------------------------------
 
 require_flake() {
-  [[ -f $flake/flake.nix ]] || die "No flake at $flake (set NIXIE_FLAKE)"
+  [[ -n $flake ]] ||
+    die "No flake configured: set programs.nixie.flake, \"flake = <path>\" in $config_file, or NIXIE_FLAKE"
+  [[ -f $flake/flake.nix ]] || die "No flake at $flake (from $flake_source)"
 }
 
 require_nixos() {
@@ -844,9 +869,13 @@ Options:
   -y, --yes                   Skip confirmations (required when not on a TTY)
 
 Environment:
-  NIXIE_FLAKE                 Flake checkout (now: $flake)
+  NIXIE_FLAKE                 Flake checkout (now: ${flake:-unset}${flake_source:+, from $flake_source})
   NIXIE_HOST                  Host name to build (now: $host)
   NO_COLOR                    Plain output
+
+Configuration ($config_file):
+  flake = <path>              Flake checkout, used when NIXIE_FLAKE is unset;
+                                Home Manager writes it from programs.nixie.flake
 
 On NixOS, Home Manager is part of the system. "rebuild home" activates the new
 home directly; the next boot or full switch restores the system's own copy.

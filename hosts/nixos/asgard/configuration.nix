@@ -114,6 +114,7 @@
         ../../../profiles/home/desktop-linux.nix
         ../../../profiles/home/gaming.nix
       ];
+      programs.nixie.flake = "/etc/nix-config";
     };
   };
 }

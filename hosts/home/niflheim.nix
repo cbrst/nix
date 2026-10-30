@@ -1,4 +1,5 @@
 {
+  config,
   defaultSettings,
   lib,
   pkgs,
@@ -20,4 +21,6 @@
   home.packages = [
     pkgs.terminal-notifier
   ];
+
+  programs.nixie.flake = "${config.home.homeDirectory}/Projects/nix";
 }
