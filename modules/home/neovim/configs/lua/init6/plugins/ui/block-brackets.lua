@@ -95,8 +95,8 @@ function M.setup()
 					end_col = col + width,
 					hl_group = "Init6BlockBracket",
 					ephemeral = true,
-					-- Above Treesitter's @punctuation.bracket.
-					priority = vim.hl.priorities.treesitter + 10,
+					-- Above Treesitter's @punctuation.bracket and LSP punctuation tokens (Roslyn).
+					priority = vim.hl.priorities.semantic_tokens + 10,
 				})
 			end
 		end,
