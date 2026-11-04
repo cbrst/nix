@@ -25,12 +25,20 @@
     ./peripheral-battery.nix
     ../../../modules/nixos/secure-boot.nix
     ../../../modules/nixos/gaming.nix
+    ../../../modules/nixos/vm-host.nix
     ../../../profiles/nixos/desktop.nix
     ../../../profiles/nixos/development.nix
   ];
 
   # This value is specific to this computer.
   networking.hostName = "asgard";
+
+  # Bridge the wired NIC for libvirt guests (Home Assistant OS). Keep eno1's
+  # MAC on br0 so the router still hands out the same address.
+  vmHost.bridge = {
+    interface = "eno1";
+    macAddress = "e0:d5:5e:0c:07:4d";
+  };
 
   # set tailscale operator
   services.tailscale.extraSetFlags = [ "--operator=cbrst" ];
@@ -97,6 +105,7 @@
     extraGroups = [
       "wheel"
       "gamemode"
+      "libvirtd"
     ];
     shell = pkgs.zsh;
   };

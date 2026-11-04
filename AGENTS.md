@@ -141,6 +141,7 @@ flake.nix
     ├── hardware-configuration.nix
     ├── modules/nixos/secure-boot.nix
     ├── modules/nixos/gaming.nix
+    ├── modules/nixos/vm-host.nix
     ├── profiles/nixos/desktop.nix
     │   └── modules/nixos/{base,archives,nautilus,fonts,gtk,multimedia,
     │                       niri,noctalia,noctalia-greeter,1password,pipewire}
