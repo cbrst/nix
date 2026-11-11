@@ -558,6 +558,7 @@
         "nur": "nur",
         "rtk-src": "rtk-src",
         "serena": "serena",
+        "solidcraft": "solidcraft",
         "zshcs": "zshcs"
       }
     },
@@ -620,6 +621,27 @@
       "original": {
         "owner": "oraios",
         "repo": "serena",
+        "type": "github"
+      }
+    },
+    "solidcraft": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793635906,
+        "narHash": "sha256-OBFZLKF/qnO2wzDpVcyTHJoxHyHw7+hi41zJXim/4GE=",
+        "owner": "tangency-labs",
+        "repo": "solidcraft",
+        "rev": "8e2b0cd60d14b4152b12b8f1fdb2bcfdcd8c52f4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tangency-labs",
+        "ref": "v0.30.1",
+        "repo": "solidcraft",
         "type": "github"
       }
     },

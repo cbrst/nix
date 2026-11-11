@@ -46,6 +46,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # CAD
+    solidcraft = {
+      url = "github:tangency-labs/solidcraft/v0.30.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     rtk-src = {
       url = "github:rtk-ai/rtk/v0.42.4";
       flake = false;

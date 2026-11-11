@@ -84,7 +84,7 @@ Niflheim exposes a standalone Home Manager output for the same user.
 ## Flake Architecture
 
 `flake.nix` is the entry point. It pins `nixpkgs` unstable, Home Manager,
-Affinity Nix, Noctalia, Noctalia Greeter, NUR, Serena, zshcs, and non-flake
+Affinity Nix, Noctalia, Noctalia Greeter, NUR, Serena, SolidCraft, zshcs, and non-flake
 package sources. Shared `defaultSettings` define fonts and the theme
 family. Each host publishes its resolved `settings` through `_module.args`,
 which lets the host apply machine-specific overrides before dependent modules
@@ -149,6 +149,7 @@ flake.nix
         ├── users/cbrst/home.nix
         ├── profiles/home/development.nix
         ├── profiles/home/gaming.nix
+        ├── profiles/home/cad.nix
         └── profiles/home/desktop-linux.nix
             └── profiles/home/desktop-base.nix
 ```
@@ -175,6 +176,9 @@ profiles/home/development.nix
 
 profiles/home/gaming.nix
 └── modules/home/mangohud.nix
+
+profiles/home/cad.nix
+└── modules/home/solidcraft.nix
 
 profiles/home/desktop-base.nix
 └── modules/home/{fonts,ghostty}
