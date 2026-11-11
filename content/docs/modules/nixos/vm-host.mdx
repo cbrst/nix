@@ -1,0 +1,33 @@
+---
+title: VM host
+description: KVM guests through libvirt, attached to a br0 bridge on the LAN.
+---
+
+[`modules/nixos/vm-host.nix`](https://github.com/cbrst/nix/blob/main/modules/nixos/vm-host.nix)
+is imported directly by [Asgard](/hosts/asgard/). The intended guest is Home
+Assistant OS.
+
+## What it enables
+
+- `virtualisation.libvirtd` and `programs.virt-manager`, so `virsh` and
+  virt-manager manage `qemu:///system`. Members of the `libvirtd` group need no
+  root password; the host adds the user to that group.
+- A `br0` bridge defined with NetworkManager `ensureProfiles`, with STP
+  disabled, IPv4 and IPv6 set to `auto`, and stable-privacy IPv6 addressing.
+- A port profile that enslaves the physical interface to `br0`, with
+  `autoconnect-priority` 10 so it wins over NetworkManager's generated
+  "Wired connection" profile.
+
+Guests attach to `br0` instead of libvirt's default NAT network, so they appear
+on the LAN as their own hosts. mDNS, Matter, and Thread border routing need
+that; NAT would hide them.
+
+## Options
+
+The module takes machine-specific values from the host, so it holds none of
+its own.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `vmHost.bridge.interface` | none (required) | The wired interface to enslave to `br0` |
+| `vmHost.bridge.macAddress` | `null` | MAC address for `br0`, applied as `cloned-mac-address`. Set it to the physical interface's address so the host keeps its DHCP lease and any router reservation |

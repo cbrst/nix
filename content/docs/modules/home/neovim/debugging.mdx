@@ -1,6 +1,6 @@
 ---
 title: Debugging
-description: nvim-dap adapters and launch configurations for Python, JavaScript and TypeScript, shell, and Lua, with their mappings.
+description: nvim-dap adapters and launch configurations for Python, JavaScript and TypeScript, C#, shell, and Lua, with their mappings.
 ---
 
 Source:
@@ -22,8 +22,8 @@ nvim-dap-virtual-text, one-small-step-for-vimkind, and the `debug`
 
 Adapters are resolved with `exepath` when the configuration loads, so they
 must be on the wrapped `PATH`; `:checkhealth init6` checks
-`debugpy-adapter`, `js-debug`, `bash-debug-adapter`, and
-`local-lua-debug-adapter`.
+`debugpy-adapter`, `js-debug`, `bash-debug-adapter`,
+`local-lua-debug-adapter`, and `netcoredbg`.
 
 ## Adapters and configurations
 
@@ -32,6 +32,7 @@ must be on the wrapped `PATH`; `:checkhealth init6` checks
 | Python | `debugpy-adapter` | Debug the current file. The interpreter is `.venv/bin/python` or `venv/bin/python` in the working directory when one exists, else `python3` from `PATH` |
 | JavaScript, TypeScript, JSX, TSX | `js-debug` (`pwa-node`, a server on a free port) | Debug the current file with Node.js (source maps on, Node internals and `node_modules` skipped); attach to a running Node process picked from a list |
 | sh, Zsh | `bash-debug-adapter` (bashdb) | Debug the current file with Bash in the integrated terminal |
+| C# | `netcoredbg` (`coreclr`, VS Code mode) | Launch a built DLL, prompting for its path with `bin/Debug` under the working directory as the default; attach to a running .NET process picked from a list. netcoredbg does not build, so run `dotnet build` first |
 | Lua | `local-lua-debug-adapter` | Debug the current file with the standalone `lua` interpreter |
 | Lua | `nlua` (osv) | Attach to a Neovim instance on port 8086 |
 
