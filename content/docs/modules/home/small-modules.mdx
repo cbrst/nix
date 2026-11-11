@@ -107,6 +107,36 @@ preset 3, toggled with `Right Shift+F12`.
 
 `prismlauncher.nix` (gaming profile) installs the Minecraft launcher.
 
+## SolidCraft
+
+`solidcraft.nix` (cad profile) installs the `solidcraft` package from the
+pinned `solidcraft` flake input. Upstream's flake builds it from source and
+there is no binary cache, so the first build is slow.
+
+## Squeezelite
+
+`squeezelite.nix` runs a Squeezelite player that appears in Music Assistant.
+It is not part of a profile; Asgard and Niflheim import it and enable it with
+`services.squeezelite-client`:
+
+| Option | Meaning |
+| --- | --- |
+| `enable` | Runs the player |
+| `server` | Music Assistant's Slimproto server as `host` or `host:port`. It is required because autodiscovery broadcasts do not cross Tailscale |
+| `name` | The player name shown in Music Assistant |
+
+Both hosts point `server` at the `homeassistant` machine on the tailnet.
+
+The player passes a MAC address derived from a hash of `name` (a locally
+administered address). Music Assistant identifies players by MAC, and
+Squeezelite would otherwise take it from the first network interface, so a
+bridge or VPN interface could make the same machine look like a new player.
+
+On Linux it uses `squeezelite-pulse` against PipeWire's PulseAudio server and
+runs as a systemd user service that starts after `pipewire-pulse` and restarts
+on exit. On macOS it uses `squeezelite` with CoreAudio as a launchd agent that
+keeps running, and releases the audio device after 5 seconds of idle (`-C 5`).
+
 ## Foot
 
 `foot/` configures the Foot terminal. Its `colors-light` and `colors-dark`

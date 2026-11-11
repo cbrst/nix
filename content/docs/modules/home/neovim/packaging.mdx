@@ -70,7 +70,8 @@ can select them by feature:
 | --- | --- | --- |
 | `core` | `file`, `man-db`, `mosh`, `ripgrep`, `sshfs`, `tree-sitter` | Always |
 | `runtimes` | Bash, Lua, Node.js, Python 3, Zsh | Always |
-| `debug` | bashdb with the Bash Debug adapter, the local Lua debug adapter, debugpy, js-debug | `debug.enable` |
+| `debug` | bashdb with the Bash Debug adapter, the local Lua debug adapter, debugpy, js-debug, netcoredbg | `debug.enable` |
+| `languages.dotnet` | .NET SDK 10, Roslyn language server (`roslyn-ls`) | `languages.dotnet.enable` |
 | `languages.lua` | lua-language-server, StyLua | `languages.lua.enable` |
 | `languages.markdown` | mdsf, rumdl | `languages.markdown.enable` |
 | `languages.nix` | nil, nixd | `languages.nix.enable` |
@@ -175,7 +176,7 @@ The flake publishes the editor as two packages for `x86_64-linux` and
 | Package | Features | Closure |
 | --- | --- | --- |
 | `nvim` | The defaults: everything | About 4.6 GiB |
-| `nvim-lite` | Overrides from `lite.nix`: no AI or debugging, no PHP, Python, or web tooling, and 24 grammars for configuration, scripting, and VCS files | About 2.1 GiB |
+| `nvim-lite` | Overrides from `lite.nix`: no AI or debugging, no .NET, PHP, Python, or web tooling, and 24 grammars for configuration, scripting, and VCS files | About 2.1 GiB |
 
 ```bash
 nix run .#nvim -- file.txt                      # from a checkout

@@ -19,8 +19,8 @@ Everything is on by default, so a host that sets nothing gets the full editor.
 | `grammars` | `"all"` | A list of names from `vimPlugins.nvim-treesitter.builtGrammars` installs only those parsers |
 | `languages.<name>.enable` | `true` | No tools from that language group and no LSP or Conform setup for it; `web` also drops nvim-vtsls and nvim-ts-autotag |
 
-The languages are `lua`, `markdown`, `nix`, `php`, `python`, `shell`, `web`, and
-`yaml`. A host sets them like any Home Manager option:
+The languages are `dotnet`, `lua`, `markdown`, `nix`, `php`, `python`, `shell`,
+`web`, and `yaml`. A host sets them like any Home Manager option:
 
 ```nix
 # hosts/home/niflheim.nix
@@ -109,7 +109,7 @@ passes it as `features` to `package.nix`:
 - `ai.enable = false`: the Claude CLI is large and the standalone package
   cannot use the Home Manager-configured one anyway.
 - `debug.enable = false`: the adapters and their Node-based wrappers.
-- `languages.{php,python,web}.enable = false`: configuration editing keeps
+- `languages.{dotnet,php,python,web}.enable = false`: configuration editing keeps
   Lua, Markdown, Nix, shell, and YAML.
 - `grammars`: 24 names for configuration, scripting, and VCS files (`bash`,
   `diff`, `git_config`, `git_rebase`, `gitcommit`, `jjdescription`, `json`,

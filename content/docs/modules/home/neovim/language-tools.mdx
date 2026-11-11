@@ -49,6 +49,7 @@ once start-up has finished.
 | `vtsls` | `web` | JavaScript and TypeScript; see [TypeScript](#typescript) |
 | `lua_ls` | `lua` | Lua; call snippets replace the call expression |
 | `nil_ls` | `nix` | Nix; missing flake inputs are fetched automatically (`autoArchive`) instead of prompting on every attach |
+| `roslyn_ls` | `dotnet` | C#. The .NET SDK in the group is only a fallback: tools are appended to `PATH`, so an SDK from a project's direnv environment wins |
 | `phpactor` | `php` | PHP |
 | `zuban` | `python` | Python |
 | `rumdl` | `markdown` | Markdown lint diagnostics |
@@ -142,8 +143,9 @@ For every save, `format_on_save` decides in order:
    formatting; remote files are often live and are formatted on request only.
 3. C and C++: Conform only, never LSP formatting, because those languages have
    no single accepted style.
-4. Everything else: Conform with a 500 ms timeout, falling back to LSP
-   formatting when the filetype has no formatter.
+4. Everything else: Conform with a 500 ms timeout (2000 ms for C#, because
+   Roslyn loads projects slowly and earlier requests can time out), falling
+   back to LSP formatting when the filetype has no formatter.
 
 Errors are not shown as notifications. `<leader>cf` formats the buffer or
 selection on request, asynchronously, with the same LSP fallback.
