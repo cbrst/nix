@@ -150,8 +150,9 @@ flake.nix
         ├── profiles/home/development.nix
         ├── profiles/home/gaming.nix
         ├── profiles/home/cad.nix
-        └── profiles/home/desktop-linux.nix
-            └── profiles/home/desktop-base.nix
+        ├── profiles/home/desktop-linux.nix
+        │   └── profiles/home/desktop-base.nix
+        └── modules/home/squeezelite.nix
 ```
 
 Niflheim:
@@ -161,7 +162,8 @@ flake.nix
 └── hosts/home/niflheim.nix
     ├── users/cbrst/home.nix
     ├── profiles/home/development.nix
-    └── profiles/home/desktop-base.nix
+    ├── profiles/home/desktop-base.nix
+    └── modules/home/squeezelite.nix
 ```
 
 Home profiles:

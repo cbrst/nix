@@ -15,6 +15,7 @@
   imports = [
     ../../profiles/home/desktop-macos.nix
     ../../profiles/home/development.nix
+    ../../modules/home/squeezelite.nix
   ];
 
   # Keep operating-system differences at the host boundary.
@@ -23,4 +24,11 @@
   ];
 
   programs.nixie.flake = "${config.home.homeDirectory}/Projects/nix";
+
+  # Music Assistant runs on the "homeassistant" tailnet machine.
+  services.squeezelite-client = {
+    enable = true;
+    server = "100.117.183.9";
+    name = "niflheim";
+  };
 }

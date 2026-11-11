@@ -123,8 +123,16 @@
         ../../../profiles/home/desktop-linux.nix
         ../../../profiles/home/gaming.nix
         ../../../profiles/home/cad.nix
+        ../../../modules/home/squeezelite.nix
       ];
       programs.nixie.flake = "/etc/nix-config";
+
+      # Music Assistant runs on the "homeassistant" tailnet machine.
+      services.squeezelite-client = {
+        enable = true;
+        server = "100.117.183.9";
+        name = "asgard";
+      };
     };
   };
 }
