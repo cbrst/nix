@@ -25,6 +25,7 @@
     ./peripheral-battery.nix
     ../../../modules/nixos/secure-boot.nix
     ../../../modules/nixos/gaming.nix
+    ../../../modules/nixos/media-center.nix
     ../../../modules/nixos/vm-host.nix
     ../../../profiles/nixos/desktop.nix
     ../../../profiles/nixos/development.nix
@@ -39,6 +40,10 @@
     interface = "eno1";
     macAddress = "e0:d5:5e:0c:07:4d";
   };
+
+  # Steam Deck-style Jellyfin session, picked in the greeter. The server
+  # address lives in ~/.config/media-center/url, not in this repository.
+  programs.media-center.enable = true;
 
   # set tailscale operator
   services.tailscale.extraSetFlags = [ "--operator=cbrst" ];

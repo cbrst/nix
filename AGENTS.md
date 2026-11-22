@@ -141,6 +141,7 @@ flake.nix
     ├── hardware-configuration.nix
     ├── modules/nixos/secure-boot.nix
     ├── modules/nixos/gaming.nix
+    ├── modules/nixos/media-center.nix
     ├── modules/nixos/vm-host.nix
     ├── profiles/nixos/desktop.nix
     │   └── modules/nixos/{base,archives,nautilus,fonts,gtk,multimedia,
@@ -212,7 +213,9 @@ Neovim, Ghostty, foot, Firefox, Noctalia and the shell prompt all render from
 it, so a new family only needs palette entries there.
 
 External mutable state intentionally outside the repository includes account
-passwords, `/var/lib/sbctl`, `~/.ssh/hosts`, and password-manager agent sockets.
+passwords, `/var/lib/sbctl`, `~/.ssh/hosts`, password-manager agent sockets, and
+the Media Center session's Jellyfin address (`~/.config/media-center/url`,
+kept out because this repository is public).
 Do not attempt to make these declarative unless the user specifically requests a
 secrets-management design.
 
