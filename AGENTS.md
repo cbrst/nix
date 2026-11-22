@@ -183,7 +183,7 @@ profiles/home/cad.nix
 └── modules/home/solidcraft.nix
 
 profiles/home/desktop-base.nix
-└── modules/home/{fonts,ghostty}
+└── modules/home/{fonts,ghostty,jellyfin-client}
 
 profiles/home/desktop-linux.nix
 ├── profiles/home/desktop-base.nix
