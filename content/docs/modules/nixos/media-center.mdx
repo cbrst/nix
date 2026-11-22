@@ -1,0 +1,52 @@
+---
+title: Media Center
+description: A greeter session that runs Jellyfin's web client in a full-screen Chromium on KWin, with HDR.
+---
+
+[`modules/nixos/media-center.nix`](https://github.com/cbrst/nix/blob/main/modules/nixos/media-center.nix)
+is imported directly by [Asgard](/hosts/asgard/), which turns it on with
+`programs.media-center.enable = true`. It adds a **Media Center** entry to the
+greeter's session list, in the style of the Steam Deck's game mode.
+
+## How the session works
+
+The session runs `kwin_wayland --drm --no-lockscreen` on its own, with no
+Plasma shell. KWin starts a launcher script and exits with it, so closing the
+browser (Ctrl+W) returns to the greeter. The launcher:
+
+1. Enables HDR on every connected output with `kscreen-doctor`. It talks to
+   KWin over Wayland, which works without the rest of Plasma, and KWin stores
+   the result in `kwinoutputconfig.json`. A failure on one output is reported
+   and does not stop the session.
+2. Reads the Jellyfin address from the first line of
+   `~/.config/media-center/url`.
+3. Starts Chromium in kiosk mode on Wayland, with autoplay allowed and the
+   profile in `~/.local/share/media-center/chromium`.
+
+If the URL file is missing or empty, the browser shows a page that names the
+file to create.
+
+<Callout type="info">
+The server address is not part of the flake because this repository is public.
+Write it to `~/.config/media-center/url` yourself; see
+[Generated and external state](/architecture/external-state/).
+</Callout>
+
+## Why KWin and Chromium
+
+- **KWin rather than gamescope.** KWin offers `wp_color_manager_v1` to its
+  clients, which browser HDR video needs. gamescope does not offer colour
+  management.
+- **Chromium rather than Firefox.** jellyfin-web advertises HDR10 only for
+  desktop Chrome and for Firefox on macOS, so Firefox on Linux always got HDR
+  transcoded to SDR on the server. Chromium decodes HEVC Main 10 through
+  VA-API and describes HDR video to KWin, both on by default, so HDR10 plays
+  without server-side tone mapping.
+
+## Options
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `programs.media-center.enable` | `false` | Register the session with the display manager |
+| `programs.media-center.chromiumPackage` | `pkgs.chromium` | The browser package |
+| `programs.media-center.sdrBrightness` | `null` | SDR reference brightness in nits (100 to 1000) for the Jellyfin interface while HDR is on. `null` keeps KWin's stored value |
