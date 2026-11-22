@@ -33,6 +33,7 @@ These are intentionally not declarative. Do not add them to the flake:
 | `/var/lib/sbctl` | Secure Boot keys generated on the machine |
 | `~/.ssh/hosts` | Personal SSH host entries, included by the SSH module |
 | Password-manager agent sockets | Provided at runtime by 1Password or Bitwarden |
+| `~/.config/media-center/url` | The Jellyfin address for the Media Center session, kept out because the repository is public |
 | Karabiner-Elements application | Needs root-owned services and a DriverKit extension that Home Manager cannot install |
 | Raycast application | Updates itself; Home Manager replacing the bundle broke its data |
 
