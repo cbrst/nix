@@ -98,6 +98,23 @@ future re-enable.
 `fonts.nix` (desktop-base profile) installs the 0xProto and 0xPropo families
 named in the shared [settings](/architecture/settings-and-themes/).
 
+## Jellyfin desktop
+
+`jellyfin-client.nix` (desktop-base profile) installs `pkgs.jellyfin-desktop`.
+It configures no server or credentials; sign in to the Jellyfin server inside
+the application.
+
+## Easy SCS Mod Manager
+
+`easy-scsmodmanager.nix` (gaming profile) installs a mod and profile manager
+for Euro Truck Simulator 2 and American Truck Simulator. The package in
+`packages/easy-scsmodmanager/` builds version 1.6.1 from the upstream
+Switch-Bros tag with `buildPythonApplication`. It uses Qt 6 and wraps the entry
+point with the Qt plugin paths. The desktop entry, icons, and AppStream
+metainfo are installed into the standard XDG locations. Tests are disabled
+because upstream's suite needs pytest-qt and a display, and the package is
+limited to Linux.
+
 ## MangoHud
 
 `mangohud.nix` (gaming profile) enables the MangoHud performance overlay with
